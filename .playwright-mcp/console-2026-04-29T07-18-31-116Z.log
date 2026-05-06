@@ -1,0 +1,28 @@
+[     192ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=aeea2a78:14337
+[  137787ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5175/src/components/repair-card.css.ts?t=1777447248865:0
+[  137787ms] [ERROR] [vite] Failed to reload /src/components/repair-card.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  150458ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5175/src/components/repair-card.css.ts?t=1777447261562:0
+[  150459ms] [ERROR] [vite] Failed to reload /src/components/repair-card.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  155555ms] [ERROR] [vite] SyntaxError: Identifier 'ContractBadge' has already been declared @ http://localhost:5175/@vite/client:904
+[  155556ms] [ERROR] [vite] Failed to reload /src/components/repair-card.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  155632ms] [ERROR] [vite] SyntaxError: Identifier 'ContractBadge' has already been declared @ http://localhost:5175/@vite/client:904
+[  155632ms] [ERROR] [vite] Failed to reload /src/components/repair-card.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  167088ms] [ERROR] [vite] SyntaxError: Identifier 'ContractBadge' has already been declared @ http://localhost:5175/@vite/client:904
+[  167088ms] [ERROR] [vite] Failed to reload /src/pages/app-shell.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  173703ms] [ERROR] [vite] SyntaxError: Identifier 'ContractBadge' has already been declared @ http://localhost:5175/@vite/client:904
+[  173703ms] [ERROR] [vite] Failed to reload /src/app.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  213841ms] [ERROR] [vite] SyntaxError: Identifier 'ContractBadge' has already been declared @ http://localhost:5175/@vite/client:904
+[  213841ms] [ERROR] [vite] Failed to reload /src/components/repair-card.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  213853ms] [ERROR] [vite] SyntaxError: Identifier 'ContractBadge' has already been declared @ http://localhost:5175/@vite/client:904
+[  213853ms] [ERROR] [vite] Failed to reload /src/pages/app-shell.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  213858ms] [ERROR] [vite] SyntaxError: Identifier 'ContractBadge' has already been declared @ http://localhost:5175/@vite/client:904
+[  213858ms] [ERROR] [vite] Failed to reload /src/app.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  218915ms] [ERROR] [vite] SyntaxError: Identifier 'ContractBadge' has already been declared @ http://localhost:5175/@vite/client:904
+[  218915ms] [ERROR] [vite] Failed to reload /src/pages/home-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  226339ms] [ERROR] [vite] SyntaxError: Identifier 'ContractBadge' has already been declared @ http://localhost:5175/@vite/client:904
+[  226339ms] [ERROR] [vite] Failed to reload /src/components/repair-list.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  243988ms] [ERROR] [vite] SyntaxError: Identifier 'ContractBadge' has already been declared @ http://localhost:5175/@vite/client:904
+[  243989ms] [ERROR] [vite] Failed to reload /src/components/repair-card.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  272132ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5175/src/components/repair-card.tsx?t=1777447383242:0
+[  272132ms] [ERROR] [vite] Failed to reload /src/components/repair-card.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  304437ms] [WARNING] WARN: A component changed from controlled to uncontrolled. @ http://localhost:5175/node_modules/.vite/deps/cross-CioPCD06.js?v=aeea2a78:15

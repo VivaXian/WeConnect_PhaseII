@@ -1,0 +1,7 @@
+[     141ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=aeea2a78:14337
+[  475018ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5175/src/utils/format-date.ts?t=1777447901341:0
+[  475019ms] [ERROR] [vite] Failed to reload /src/components/repair-card.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  475512ms] [ERROR] [vite] Failed to reload /src/components/repair-card.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  475633ms] [ERROR] [vite] Failed to reload /src/app.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  475634ms] [ERROR] [vite] Failed to reload /src/pages/home-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[  475888ms] [WARNING] WARN: A component changed from uncontrolled to controlled. @ http://localhost:5175/node_modules/.vite/deps/cross-CioPCD06.js?v=aeea2a78:15

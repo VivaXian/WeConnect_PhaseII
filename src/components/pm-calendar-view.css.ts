@@ -1,0 +1,138 @@
+import { style } from '@vanilla-extract/css';
+
+export const calendarStyles = {
+  wrapper: style({
+    margin: '10px 16px 0',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: '12px 12px 0',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
+  }),
+  header: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  }),
+  navBtn: style({
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: 22,
+    color: '#0161de',
+    lineHeight: '28px',
+    padding: '0 6px',
+    fontFamily: 'inherit',
+  }),
+  monthTitle: style({
+    fontSize: 14,
+    fontWeight: 700,
+    color: '#1a1a1a',
+  }),
+  grid: style({
+    display: 'grid',
+    gridTemplateColumns: 'repeat(7, 1fr)',
+    gap: 2,
+    marginBottom: 4,
+  }),
+  weekLabel: style({
+    textAlign: 'center',
+    fontSize: 11,
+    fontWeight: 600,
+    color: '#aaa',
+    height: 24,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }),
+  dayCell: style({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 36,
+    borderRadius: 8,
+    gap: 2,
+    cursor: 'default',
+  }),
+  dayCellToday: style({
+    backgroundColor: '#f0f5ff',
+  }),
+  dayCellHasPm: style({
+    cursor: 'pointer',
+    backgroundColor: '#f0f7ff',
+  }),
+  dayCellSelected: style({
+    backgroundColor: '#0161de',
+    cursor: 'pointer',
+  }),
+  dayNum: style({
+    fontSize: 13,
+    lineHeight: '16px',
+    color: '#1a1a1a',
+  }),
+  dayNumSelected: style({
+    color: '#ffffff',
+    fontWeight: 700,
+  }),
+  dayNumToday: style({
+    color: '#0161de',
+    fontWeight: 700,
+  }),
+  pmDot: style({
+    width: 5,
+    height: 5,
+    borderRadius: '50%',
+    backgroundColor: '#0161de',
+  }),
+  pmDotSelected: style({
+    backgroundColor: '#ffffff',
+  }),
+  summary: style({
+    borderTop: '1px solid #f0f0f0',
+    marginTop: 8,
+    paddingTop: 10,
+    paddingBottom: 12,
+  }),
+  summaryTitle: style({
+    fontSize: 13,
+    fontWeight: 600,
+    color: '#333',
+    marginBottom: 7,
+  }),
+  summaryRow: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingBottom: 5,
+  }),
+  summaryDot: style({
+    width: 6,
+    height: 6,
+    borderRadius: '50%',
+    backgroundColor: '#0161de',
+    flexShrink: 0,
+  }),
+  summaryName: style({
+    fontSize: 13,
+    color: '#222',
+    fontWeight: 500,
+    flex: 1,
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+  }),
+  summaryDept: style({
+    fontSize: 12,
+    color: '#888',
+    flexShrink: 0,
+  }),
+  noEvents: style({
+    padding: '10px 0 12px',
+    fontSize: 13,
+    color: '#aaa',
+    textAlign: 'center',
+  }),
+};

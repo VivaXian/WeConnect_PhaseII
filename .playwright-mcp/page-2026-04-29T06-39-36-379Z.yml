@@ -1,0 +1,155 @@
+- generic [ref=e3]:
+  - group "切换角色（演示）" [ref=e4]:
+    - button "普通用户（报修员）" [ref=e5] [cursor=pointer]
+    - button "设备科科长" [ref=e6] [cursor=pointer]
+  - generic [ref=e8]:
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12]: 服务记录
+        - generic [ref=e13]: WeConnect医院 · 全院视图
+        - generic [ref=e14]:
+          - button "3 即将到期" [ref=e15] [cursor=pointer]:
+            - generic [ref=e16]: "3"
+            - generic [ref=e17]: 即将到期
+          - button "5 本月PM" [ref=e18] [cursor=pointer]:
+            - generic [ref=e19]: "5"
+            - generic [ref=e20]: 本月PM
+          - button "2 风险设备" [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]: "2"
+            - generic [ref=e23]: 风险设备
+      - generic [ref=e24]:
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]: 扫码报修
+            - generic [ref=e29]: 扫描设备二维码，快速提交报修申请
+          - button "扫码" [ref=e30] [cursor=pointer]
+        - generic [ref=e32]:
+          - button "全部" [ref=e33] [cursor=pointer]
+          - button "服务中" [ref=e34] [cursor=pointer]
+          - button "待签字" [ref=e35] [cursor=pointer]
+          - button "本月PM" [ref=e36] [cursor=pointer]
+          - button "风险设备" [ref=e37] [cursor=pointer]
+        - generic [ref=e38]:
+          - generic [ref=e40]: 共 5 条记录
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]: 2025年11月 (3)
+              - generic [ref=e44]:
+                - generic [ref=e45]:
+                  - generic [ref=e46]:
+                    - generic [ref=e47]:
+                      - generic "白金保服务合同" [ref=e48]:
+                        - img [ref=e49]
+                      - generic [ref=e53]:
+                        - generic [ref=e54]:
+                          - generic [ref=e55]: Ingenia 3.0T
+                          - button "服务中" [pressed] [ref=e56] [cursor=pointer]
+                        - generic [ref=e58]: WeConnect医院
+                    - generic [ref=e59]:
+                      - generic [ref=e60]:
+                        - img [ref=e61]
+                        - generic [ref=e65]:
+                          - generic [ref=e66]: 已分配服务工程师
+                          - generic [ref=e67]: 2025-11-20 08:50:48
+                      - generic [ref=e69]:
+                        - generic [ref=e70]: 张工
+                        - generic [ref=e71]: 飞利浦服务工程师
+                  - generic [ref=e73]:
+                    - button "设备详情" [ref=e74] [cursor=pointer]
+                    - button "报修详情" [ref=e75] [cursor=pointer]
+                - generic [ref=e76]:
+                  - generic [ref=e77]:
+                    - generic [ref=e78]:
+                      - generic "白金保服务合同" [ref=e79]:
+                        - img [ref=e80]
+                      - generic [ref=e84]:
+                        - generic [ref=e86]: Elition 磁共振
+                        - generic [ref=e88]: WeConnect医院（南院）
+                    - generic [ref=e89]:
+                      - generic [ref=e90]:
+                        - img [ref=e91]
+                        - generic [ref=e94]:
+                          - generic [ref=e95]: 服务完成
+                          - generic [ref=e96]: 2025-11-07 12:00:06
+                      - generic [ref=e98]: 有1个待签字确认工单
+                  - generic [ref=e100]:
+                    - button "评价服务" [ref=e101] [cursor=pointer]
+                    - button "设备详情" [ref=e102] [cursor=pointer]
+                    - button "报修详情" [ref=e103] [cursor=pointer]
+                - generic [ref=e104]:
+                  - generic [ref=e105]:
+                    - generic [ref=e106]:
+                      - generic "白金保服务合同" [ref=e107]:
+                        - img [ref=e108]
+                      - generic [ref=e112]:
+                        - generic [ref=e114]: Vereos PET/CT
+                        - generic [ref=e115]:
+                          - generic [ref=e116]: WeConnect医院
+                          - generic [ref=e117]: 核医学科
+                    - generic [ref=e118]:
+                      - generic [ref=e119]:
+                        - img [ref=e120]
+                        - generic [ref=e123]:
+                          - generic [ref=e124]: 服务完成
+                          - generic [ref=e125]: 2025-11-15 14:22:00
+                      - generic [ref=e127]: 有1个待签字确认工单
+                  - generic [ref=e129]:
+                    - button "评价服务" [ref=e130] [cursor=pointer]
+                    - button "设备详情" [ref=e131] [cursor=pointer]
+                    - button "报修详情" [ref=e132] [cursor=pointer]
+            - generic [ref=e133]:
+              - generic [ref=e134]: 2025年10月
+              - generic [ref=e136]:
+                - generic [ref=e137]:
+                  - generic [ref=e138]:
+                    - generic "白金保服务合同" [ref=e139]:
+                      - img [ref=e140]
+                    - generic [ref=e144]:
+                      - generic [ref=e146]: Azurion M3
+                      - generic [ref=e147]:
+                        - generic [ref=e148]: WeConnect医院（南院）
+                        - generic [ref=e149]: 影像科一室
+                  - generic [ref=e150]:
+                    - generic [ref=e151]:
+                      - img [ref=e152]
+                      - generic [ref=e155]:
+                        - generic [ref=e156]: 服务完成
+                        - generic [ref=e157]: 2025-10-12 20:15:55
+                    - generic [ref=e159]: 有1个待签字确认工单
+                - generic [ref=e161]:
+                  - button "设备详情" [ref=e162] [cursor=pointer]
+                  - button "报修详情" [ref=e163] [cursor=pointer]
+            - generic [ref=e164]:
+              - generic [ref=e165]: 2025年9月
+              - generic [ref=e167]:
+                - generic [ref=e168]:
+                  - generic [ref=e169]:
+                    - generic "白金保服务合同" [ref=e170]:
+                      - img [ref=e171]
+                    - generic [ref=e175]:
+                      - generic [ref=e177]: MR 5300
+                      - generic [ref=e178]:
+                        - generic [ref=e179]: WeConnect医院（南院）
+                        - generic [ref=e180]: 影像科一室
+                  - generic [ref=e181]:
+                    - generic [ref=e182]:
+                      - img [ref=e183]
+                      - generic [ref=e186]:
+                        - generic [ref=e187]: 报修已取消
+                        - generic [ref=e188]: 2025-09-07 12:00:06
+                    - generic [ref=e190]: 报修已由服务团队核实后取消
+                - generic [ref=e192]:
+                  - button "设备详情" [ref=e193] [cursor=pointer]
+                  - button "报修详情" [ref=e194] [cursor=pointer]
+    - contentinfo [ref=e196]:
+      - tablist [ref=e198]:
+        - tab "服务记录，3条待处理" [selected] [ref=e199] [cursor=pointer]:
+          - img [ref=e200]
+          - status [ref=e204]: "3"
+          - text: 服务记录
+        - tab "设备" [ref=e205] [cursor=pointer]:
+          - img [ref=e206]
+          - text: 设备
+        - tab "我的" [ref=e208] [cursor=pointer]:
+          - img [ref=e209]
+          - text: 我的

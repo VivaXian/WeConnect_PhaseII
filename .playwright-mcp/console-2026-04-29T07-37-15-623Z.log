@@ -1,0 +1,55 @@
+[     113ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=aeea2a78:14337
+[  205965ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=aeea2a78:14337
+[ 1688679ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5175/src/utils/device-data.ts?t=1777449924294:0
+[ 1688679ms] [ERROR] [vite] Failed to reload /src/pages/user-device-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 1688679ms] [ERROR] [vite] Failed to reload /src/pages/device-list-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 1744097ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5175/src/utils/device-data.ts?t=1777449979675:0
+[ 1744097ms] [ERROR] [vite] Failed to reload /src/pages/user-device-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 1744098ms] [ERROR] [vite] Failed to reload /src/pages/device-list-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 1777609ms] [ERROR] [vite] Failed to reload /src/pages/app-shell.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 1783085ms] [ERROR] [vite] Failed to reload /src/pages/app-shell.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 1882509ms] [ERROR] [vite] Failed to reload /src/pages/home-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 1929322ms] [ERROR] [vite] Failed to reload /src/pages/device-list-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 1948616ms] [ERROR] [vite] Failed to reload /src/pages/user-device-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 1974462ms] [ERROR] [vite] Failed to reload /src/pages/super-user-service-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 1974564ms] [ERROR] [vite] Failed to reload /src/pages/super-user-service-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 1981399ms] [ERROR] [vite] Failed to reload /src/pages/super-user-service-page.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 2252322ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=aeea2a78:14337
+[ 2268184ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=aeea2a78:14337
+[ 2898068ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=99c646ea:14337
+[ 3966799ms] [ERROR] [vite] SyntaxError: Identifier 'EMPTY_PANEL_STYLE' has already been declared @ http://localhost:5175/@vite/client:904
+[ 3966800ms] [ERROR] [vite] Failed to reload /src/components/shared-bottom-bar.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 3992262ms] [ERROR] [vite] SyntaxError: Identifier 'EMPTY_PANEL_STYLE' has already been declared @ http://localhost:5175/@vite/client:904
+[ 3992262ms] [ERROR] [vite] Failed to reload /src/pages/app-shell.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 4068274ms] [ERROR] [vite] SyntaxError: Identifier 'EMPTY_PANEL_STYLE' has already been declared @ http://localhost:5175/@vite/client:904
+[ 4068274ms] [ERROR] [vite] Failed to reload /src/components/shared-bottom-bar.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 4068327ms] [ERROR] [vite] SyntaxError: Identifier 'EMPTY_PANEL_STYLE' has already been declared @ http://localhost:5175/@vite/client:904
+[ 4068327ms] [ERROR] [vite] Failed to reload /src/pages/app-shell.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5175/@vite/client:904
+[ 5132665ms] [ERROR] Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem. @ http://localhost:5175/node_modules/.vite/deps/react.js?v=5ee34080:296
+[ 5132667ms] [ERROR] Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem. @ http://localhost:5175/node_modules/.vite/deps/react.js?v=5ee34080:296
+[ 5132675ms] TypeError: Cannot read properties of null (reading 'useState')
+    at exports.useState (http://localhost:5175/node_modules/.vite/deps/react.js?v=5ee34080:748:30)
+    at AppShell (http://localhost:5175/src/pages/app-shell.tsx?t=1777453366158:20:39)
+    at Object.react_stack_bottom_frame (http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=99c646ea:12868:12)
+    at renderWithHooks (http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=99c646ea:4213:19)
+    at updateFunctionComponent (http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=99c646ea:5569:16)
+    at beginWork (http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=99c646ea:6140:20)
+    at runWithFiberInDEV (http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=99c646ea:851:66)
+    at performUnitOfWork (http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=99c646ea:8429:92)
+    at workLoopSync (http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=99c646ea:8325:37)
+    at renderRootSync (http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=99c646ea:8309:6)
+[ 5132668ms] [WARNING] %s
+
+%s
+ An error occurred in the <AppShell> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=99c646ea:5257
+[ 5132963ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=5ee34080:14337
+[ 6026030ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5175/node_modules/.vite/deps/react-dom_client.js?v=5ee34080:14337

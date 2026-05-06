@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "Filament": {
+      "type": "http",
+      "url": "https://api.filament.rocks/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    }
+  }
+}
