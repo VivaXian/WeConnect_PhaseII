@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Filament React MCP Starter
 
 > [!NOTE]
