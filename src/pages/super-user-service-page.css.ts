@@ -109,7 +109,7 @@ export const suServiceStyles = {
     color: '#ffffff',
   }),
   listSection: style({
-    padding: '10px 16px 16px',
+    padding: '10px 0 16px',
     display: 'flex',
     flexDirection: 'column',
     gap: 10,
@@ -119,6 +119,7 @@ export const suServiceStyles = {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingLeft: 16,
     paddingBottom: 4,
   }),
   emptyState: style({
