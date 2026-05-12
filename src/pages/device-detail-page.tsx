@@ -1,14 +1,18 @@
 import clsx from 'clsx';
 import { useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import type { Device } from '../types/device';
-import {
-  BUSINESS_CONTRACT_LABEL,
-  CONTRACT_LABEL,
-  DEVICE_STATUS_LABEL,
-} from '../types/device';
+import { DEVICE_STATUS_LABEL } from '../types/device';
+import type { LinkedWorkOrder } from '../types/repair';
 import { useRoleStore } from '../stores/role-store';
+import { useDeviceCustomNamesStore } from '../stores/device-custom-names-store';
+import { useDeviceLocationsStore } from '../stores/device-locations-store';
 import { repairData } from '../utils/repair-data';
 import { detailStyles } from './device-detail-page.css';
+import { DeviceDetailContractTab } from './device-detail-contract-tab';
+import { DeviceDetailPmTab } from './device-detail-pm-tab';
+import { DeviceDetailRepairTab } from './device-detail-repair-tab';
+import { DeviceDetailWorkOrderTab } from './device-detail-workorder-tab';
 
 function daysFromToday(dateStr: string): number {
   const today = new Date();
@@ -16,390 +20,318 @@ function daysFromToday(dateStr: string): number {
   return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function pmSoon(dateStr: string | undefined): boolean {
-  if (!dateStr) return false;
-  const d = daysFromToday(dateStr);
-  return d >= 0 && d <= 30;
-}
-
-function formatPmDate(dateStr: string): string {
-  const [, month, day] = dateStr.split('-');
-  return `${parseInt(month, 10)}月${parseInt(day, 10)}日`;
-}
-
-type DetailTab = 'info' | 'history';
-
-const STATUS_LABEL: Record<string, string> = {
-  'in-service': '服务中',
-  'completed-pending': '待签字',
-  cancelled: '已取消',
-};
+type DetailTab = 'repair' | 'pm' | 'workorder' | 'contract';
 
 interface DeviceDetailPageProps {
   device: Device;
   onBack: () => void;
   onRepairDetailPress?: (repairId: string) => void;
+  onWorkOrderPress?: (orderId: string) => void;
+  onQuickRepair?: () => void;
 }
 
-export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress }: DeviceDetailPageProps) => {
+export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOrderPress, onQuickRepair }: DeviceDetailPageProps) => {
   const { role } = useRoleStore();
   const isAdmin = role === 'admin';
-  const [activeTab, setActiveTab] = useState<DetailTab>('history');
+  const [activeTab, setActiveTab] = useState<DetailTab>('workorder');
+  const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
+  const { names: customNames, setName } = useDeviceCustomNamesStore(
+    useShallow((state) => ({ names: state.names, setName: state.setName }))
+  );
+  const customName = customNames[device.id] ?? device.customName ?? '';
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editNameDraft, setEditNameDraft] = useState('');
+
+  const { locations, setLocation } = useDeviceLocationsStore(
+    useShallow((state) => ({ locations: state.locations, setLocation: state.setLocation }))
+  );
+  const locationOverride = locations[device.id];
+  const displayDept = locationOverride?.department ?? device.department;
+  const displayLocation = locationOverride?.location ?? device.location;
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [deptDraft, setDeptDraft] = useState('');
+  const [locationDraft, setLocationDraft] = useState('');
+
+  const handleEditLocationStart = () => {
+    setDeptDraft(displayDept);
+    setLocationDraft(displayLocation);
+    setIsEditingLocation(true);
+  };
+  const handleLocationSave = () => {
+    setLocation(device.id, { department: deptDraft.trim() || device.department, location: locationDraft.trim() || device.location });
+    setIsEditingLocation(false);
+  };
 
   const allRecords = repairData.flatMap((g) => g.records);
   const deviceRecords = allRecords.filter((r) => r.deviceName === device.name);
   const activeRepair = deviceRecords.find((r) => r.status === 'in-service');
-
-  // Regular users only see their own repairs; in prototype, show first record to simulate this
   const historyRecords = isAdmin ? deviceRecords : deviceRecords.slice(0, 1);
+  const allWorkOrders: LinkedWorkOrder[] = [
+    ...deviceRecords.flatMap((r) => r.linkedWorkOrders ?? []),
+    ...(device.pmWorkOrders ?? []).map((pm) => ({
+      id: pm.id,
+      type: 'maintenance' as const,
+      workOrderNo: pm.workOrderNo,
+      status: pm.status,
+      date: pm.date,
+    })),
+    ...(device.deviceWorkOrders ?? []),
+  ];
 
   const contractDays = device.contractEnd ? daysFromToday(device.contractEnd) : null;
   const contractStatus =
-    contractDays === null
-      ? 'none'
-      : contractDays > 120
-      ? 'good'
-      : contractDays > 0
-      ? 'warning'
-      : 'expired';
+    contractDays === null ? 'none'
+    : contractDays > 120 ? 'good'
+    : contractDays > 0 ? 'warning'
+    : 'expired';
 
-  // Days since last PM (positive = days ago)
-  const daysSincePm = device.pmLastDate
-    ? Math.abs(daysFromToday(device.pmLastDate))
-    : null;
-
-  // PM risk level for admin: high/concern/ok
+  const hasActiveContract = contractStatus === 'good' || contractStatus === 'warning';
+  const daysSincePm = device.pmLastDate ? Math.abs(daysFromToday(device.pmLastDate)) : null;
   const pmRiskLevel =
-    device.pmRisk
-      ? 'high'
-      : device.pmLastDate && Math.abs(daysFromToday(device.pmLastDate)) > 180
-      ? 'concern'
-      : 'ok';
+    device.pmRisk ? 'high'
+    : (daysSincePm !== null && daysSincePm > 180 && (!hasActiveContract || !device.pmNextDate)) ? 'concern'
+    : 'ok';
+  const showPmSoon = (() => {
+    if (!device.pmNextDate) return false;
+    const d = daysFromToday(device.pmNextDate);
+    return d >= 0 && d <= 30;
+  })();
 
-  const showPmSoon = pmSoon(device.pmNextDate);
+  const tabs: { key: DetailTab; label: string }[] = [
+    { key: 'workorder', label: '全部工单' },
+    { key: 'repair', label: '报修记录' },
+    { key: 'pm', label: '保养记录' },
+    ...(isAdmin ? [{ key: 'contract' as DetailTab, label: '合同信息' }] : []),
+  ];
+
+  const displayName = customName || device.name;
+
+  const handleEditStart = () => {
+    setEditNameDraft(customName);
+    setIsEditingName(true);
+  };
+
+  const handleEditConfirm = () => {
+    setName(device.id, editNameDraft.trim());
+    setIsEditingName(false);
+  };
+
+  const formatPmDate = (dateStr: string) => {
+    const [, m, d] = dateStr.split('-');
+    return `${parseInt(m, 10)}月${parseInt(d, 10)}日`;
+  };
 
   return (
     <div className={detailStyles.page}>
-      {/* Blue header */}
       <div className={detailStyles.header}>
         <div className={detailStyles.headerTop}>
           <button className={detailStyles.backBtn} onClick={onBack} aria-label="返回">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <div className={detailStyles.headerNameRow}>
+            {isEditingName ? (
+              <input
+                className={detailStyles.nameEditInput}
+                value={editNameDraft}
+                onChange={(e) => setEditNameDraft(e.target.value)}
+                onBlur={handleEditConfirm}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleEditConfirm();
+                  if (e.key === 'Escape') setIsEditingName(false);
+                }}
+                autoFocus
+                placeholder={device.name}
+              />
+            ) : (
+              <>
+                <span className={detailStyles.headerName}>{displayName}</span>
+                <button className={detailStyles.editNameBtn} onClick={handleEditStart} aria-label="编辑备注名">
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                    <path d="M8.5 1.5L11.5 4.5L4.5 11.5H1.5V8.5L8.5 1.5Z" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
+          <button
+            className={detailStyles.headerExpandBtn}
+            onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
+            aria-label={isHeaderExpanded ? '收起' : '展开'}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path
-                d="M12 4L6 10L12 16"
-                stroke="white"
-                strokeWidth="2"
+                d={isHeaderExpanded ? 'M4 10L8 6L12 10' : 'M4 6L8 10L12 6'}
+                stroke="rgba(255,255,255,0.75)"
+                strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
           </button>
-          <div className={detailStyles.headerName}>{device.name}</div>
         </div>
-        <div className={detailStyles.headerMeta}>
-          {device.department} · {device.location}
-        </div>
-        {/* Multi-chip status row */}
-        <div className={detailStyles.headerChips}>
-          {/* Operational status — always shown */}
-          <span className={clsx(
-            detailStyles.chip,
-            device.status === 'normal' && detailStyles.chipSuccess,
-            device.status === 'under-repair' && detailStyles.chipWarning,
-            device.status === 'pending-repair' && detailStyles.chipWarning,
-            device.status === 'offline' && detailStyles.chipError,
-          )}>
-            {DEVICE_STATUS_LABEL[device.status]}
+
+        <div className={detailStyles.headerMetaRow}>
+          <span className={detailStyles.headerMetaText}>
+            {customName && <>{device.name} · </>}{displayDept || '未填写科室'} · {displayLocation || '未填写位置'}
           </span>
-          {/* Active repair — shown when in service */}
-          {activeRepair && (
-            <span className={clsx(detailStyles.chip, detailStyles.chipActive)}>
-              ● 服务中
-            </span>
-          )}
-          {/* Contract status — admin only */}
-          {isAdmin && (
+          <button
+            className={detailStyles.headerMetaEditBtn}
+            onClick={handleEditLocationStart}
+            aria-label="编辑科室和位置"
+          >
+            <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
+              <path d="M8.5 1.5L11.5 4.5L4.5 11.5H1.5V8.5L8.5 1.5Z" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div className={detailStyles.headerChips}>
+          {device.status !== 'normal' && !activeRepair && (
             <span className={clsx(
               detailStyles.chip,
-              contractStatus === 'good' && detailStyles.chipSuccess,
+              (device.status === 'under-repair' || device.status === 'pending-repair') && detailStyles.chipWarning,
+              device.status === 'offline' && detailStyles.chipError,
+            )}>
+              {DEVICE_STATUS_LABEL[device.status]}
+            </span>
+          )}
+          {activeRepair && (
+            <span className={clsx(detailStyles.chip, detailStyles.chipActive)}>● 服务中</span>
+          )}
+          {isAdmin && (contractStatus === 'warning' || contractStatus === 'expired') && (
+            <span className={clsx(
+              detailStyles.chip,
               contractStatus === 'warning' && detailStyles.chipWarning,
               contractStatus === 'expired' && detailStyles.chipError,
-              contractStatus === 'none' && detailStyles.chipNeutral,
             )}>
-              {contractStatus === 'good' ? '合同保障中' : contractStatus === 'warning' ? '合同即将到期' : contractStatus === 'expired' ? '已脱保' : '无合同'}
+              {contractStatus === 'warning' ? '即将出保' : '已出保'}
             </span>
           )}
-          {/* PM risk — admin only */}
-          {isAdmin && (
+          {isAdmin && contractStatus === 'none' && (
+            <span className={clsx(detailStyles.chip, detailStyles.chipNeutral)}>无合同</span>
+          )}
+          {(isAdmin ? pmRiskLevel !== 'ok' : pmRiskLevel === 'high') && (
             <span className={clsx(
               detailStyles.chip,
-              pmRiskLevel === 'ok' && detailStyles.chipSuccess,
               pmRiskLevel === 'concern' && detailStyles.chipWarning,
               pmRiskLevel === 'high' && detailStyles.chipError,
             )}>
-              {pmRiskLevel === 'ok' ? 'PM正常' : pmRiskLevel === 'concern' ? 'PM需关注' : 'PM高风险'}
+              {pmRiskLevel === 'concern' ? 'PM需关注' : 'PM高风险'}
             </span>
           )}
         </div>
-      </div>
 
-      {/* Tab bar — 历史报修 is Tab 1 */}
-      <div className={detailStyles.tabBar}>
-        <button
-          className={clsx(detailStyles.tabBtn, activeTab === 'history' && detailStyles.tabBtnActive)}
-          onClick={() => setActiveTab('history')}
-        >
-          历史报修
-          {deviceRecords.length > 0 && (
-            <span style={{ marginLeft: 4, fontSize: 12, opacity: 0.8 }}>
-              ({isAdmin ? deviceRecords.length : historyRecords.length})
-            </span>
-          )}
-        </button>
-        <button
-          className={clsx(detailStyles.tabBtn, activeTab === 'info' && detailStyles.tabBtnActive)}
-          onClick={() => setActiveTab('info')}
-        >
-          设备信息
-        </button>
-      </div>
+        <div className={detailStyles.headerActions}>
+          <a
+            href="tel:400-800-8008"
+            className={detailStyles.headerActionBtnOutline}
+            aria-label="电话咨询"
+          >
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 2h3l1.5 3.5-1.75 1.05A9.5 9.5 0 008.45 9.25L9.5 7.5 13 9v3a1 1 0 01-1 1C5.82 13 2 9.18 2 4a1 1 0 011-2z" fill="rgba(255,255,255,0.65)"/>
+            </svg>
+            电话咨询
+          </a>
+          <button
+            className={detailStyles.headerActionBtnFill}
+            onClick={onQuickRepair}
+            aria-label="极速报修"
+          >
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M9 1L3 9h5l-1 6 7-9h-5L9 1z" fill="#0161de"/>
+            </svg>
+            极速报修
+          </button>
+        </div>
 
-      {/* Tab: 设备信息 */}
-      {activeTab === 'info' && (
-        <div className={detailStyles.tabContent}>
-          {!isAdmin && device.pmRisk && (
-            <div className={detailStyles.alertBannerDanger}>
-              <span>⚠️</span>
-              <span className={detailStyles.alertText}>该设备保养间隔较长，建议关注设备维护状态</span>
-            </div>
-          )}
-          {!isAdmin && showPmSoon && !device.pmRisk && (
-            <div className={detailStyles.alertBannerInfo}>
-              <span>📅</span>
-              <span className={detailStyles.alertText}>本月有保养计划，预计 {device.pmNextDate ? formatPmDate(device.pmNextDate) : ''} 执行</span>
-            </div>
-          )}
-          {isAdmin && contractStatus === 'expired' && (
-            <div className={detailStyles.alertBannerDanger}>
-              <span>🔴</span>
-              <span className={detailStyles.alertText}>服务合同已到期，设备当前无厂商服务保障</span>
-            </div>
-          )}
-          {isAdmin && contractStatus === 'warning' && contractDays !== null && (
-            <div className={detailStyles.alertBannerWarn}>
-              <span>⏰</span>
-              <span className={detailStyles.alertText}>
-                服务合同将在 {contractDays} 天后到期，请关注续约事宜
-              </span>
-            </div>
-          )}
-          {isAdmin && device.pmRisk && (
-            <div className={detailStyles.alertBannerDanger}>
-              <span>⚠️</span>
-              <span className={detailStyles.alertText}>该设备已出保，无服务合同保障，建议尽快续约</span>
-            </div>
-          )}
-          {isAdmin && showPmSoon && !device.pmRisk && (
-            <div className={detailStyles.alertBannerInfo}>
-              <span>📅</span>
-              <span className={detailStyles.alertText}>本月有保养计划，预计 {device.pmNextDate ? formatPmDate(device.pmNextDate) : ''} 执行</span>
-            </div>
-          )}
-
-          <div className={detailStyles.section}>
-            <div className={detailStyles.sectionHead}>
-              <span className={detailStyles.sectionTitle}>设备信息</span>
-            </div>
-            <div className={detailStyles.infoRow}>
-              <span className={detailStyles.infoLabel}>类型</span>
-              <span className={detailStyles.infoValue}>{device.type}</span>
-            </div>
-            <div className={detailStyles.infoRow}>
-              <span className={detailStyles.infoLabel}>科室</span>
-              <span className={detailStyles.infoValue}>{device.department}</span>
-            </div>
-            <div className={detailStyles.infoRow}>
-              <span className={detailStyles.infoLabel}>位置</span>
-              <span className={detailStyles.infoValue}>{device.location}</span>
-            </div>
-            <div className={detailStyles.infoRowLast}>
-              <span className={detailStyles.infoLabel}>序列号</span>
-              <span className={detailStyles.infoValue}>{device.serialNumber}</span>
-            </div>
-          </div>
-
-          {activeRepair && (
-            <div className={detailStyles.section}>
-              <div className={detailStyles.sectionHead}>
-                <span className={detailStyles.sectionTitle}>当前服务</span>
-              </div>
-              <div className={detailStyles.serviceRow}>
-                <div className={detailStyles.serviceDot} />
-                <div className={detailStyles.serviceInfo}>
-                  <div className={detailStyles.serviceLabel}>{activeRepair.progress.label}</div>
-                  <div className={detailStyles.serviceDate}>{activeRepair.progress.date}</div>
-                  {activeRepair.progress.engineer && (
-                    <div className={detailStyles.serviceEngineer}>
-                      {activeRepair.progress.engineer.name} · {activeRepair.progress.engineer.role}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {isAdmin && (
-            <div className={detailStyles.section}>
-              <div className={detailStyles.sectionHead}>
-                <span className={detailStyles.sectionTitle}>合同信息</span>
-                {contractDays !== null && (
-                  <span
-                    className={clsx(
-                      detailStyles.daysChip,
-                      contractStatus === 'good' && detailStyles.chipGood,
-                      contractStatus === 'warning' && detailStyles.chipWarn,
-                      contractStatus === 'expired' && detailStyles.chipDanger
-                    )}
-                  >
-                    {contractStatus === 'expired' ? '已过期' : contractStatus === 'warning' ? `还剩 ${contractDays} 天` : '有效'}
-                  </span>
-                )}
-              </div>
-              <div className={detailStyles.infoRow}>
-                <span className={detailStyles.infoLabel}>合同类型</span>
-                <span className={detailStyles.infoValueAccent}>
-                  {device.businessContract ? BUSINESS_CONTRACT_LABEL[device.businessContract] : '—'}
-                </span>
-              </div>
-              <div className={detailStyles.infoRow}>
-                <span className={detailStyles.infoLabel}>服务等级</span>
-                <span className={detailStyles.infoValue}>{CONTRACT_LABEL[device.contract]}</span>
-              </div>
-              {device.contractStart && (
-                <div className={detailStyles.infoRow}>
-                  <span className={detailStyles.infoLabel}>开始日期</span>
-                  <span className={detailStyles.infoValue}>{device.contractStart}</span>
-                </div>
-              )}
-              <div className={detailStyles.infoRowLast}>
-                <span className={detailStyles.infoLabel}>结束日期</span>
-                <span className={detailStyles.infoValue}>{device.contractEnd ?? '该设备暂无服务合同'}</span>
-              </div>
-            </div>
-          )}
-
-          <div className={detailStyles.section}>
-            <div className={detailStyles.sectionHead}>
-              <span className={detailStyles.sectionTitle}>保养信息</span>
-              {isAdmin && (
-                <span className={clsx(
-                  detailStyles.daysChip,
-                  pmRiskLevel === 'ok' && detailStyles.chipGood,
-                  pmRiskLevel === 'concern' && detailStyles.chipWarn,
-                  pmRiskLevel === 'high' && detailStyles.chipDanger
-                )}>
-                  {pmRiskLevel === 'high' ? '高风险' : pmRiskLevel === 'concern' ? '需关注' : '正常'}
-                </span>
-              )}
-            </div>
-            <div className={detailStyles.infoRow}>
-              <span className={detailStyles.infoLabel}>上次保养</span>
-              <span className={detailStyles.infoValue}>{device.pmLastDate ?? '暂无记录'}</span>
-            </div>
-            {daysSincePm !== null && (
-              <div className={detailStyles.infoRow}>
-                <span className={detailStyles.infoLabel}>距上次</span>
-                <span className={detailStyles.infoValue}>{daysSincePm} 天</span>
+        {isHeaderExpanded && (
+          <div className={detailStyles.headerExpandedInfo}>
+            {device.eqNumber && (
+              <div className={detailStyles.headerInfoRow}>
+                <span className={detailStyles.headerInfoLabel}>EQ</span>
+                <span className={detailStyles.headerInfoValue}>{device.eqNumber}</span>
               </div>
             )}
-            <div className={detailStyles.infoRow}>
-              <span className={detailStyles.infoLabel}>下次计划</span>
-              <span className={detailStyles.infoValue}>{device.pmNextDate ?? '待排期'}</span>
+            <div className={detailStyles.headerInfoRow}>
+              <span className={detailStyles.headerInfoLabel}>序列号</span>
+              <span className={detailStyles.headerInfoValue}>{device.serialNumber}</span>
             </div>
-            <div className={detailStyles.infoRowLast}>
-              <span className={detailStyles.infoLabel}>风险提示</span>
-              <span className={detailStyles.infoValue}>
-                {isAdmin
-                  ? (device.pmRisk ? '合同到期，保养风险高' : pmRiskLevel === 'concern' ? '保养间隔较长，建议评估' : '保养间隔正常')
-                  : (device.pmRisk ? '设备保养间隔较长，建议联系服务团队' : '保养间隔正常')}
-              </span>
-            </div>
+          </div>
+        )}
+      </div>
+
+      {isEditingLocation && (
+        <div className={detailStyles.locationEditPanel}>
+          <div className={detailStyles.locationEditRow}>
+            <span className={detailStyles.locationEditLabel}>科室</span>
+            <input
+              className={detailStyles.locationEditInput}
+              value={deptDraft}
+              onChange={(e) => setDeptDraft(e.target.value)}
+              placeholder="例：影像科"
+            />
+          </div>
+          <div className={detailStyles.locationEditRow}>
+            <span className={detailStyles.locationEditLabel}>位置</span>
+            <input
+              className={detailStyles.locationEditInput}
+              value={locationDraft}
+              onChange={(e) => setLocationDraft(e.target.value)}
+              placeholder="例：南楼2层"
+            />
+          </div>
+          <div className={detailStyles.locationEditActions}>
+            <button className={detailStyles.locationEditCancel} onClick={() => setIsEditingLocation(false)}>取消</button>
+            <button className={detailStyles.locationEditSave} onClick={handleLocationSave}>保存</button>
           </div>
         </div>
       )}
 
-      {/* Tab: 历史报修 */}
-      {activeTab === 'history' && (
-        <div className={detailStyles.tabContent}>
-          {!isAdmin && (
-            <div className={detailStyles.noteBanner}>
-              <span style={{ fontSize: 16 }}>ℹ️</span>
-              <span className={detailStyles.noteBannerText}>
-                您只能查看自己对该台设备的历史报修记录
-              </span>
-            </div>
-          )}
-
-          {historyRecords.length === 0 ? (
-            <div className={detailStyles.emptyHistory}>暂无报修记录</div>
-          ) : (
-            historyRecords.map((record) => {
-              const lastCompletedNode = record.timeline
-                ?.filter((n) => n.isCompleted)
-                .slice(-1)[0];
-              const completedTime = record.status !== 'in-service' ? lastCompletedNode?.date : undefined;
-
-              return (
-                <div
-                  key={record.id}
-                  className={detailStyles.repairHistoryCard}
-                  onClick={() => onRepairDetailPress?.(record.id)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && onRepairDetailPress?.(record.id)}
-                >
-                  <div className={detailStyles.repairHistoryLeft}>
-                    <div className={detailStyles.repairHistoryTopRow}>
-                      <span className={detailStyles.repairHistoryId}>
-                        报修号：{record.repairId}
-                      </span>
-                      <span
-                        className={clsx(
-                          detailStyles.repairHistoryStatusTag,
-                          record.status === 'in-service' && detailStyles.repairHistoryStatusInService,
-                          record.status === 'completed-pending' && detailStyles.repairHistoryStatusCompleted,
-                          record.status === 'cancelled' && detailStyles.repairHistoryStatusCancelled,
-                        )}
-                      >
-                        {STATUS_LABEL[record.status]}
-                      </span>
-                    </div>
-                    <div className={detailStyles.repairHistoryMeta}>
-                      {record.repairTime && (
-                        <div className={detailStyles.repairHistoryMetaRow}>
-                          <span className={detailStyles.repairHistoryMetaLabel}>报修时间</span>
-                          <span>{record.repairTime}</span>
-                        </div>
-                      )}
-                      {completedTime && (
-                        <div className={detailStyles.repairHistoryMetaRow}>
-                          <span className={detailStyles.repairHistoryMetaLabel}>完成时间</span>
-                          <span>{completedTime}</span>
-                        </div>
-                      )}
-                    </div>
-                    {record.problemDescription && (
-                      <div className={detailStyles.repairHistoryDesc}>
-                        {record.problemDescription}
-                      </div>
-                    )}
-                  </div>
-                  <span className={detailStyles.repairHistoryChevron}>›</span>
-                </div>
-              );
-            })
-          )}
+      {showPmSoon && (
+        <div className={detailStyles.pmAlertBanner}>
+          <span className={detailStyles.pmAlertIcon}>📅</span>
+          <span className={detailStyles.pmAlertText}>
+            本月保养计划 — 预计 {device.pmNextDate ? formatPmDate(device.pmNextDate) : ''} 执行
+          </span>
+          <button className={detailStyles.pmAlertTabBtn} onClick={() => setActiveTab('pm')}>
+            查看 ›
+          </button>
         </div>
+      )}
+
+      <div className={detailStyles.tabBar}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            className={clsx(detailStyles.tabBtn, activeTab === tab.key && detailStyles.tabBtnActive)}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'repair' && (
+        <DeviceDetailRepairTab records={historyRecords} isAdmin={isAdmin} onRepairDetailPress={onRepairDetailPress} />
+      )}
+      {activeTab === 'pm' && (
+        <DeviceDetailPmTab
+          device={device}
+          pmRiskLevel={pmRiskLevel}
+          daysSincePm={daysSincePm}
+          showPmSoon={showPmSoon}
+          isAdmin={isAdmin}
+          pmWorkOrders={device.pmWorkOrders ?? []}
+          onWorkOrderPress={onWorkOrderPress}
+        />
+      )}
+      {activeTab === 'workorder' && (
+        <DeviceDetailWorkOrderTab workOrders={allWorkOrders} isAdmin={isAdmin} onWorkOrderPress={onWorkOrderPress} />
+      )}
+      {activeTab === 'contract' && isAdmin && (
+        <DeviceDetailContractTab device={device} contractStatus={contractStatus} contractDays={contractDays} />
       )}
     </div>
   );

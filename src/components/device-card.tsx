@@ -11,6 +11,7 @@ interface DeviceCardProps {
   device: Device;
   onPress?: () => void;
   tags: TagItem[];
+  customName?: string;
 }
 
 const DeviceTypeIcon = () => (
@@ -22,7 +23,7 @@ const DeviceTypeIcon = () => (
   </svg>
 );
 
-export const DeviceCard = ({ device, onPress, tags }: DeviceCardProps) => (
+export const DeviceCard = ({ device, onPress, tags, customName }: DeviceCardProps) => (
   <Card className={deviceCardStyles.card} onPress={onPress}>
     <CardBody>
       <div className={deviceCardStyles.row}>
@@ -32,11 +33,14 @@ export const DeviceCard = ({ device, onPress, tags }: DeviceCardProps) => (
 
         <div className={deviceCardStyles.info}>
           <Text variant="body-m" weight="bold" className={deviceCardStyles.deviceName}>
-            {device.name}
+            {customName ?? device.name}
           </Text>
 
-          <Text variant="body-s" color="secondary">{device.type}</Text>
-
+          {customName && (
+            <Text variant="body-s" className={deviceCardStyles.customNameNote}>
+              {device.name}
+            </Text>
+          )}
           <div className={deviceCardStyles.metaRow}>
             <Text variant="body-s" color="secondary">{device.department}</Text>
             <div className={deviceCardStyles.dot} />

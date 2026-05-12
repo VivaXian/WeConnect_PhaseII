@@ -2,10 +2,47 @@ import type { MonthGroup } from '../types/repair';
 
 export const repairData: MonthGroup[] = [
   {
-    month: '2025年11月 (2)',
+    month: '2026年4月 (1)',
     records: [
       {
-        id: 'nov-1',
+        id: 'apr26-1',
+        repairId: 'D-12126601',
+        deviceName: 'Elition 磁共振',
+        hospital: 'WeConnect医院（南院）',
+        eq: '2093780',
+        serialNo: 'SN20251101001',
+        contactPerson: '李主任',
+        contactPhone: '13900005678',
+        repairTime: '2026-04-10 09:15:00',
+        problemDescription: '设备扫描序列异常，部分线圈无响应。',
+        statusTitle: '服务中',
+        tagline: '创新于心，医路护行，我们一直在您身边',
+        status: 'in-service',
+        serviceTag: '服务中',
+        progress: {
+          icon: 'person-headset',
+          label: '已分配服务工程师',
+          date: '2026-04-10 14:30:00',
+          detail: '',
+          engineer: { name: '刘工', role: '飞利浦服务工程师', phone: '13900005678' },
+        },
+        buttons: ['设备详情', '报修详情'],
+        timeline: [
+          { icon: 'check', label: '报修已收到', date: '2026-04-10 09:15', isCompleted: true },
+          { icon: 'person', label: '已分配服务工程师', date: '2026-04-10 14:30', detail: '飞利浦服务工程师：刘工', isCompleted: true },
+          { icon: 'dot', label: '服务中', date: '', isCompleted: false },
+        ],
+        linkedWorkOrders: [
+          { id: 'wo-007', type: 'repair', workOrderNo: 'W0128923810', status: '进行中', date: '2026-04-10' },
+        ],
+      },
+    ],
+  },
+  {
+    month: '2026年3月 (1)',
+    records: [
+      {
+        id: 'mar26-1',
         repairId: 'D-12126560',
         deviceName: 'Ingenia 3.0T',
         hospital: 'WeConnect医院',
@@ -13,7 +50,7 @@ export const repairData: MonthGroup[] = [
         serialNo: 'SN20250122001',
         contactPerson: '王主任',
         contactPhone: '13812978011',
-        repairTime: '2025-11-12 10:40:02',
+        repairTime: '2026-03-15 10:40:02',
         problemDescription: '设备无法开机，屏幕无显示，已停机。',
         statusTitle: '服务中',
         tagline: '创新于心，医路护行，我们一直在您身边',
@@ -22,21 +59,63 @@ export const repairData: MonthGroup[] = [
         progress: {
           icon: 'person-headset',
           label: '已分配服务工程师',
-          date: '2025-11-20 08:50:48',
+          date: '2026-03-18 08:50:48',
           detail: '',
           engineer: { name: '张工', role: '飞利浦服务工程师', phone: '13900001234' },
         },
         buttons: ['设备详情', '报修详情'],
         timeline: [
-          { icon: 'check', label: '报修已收到', date: '2025-11-12 10:40', isCompleted: true },
-          { icon: 'person', label: '已分配服务工程师', date: '2025-11-12 14:20', detail: '飞利浦服务工程师：张工', isCompleted: true },
-          { icon: 'cube', label: '备件已出库', date: '2025-11-18 09:00', detail: '预计2025年11月21日（3天）前到达', isCompleted: true },
+          { icon: 'check', label: '报修已收到', date: '2026-03-15 10:40', isCompleted: true },
+          { icon: 'person', label: '已分配服务工程师', date: '2026-03-15 14:20', detail: '飞利浦服务工程师：张工', isCompleted: true },
+          { icon: 'cube', label: '备件已出库', date: '2026-03-18 09:00', detail: '预计2026年3月21日（3天）前到达', isCompleted: true },
           { icon: 'dot', label: '服务中', date: '', isCompleted: false },
         ],
         linkedWorkOrders: [
-          { id: 'wo-001', type: 'repair', workOrderNo: 'W0128923783', status: '待签字' },
+          { id: 'wo-001', type: 'repair', workOrderNo: 'W0128923783', status: '待签字', date: '2026-03-18' },
         ],
       },
+    ],
+  },
+  {
+    month: '2026年2月 (1)',
+    records: [
+      {
+        id: 'feb26-1',
+        repairId: 'D-12126572',
+        deviceName: 'Vereos PET/CT',
+        hospital: 'WeConnect医院',
+        eq: '2093800',
+        serialNo: 'SN20210032001',
+        contactPerson: '孙主任',
+        contactPhone: '13900007777',
+        repairTime: '2026-02-08 14:00:00',
+        problemDescription: 'PET探测器异常，图像重建失败，已停机等待处理。',
+        statusTitle: '服务中',
+        tagline: '创新于心，医路护行，我们一直在您身边',
+        status: 'in-service',
+        serviceTag: '服务中',
+        progress: {
+          icon: 'person-headset',
+          label: '已分配服务工程师',
+          date: '2026-02-10 09:00:00',
+          detail: '',
+          engineer: { name: '陈工', role: '飞利浦服务工程师', phone: '13900003456' },
+        },
+        buttons: ['设备详情', '报修详情'],
+        timeline: [
+          { icon: 'check', label: '报修已收到', date: '2026-02-08 14:00', isCompleted: true },
+          { icon: 'person', label: '已分配服务工程师', date: '2026-02-09 09:00', detail: '飞利浦服务工程师：陈工', isCompleted: true },
+          { icon: 'dot', label: '服务中', date: '', isCompleted: false },
+        ],
+        linkedWorkOrders: [
+          { id: 'wo-006', type: 'repair', workOrderNo: 'W0128923800', status: '进行中', date: '2026-02-10' },
+        ],
+      },
+    ],
+  },
+  {
+    month: '2025年11月 (1)',
+    records: [
       {
         id: 'nov-2',
         repairId: 'D-12126559',
@@ -65,8 +144,8 @@ export const repairData: MonthGroup[] = [
           { icon: 'check', label: '服务完成', date: '2025-11-07 12:00', isCompleted: true },
         ],
         linkedWorkOrders: [
-          { id: 'wo-002', type: 'repair', workOrderNo: 'W0128923784', status: '已签字' },
-          { id: 'wo-003', type: 'repair', workOrderNo: 'W0128923785', status: '已完成' },
+          { id: 'wo-002', type: 'repair', workOrderNo: 'W0128923784', status: '已签字', date: '2025-11-07' },
+          { id: 'wo-003', type: 'repair', workOrderNo: 'W0128923785', status: '已完成', date: '2025-11-07' },
         ],
       },
     ],
@@ -102,7 +181,7 @@ export const repairData: MonthGroup[] = [
           { icon: 'check', label: '服务完成', date: '2025-10-12 20:15', isCompleted: true },
         ],
         linkedWorkOrders: [
-          { id: 'wo-005', type: 'repair', workOrderNo: 'W0128923700', status: '待签字' },
+          { id: 'wo-005', type: 'repair', workOrderNo: 'W0128923700', status: '待签字', date: '2025-10-12' },
         ],
       },
     ],

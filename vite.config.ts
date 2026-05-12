@@ -5,11 +5,11 @@ import checker from 'vite-plugin-checker';
 
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react(), filament(), checker({ typescript: true })],
-  base: '/WeConnect_PhaseII/',
+  base: command === 'build' ? '/WeConnect_PhaseII/' : '/',
   server: {
     host: '0.0.0.0',
     port: 5175,
   },
-});
+}));

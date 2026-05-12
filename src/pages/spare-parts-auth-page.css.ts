@@ -1,0 +1,81 @@
+import { style } from '@vanilla-extract/css';
+
+export const sparePartsAuthStyles = {
+  page: style({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    backgroundColor: '#f5f7fa',
+  }),
+  header: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: '14px 16px',
+    backgroundColor: '#0161de',
+  }),
+  backBtn: style({
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 4,
+    display: 'flex',
+    alignItems: 'center',
+    flexShrink: 0,
+  }),
+  headerTitle: style({
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 600,
+  }),
+  content: style({
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '40px 24px',
+    gap: 16,
+  }),
+  icon: style({
+    width: 80,
+    height: 80,
+    borderRadius: '50%',
+    backgroundColor: '#e8f0fd',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }),
+  title: style({
+    fontSize: 18,
+    fontWeight: 700,
+    color: '#1a2234',
+    textAlign: 'center',
+  }),
+  desc: style({
+    fontSize: 14,
+    color: '#667',
+    textAlign: 'center',
+    lineHeight: 1.6,
+  }),
+  statusCard: style({
+    width: '100%',
+    marginTop: 16,
+    padding: '16px 14px',
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    border: '1px solid #e8ebf0',
+  }),
+  statusLabel: style({
+    fontSize: 12,
+    color: '#8898aa',
+    fontWeight: 500,
+    marginBottom: 8,
+  }),
+  statusValue: style({
+    fontSize: 14,
+    fontWeight: 600,
+    color: '#0161de',
+  }),
+};

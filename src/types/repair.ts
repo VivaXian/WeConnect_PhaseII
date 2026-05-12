@@ -30,6 +30,7 @@ export interface LinkedWorkOrder {
   type: WorkOrderType;
   workOrderNo: string;
   status: string;
+  date?: string;
 }
 
 export interface RepairRecord {

@@ -60,4 +60,11 @@ export const deviceCardStyles = {
     flexShrink: 0,
     color: 'rgba(0,0,0,0.35)',
   }),
+  customNameNote: style({
+    fontSize: 12,
+    color: 'rgba(0,0,0,0.4)',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+  }),
 };

@@ -2,6 +2,43 @@ import type { WorkOrderGroup } from '../types/work-order';
 
 export const workOrderData: WorkOrderGroup[] = [
   {
+    month: '2026年01月',
+    orders: [
+      {
+        id: 'pm003-1',
+        type: 'maintenance',
+        status: 'completed',
+        deviceName: 'Elition 磁共振',
+        hospital: 'WeConnect医院',
+        workOrderNo: 'WM0126012001',
+        requestTime: '2026.01.20 09:00',
+      },
+    ],
+  },
+  {
+    month: '2025年12月',
+    orders: [
+      {
+        id: 'pm005-2',
+        type: 'maintenance',
+        status: 'completed',
+        deviceName: 'BigBore CT 7500',
+        hospital: 'WeConnect医院',
+        workOrderNo: 'WM0125120101',
+        requestTime: '2025.12.01 08:30',
+      },
+      {
+        id: 'pm006-1',
+        type: 'maintenance',
+        status: 'completed',
+        deviceName: 'Affiniti 70',
+        hospital: 'WeConnect医院',
+        workOrderNo: 'WM0125121501',
+        requestTime: '2025.12.15 10:00',
+      },
+    ],
+  },
+  {
     month: '2025年11月 (4)',
     orders: [
       {
@@ -43,7 +80,7 @@ export const workOrderData: WorkOrderGroup[] = [
     ],
   },
   {
-    month: '2025年10月 (3)',
+    month: '2025年10月',
     orders: [
       {
         id: 'wo-005',
@@ -55,13 +92,22 @@ export const workOrderData: WorkOrderGroup[] = [
         requestTime: '2025.10.22 08:15',
       },
       {
-        id: 'wo-006',
+        id: 'pm001-2',
         type: 'maintenance',
         status: 'completed',
-        deviceName: 'BigBore CT 7500',
+        deviceName: 'Ingenia 3.0T',
         hospital: 'WeConnect医院',
-        workOrderNo: 'WO128923701',
-        requestTime: '2025.10.18 13:40',
+        workOrderNo: 'WM0125101501',
+        requestTime: '2025.10.15 09:00',
+      },
+      {
+        id: 'pm002-2',
+        type: 'maintenance',
+        status: 'completed',
+        deviceName: 'Azurion M3',
+        hospital: 'WeConnect医院',
+        workOrderNo: 'WM0125100101',
+        requestTime: '2025.10.01 08:00',
       },
       {
         id: 'wo-007',
@@ -71,6 +117,94 @@ export const workOrderData: WorkOrderGroup[] = [
         hospital: 'WeConnect医院',
         workOrderNo: 'WO128923702',
         requestTime: '2025.10.05 10:00',
+      },
+    ],
+  },
+  {
+    month: '2025年06月',
+    orders: [
+      {
+        id: 'pm004-1',
+        type: 'maintenance',
+        status: 'completed',
+        deviceName: 'MR 5300',
+        hospital: 'WeConnect医院（南院）',
+        workOrderNo: 'WM0125061001',
+        requestTime: '2025.06.10 09:30',
+      },
+      {
+        id: 'pm005-1',
+        type: 'maintenance',
+        status: 'completed',
+        deviceName: 'BigBore CT 7500',
+        hospital: 'WeConnect医院',
+        workOrderNo: 'WM0125060501',
+        requestTime: '2025.06.05 08:00',
+      },
+    ],
+  },
+  {
+    month: '2025年04月',
+    orders: [
+      {
+        id: 'pm001-1',
+        type: 'maintenance',
+        status: 'completed',
+        deviceName: 'Ingenia 3.0T',
+        hospital: 'WeConnect医院',
+        workOrderNo: 'WM0125041802',
+        requestTime: '2025.04.18 09:00',
+      },
+      {
+        id: 'pm002-1',
+        type: 'maintenance',
+        status: 'completed',
+        deviceName: 'Azurion M3',
+        hospital: 'WeConnect医院',
+        workOrderNo: 'WM0125040301',
+        requestTime: '2025.04.03 08:30',
+      },
+    ],
+  },
+  {
+    month: '2024年08月',
+    orders: [
+      {
+        id: 'fco001-1',
+        type: 'fco',
+        status: 'completed',
+        deviceName: 'Ingenia 3.0T',
+        hospital: 'WeConnect医院',
+        workOrderNo: 'FCO0124082201',
+        requestTime: '2024.08.22 10:00',
+      },
+    ],
+  },
+  {
+    month: '2022年03月',
+    orders: [
+      {
+        id: 'fco005-1',
+        type: 'fco',
+        status: 'completed',
+        deviceName: 'BigBore CT 7500',
+        hospital: 'WeConnect医院',
+        workOrderNo: 'FCO0122031501',
+        requestTime: '2022.03.15 09:00',
+      },
+    ],
+  },
+  {
+    month: '2020年10月',
+    orders: [
+      {
+        id: 'inst005-1',
+        type: 'install',
+        status: 'completed',
+        deviceName: 'BigBore CT 7500',
+        hospital: 'WeConnect医院',
+        workOrderNo: 'INST0120100101',
+        requestTime: '2020.10.01 08:00',
       },
     ],
   },

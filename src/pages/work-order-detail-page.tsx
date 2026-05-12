@@ -18,9 +18,14 @@ export const WorkOrderDetailPage = ({ orderId, onBack, onServiceEvalPress }: Wor
 
   if (!order) {
     return (
-      <div style={{ padding: 32, textAlign: 'center', color: '#6a7282' }}>
-        <button className={wdStyles.backBtn} onClick={onBack}>← 返回</button>
-        <p>工单不存在</p>
+      <div className={wdStyles.page}>
+        <div className={wdStyles.header}>
+          <button className={wdStyles.backBtn} onClick={onBack}>← 返回</button>
+          <div className={wdStyles.headerTitle}>工单详情</div>
+        </div>
+        <div style={{ padding: '40px 24px', textAlign: 'center', color: '#9ca3af', fontSize: 14 }}>
+          工单不存在或已归档
+        </div>
       </div>
     );
   }
