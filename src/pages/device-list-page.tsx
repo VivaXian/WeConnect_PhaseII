@@ -98,7 +98,6 @@ function computeDeviceTags(device: Device): DeviceTag[] {
 interface DeviceListPageProps {
   onDevicePress?: (device: Device) => void;
   onScanRepair?: () => void;
-  onScanSparePartAuth?: () => void;
 }
 
 const allCampuses = Array.from(
@@ -111,7 +110,7 @@ const CAMPUS_OPTIONS = [
 
 const runtimeNow = new Date();
 
-export const DeviceListPage = ({ onDevicePress, onScanRepair, onScanSparePartAuth }: DeviceListPageProps) => {
+export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPageProps) => {
   const [searchValue, setSearchValue] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterStatus>('all');
   const [activeCampus, setActiveCampus] = useState('all');
@@ -240,45 +239,18 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair, onScanSparePartAut
             type="button"
             className={deviceListPageStyles.scanBtn}
             onClick={onScanRepair}
-            aria-label="扫码报修"
+            aria-label="扫码报修/绑定"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.8"/>
-              <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.8"/>
-              <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.8"/>
-              <rect x="5" y="5" width="3" height="3" fill="currentColor"/>
-              <rect x="5" y="16" width="3" height="3" fill="currentColor"/>
-              <rect x="16" y="5" width="3" height="3" fill="currentColor"/>
-              <rect x="14" y="14" width="3" height="3" fill="currentColor"/>
-              <rect x="17" y="17" width="3" height="3" fill="currentColor"/>
+              <path d="M2 7V4a1 1 0 0 1 1-1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <path d="M22 7V4a1 1 0 0 0-1-1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <path d="M2 17v3a1 1 0 0 0 1 1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <path d="M22 17v3a1 1 0 0 1-1 1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
             </svg>
-            扫码报修
+            报修/绑定
           </button>
         </div>
-
-        {/* 备件防伪 banner */}
-        <button
-          type="button"
-          className={deviceListPageStyles.antiCounterfeitSectionBanner}
-          onClick={onScanSparePartAuth}
-        >
-          <div className={deviceListPageStyles.antiCounterfeitBannerIcon}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="3" y="3" width="7" height="7" rx="1" stroke="#ffffff" strokeWidth="1.8"/>
-              <rect x="3" y="14" width="7" height="7" rx="1" stroke="#ffffff" strokeWidth="1.8"/>
-              <rect x="14" y="3" width="7" height="7" rx="1" stroke="#ffffff" strokeWidth="1.8"/>
-              <rect x="5" y="5" width="3" height="3" fill="#ffffff"/>
-              <rect x="5" y="16" width="3" height="3" fill="#ffffff"/>
-              <rect x="16" y="5" width="3" height="3" fill="#ffffff"/>
-              <rect x="14" y="14" width="3" height="3" fill="#ffffff"/>
-              <rect x="17" y="17" width="3" height="3" fill="#ffffff"/>
-            </svg>
-          </div>
-          <div className={deviceListPageStyles.antiCounterfeitBannerContent}>
-            <div className={deviceListPageStyles.antiCounterfeitBannerTitle}>备件防伪</div>
-            <div className={deviceListPageStyles.antiCounterfeitBannerDesc}>扫描二维码验证正品</div>
-          </div>
-        </button>
 
         {/* 设备类型 filter */}
         <div className={deviceListPageStyles.filterRow}>

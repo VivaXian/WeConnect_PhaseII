@@ -77,10 +77,9 @@ const CAMPUS_OPTIONS = [
 interface UserDevicePageProps {
   onDevicePress?: (device: Device) => void;
   onScanRepair?: () => void;
-  onScanSparePartAuth?: () => void;
 }
 
-export const UserDevicePage = ({ onDevicePress, onScanRepair, onScanSparePartAuth }: UserDevicePageProps) => {
+export const UserDevicePage = ({ onDevicePress, onScanRepair }: UserDevicePageProps) => {
   const [searchValue, setSearchValue] = useState('');
   const [activeFilter, setActiveFilter] = useState<UserFilterStatus>('all');
   const [activeCampus, setActiveCampus] = useState('all');
@@ -187,19 +186,16 @@ export const UserDevicePage = ({ onDevicePress, onScanRepair, onScanSparePartAut
           type="button"
           className={userDeviceStyles.scanBtn}
           onClick={onScanRepair}
-          aria-label="扫码报修"
+          aria-label="扫码报修/绑定"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.8"/>
-            <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.8"/>
-            <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.8"/>
-            <rect x="5" y="5" width="3" height="3" fill="currentColor"/>
-            <rect x="5" y="16" width="3" height="3" fill="currentColor"/>
-            <rect x="16" y="5" width="3" height="3" fill="currentColor"/>
-            <rect x="14" y="14" width="3" height="3" fill="currentColor"/>
-            <rect x="17" y="17" width="3" height="3" fill="currentColor"/>
+            <path d="M2 7V4a1 1 0 0 1 1-1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            <path d="M22 7V4a1 1 0 0 0-1-1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            <path d="M2 17v3a1 1 0 0 0 1 1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            <path d="M22 17v3a1 1 0 0 1-1 1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
           </svg>
-          扫码报修
+          报修/绑定
         </button>
       </div>
 
@@ -219,29 +215,7 @@ export const UserDevicePage = ({ onDevicePress, onScanRepair, onScanSparePartAut
         </div>
       </div>
 
-      {/* 备件防伪 banner */}
-      <button
-        type="button"
-        className={userDeviceStyles.antiCounterfeitSectionBanner}
-        onClick={onScanSparePartAuth}
-      >
-        <div className={userDeviceStyles.antiCounterfeitBannerIcon}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="3" y="3" width="7" height="7" rx="1" stroke="#ffffff" strokeWidth="1.8"/>
-            <rect x="3" y="14" width="7" height="7" rx="1" stroke="#ffffff" strokeWidth="1.8"/>
-            <rect x="14" y="3" width="7" height="7" rx="1" stroke="#ffffff" strokeWidth="1.8"/>
-            <rect x="5" y="5" width="3" height="3" fill="#ffffff"/>
-            <rect x="5" y="16" width="3" height="3" fill="#ffffff"/>
-            <rect x="16" y="5" width="3" height="3" fill="#ffffff"/>
-            <rect x="14" y="14" width="3" height="3" fill="#ffffff"/>
-            <rect x="17" y="17" width="3" height="3" fill="#ffffff"/>
-          </svg>
-        </div>
-        <div className={userDeviceStyles.antiCounterfeitBannerContent}>
-          <div className={userDeviceStyles.antiCounterfeitBannerTitle}>备件防伪</div>
-          <div className={userDeviceStyles.antiCounterfeitBannerDesc}>扫描二维码验证正品</div>
-        </div>
-      </button>
+      {/* 备件防伪 banner removed — entry moved to 我的 page */}
 
       <div className={userDeviceStyles.listSection}>
         <div className={userDeviceStyles.sectionHeader}>

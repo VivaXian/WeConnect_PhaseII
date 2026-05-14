@@ -8,8 +8,10 @@
   "scripts": {
     "dev": "vite --open",
     "build": "vite build",
+    "build:pages": "vite build",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "verify:pages": "yarn type-check && yarn build:pages"
   },
   "dependencies": {
     "@filament/react": "4.10.0",
