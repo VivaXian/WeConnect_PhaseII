@@ -11,11 +11,17 @@ import { repairCardStyles } from './repair-card.css';
 
 const ContractBadge = () => (
   <div className={repairCardStyles.contractBadge} aria-label="白金保服务合同">
-    <svg width={24} height={24} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 3L14.5 8.5L21 9.5L16.5 14L17.5 21L12 18L6.5 21L7.5 14L3 9.5L9.5 8.5L12 3Z"
-        fill="#eb9c00" stroke="#de7510" strokeWidth={1} />
-      <rect x="7" y="17" width="10" height="2" rx="1" fill="#de7510" />
-      <rect x="7" y="19.5" width="10" height="2" rx="1" fill="#de7510" />
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12.177 1.95312L20.427 4.99805L20.76 5.12109L20.7542 5.47559L20.6409 12.0078V12.0547C20.6401 12.0876 20.638 12.1348 20.635 12.1943C20.629 12.3135 20.6173 12.4841 20.594 12.6963C20.5475 13.1202 20.4546 13.7133 20.2698 14.3975C19.9008 15.7631 19.1591 17.514 17.6633 19.0059L17.6624 19.0049C16.8919 19.8309 15.8989 20.5897 14.9045 21.1436C13.9179 21.6931 12.8686 22.0771 12.0042 22.0771C11.14 22.0771 10.0885 21.6926 9.08813 21.1445C8.07389 20.5888 7.04803 19.83 6.22388 19.0059L6.21704 18.998C4.78356 17.5051 4.07351 15.7545 3.72095 14.3916C3.54433 13.7088 3.45584 13.1173 3.41138 12.6943C3.38912 12.4826 3.37802 12.3122 3.37231 12.1934C3.36946 12.134 3.36819 12.0874 3.36743 12.0547C3.36705 12.0383 3.36656 12.0249 3.36646 12.0156C3.36643 12.0131 3.36647 12.0108 3.36646 12.0088L3.24634 5.47559L3.2395 5.12109L3.57349 4.99805L11.8313 1.95312L12.0042 1.88867L12.177 1.95312Z" fill="#EB9C00" stroke="#DE7510"/>
+      <path d="M20.2538 5.46687L12.0038 2.42188L3.74634 5.46687L3.86634 11.9994C3.86634 11.9994 3.86634 15.8281 6.57759 18.6519C8.15634 20.2306 10.5263 21.5769 12.0038 21.5769C13.4813 21.5769 15.8438 20.2306 17.3101 18.6519C20.1413 15.8281 20.1413 11.9994 20.1413 11.9994L20.2538 5.46687Z" fill="url(#paint0_linear_3201_18552)"/>
+      <path d="M11.999 7.5C12.4132 7.50008 12.749 7.83584 12.749 8.25V11.25H15.749C16.1632 11.2501 16.499 11.5858 16.499 12C16.499 12.4142 16.1632 12.7499 15.749 12.75H12.749V15.75C12.749 16.1642 12.4132 16.4999 11.999 16.5C11.5848 16.5 11.249 16.1642 11.249 15.75V12.75H8.24902C7.83481 12.75 7.49902 12.4142 7.49902 12C7.49902 11.5858 7.83481 11.25 8.24902 11.25H11.249V8.25C11.249 7.83579 11.5848 7.5 11.999 7.5Z" fill="#DE7510"/>
+      <defs>
+        <linearGradient id="paint0_linear_3201_18552" x1="12.0001" y1="2.42188" x2="12.0001" y2="21.5769" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FFD885"/>
+          <stop offset="0.485" stopColor="#FFF6E0"/>
+          <stop offset="1" stopColor="#FFD885"/>
+        </linearGradient>
+      </defs>
     </svg>
   </div>
 );
@@ -66,16 +72,17 @@ export const RepairCard = ({ record, onDevicePress, onRepairDetailPress, onServi
           </div>
         </div>
         <div className={repairCardStyles.engineerRow}>
-          {record.progress.engineer ? (
+          {record.status === 'in-service' && record.progress.engineer ? (
             <FlexBox gap={4} alignItems="center">
               <Text variant="body-s" color="primary">{record.progress.engineer.name}</Text>
               <Text variant="body-s" color="secondary">{record.progress.engineer.role}</Text>
             </FlexBox>
-          ) : (
+          ) : record.status === 'completed-pending' ? null : (
             <Text variant="body-s" color="secondary">{record.progress.detail}</Text>
           )}
         </div>
       </div>
+
     </CardBody>
 
     <CardFooter>

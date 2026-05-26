@@ -15,4 +15,9 @@ node_modules
 
 #!.yarn/cache
 .pnp.*
-dist
+#dist/
+.vite/
+.DS_Store
+**/.DS_Store
+weapp/dist/
+weapp/.swc/

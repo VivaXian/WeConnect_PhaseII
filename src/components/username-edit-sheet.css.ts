@@ -1,0 +1,78 @@
+import { style } from '@vanilla-extract/css';
+
+export const usernameEditStyles = {
+  overlay: style({
+    position: 'fixed',
+    top: 0,
+    bottom: 0,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: 375,
+    maxWidth: '100vw',
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    zIndex: 9999,
+  }),
+  panel: style({
+    backgroundColor: '#ffffff',
+    borderRadius: '20px 20px 0 0',
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  }),
+  handle: style({
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#e0e0e0',
+    margin: '12px auto 4px',
+    flexShrink: 0,
+  }),
+  header: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '12px 20px',
+  }),
+  closeBtn: style({
+    background: 'none',
+    border: 'none',
+    fontSize: 18,
+    color: '#888',
+    cursor: 'pointer',
+    lineHeight: 1,
+  }),
+  body: style({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    padding: '4px 20px 16px',
+  }),
+  label: style({
+    fontSize: 13,
+    color: '#555',
+    fontWeight: 500,
+  }),
+  input: style({
+    width: '100%',
+    fontSize: 15,
+    borderRadius: 8,
+    border: '1.5px solid #d0d5dd',
+    outline: 'none',
+    fontFamily: 'inherit',
+    boxSizing: 'border-box',
+    padding: '10px 12px',
+  }),
+  hint: style({
+    fontSize: 12,
+    color: '#aaa',
+  }),
+  footer: style({
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '4px 20px 28px',
+  }),
+};

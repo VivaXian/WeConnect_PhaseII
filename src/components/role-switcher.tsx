@@ -4,8 +4,8 @@ import { useRoleStore } from '../stores/role-store';
 import { roleSwitcherStyles } from './role-switcher.css';
 
 const ROLES: { key: UserRole; label: string }[] = [
-  { key: 'user', label: '普通用户（报修员）' },
-  { key: 'admin', label: '设备科科长' },
+  { key: 'user', label: '认证用户' },
+  { key: 'admin', label: '授权用户' },
 ];
 
 export const RoleSwitcher = () => {

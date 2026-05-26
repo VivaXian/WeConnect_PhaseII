@@ -86,7 +86,7 @@ export const DeviceDetailPmTab = ({ device, pmRiskLevel, daysSincePm, showPmSoon
               pmRiskLevel === 'concern' && detailStyles.chipWarn,
               pmRiskLevel === 'high' && detailStyles.chipDanger,
             )}>
-              {pmRiskLevel === 'high' ? '高风险' : '需关注'}
+              保养风险
             </span>
           )}
         </div>

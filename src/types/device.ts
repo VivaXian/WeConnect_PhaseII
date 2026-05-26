@@ -10,6 +10,7 @@ export type UserFilterStatus = 'all' | 'pm-risk' | 'in-repair';
 
 export interface ContractPeriod {
   type: ContractPeriodType;
+  subType?: string;
   startDate: string;
   endDate: string;
 }
@@ -49,14 +50,18 @@ export interface Device {
   pmLastDate?: string;
   pmNextDate?: string;
   pmRisk?: boolean;
+  acceptancePending?: boolean;
+  installDate?: string;
+  isDistributedDevice?: boolean;
+  canShowInstallDate?: boolean;
   pmWorkOrders?: PmWorkOrderEntry[];
   deviceWorkOrders?: DeviceWorkOrderEntry[];
 }
 
 export const DEVICE_STATUS_LABEL: Record<DeviceStatus, string> = {
   normal: '正常运行',
-  'under-repair': '维修中',
-  'pending-repair': '待维修',
+  'under-repair': '报修中',
+  'pending-repair': '报修中',
   offline: '停机',
 };
 
@@ -82,9 +87,9 @@ export const BUSINESS_CONTRACT_LABEL: Record<BusinessContract, string> = {
 };
 
 export const CONTRACT_PERIOD_LABEL: Record<ContractPeriodType, string> = {
-  warranty: '质保',
-  pos: '延保',
-  csa: '维保',
+  warranty: '质保合同',
+  pos: '延保合同',
+  csa: '维保合同',
 };
 
 export const CONTRACT_PERIOD_DESC: Record<ContractPeriodType, string> = {

@@ -1,6 +1,5 @@
-import { RepairRecordPanel } from '../components/repair-record-panel';
 import type { Device } from '../types/device';
-import { homePageStyles } from './home-page.css';
+import { SuperUserServicePage } from './super-user-service-page';
 
 interface HomePageProps {
   onDevicePress?: (device: Device) => void;
@@ -8,14 +7,12 @@ interface HomePageProps {
   onServiceEvalPress?: (repairId: string) => void;
 }
 
-export const HomePage = ({ onDevicePress, onRepairDetailPress, onServiceEvalPress }: HomePageProps) => {
-  return (
-    <div className={homePageStyles.page}>
-      <div className={homePageStyles.topBar}>
-        <div className={homePageStyles.topBarTitle}>我的报修</div>
-        <div className={homePageStyles.topBarSub}>WeConnect医院</div>
-      </div>
-      <RepairRecordPanel onDevicePress={onDevicePress} onRepairDetailPress={onRepairDetailPress} onServiceEvalPress={onServiceEvalPress} showScanEntry />
-    </div>
-  );
-};
+export const HomePage = ({ onDevicePress, onRepairDetailPress, onServiceEvalPress }: HomePageProps) => (
+  <SuperUserServicePage
+    title="我的报修"
+    subtitle="WeConnect医院"
+    onDevicePress={onDevicePress}
+    onRepairDetailPress={onRepairDetailPress}
+    onServiceEvalPress={onServiceEvalPress}
+  />
+);

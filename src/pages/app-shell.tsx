@@ -17,6 +17,8 @@ import { ScanCameraPage } from './scan-camera-page';
 import { ScanDeviceInputPage } from './scan-device-input-page';
 import { ServiceEvaluationPage } from './service-evaluation-page';
 import { SparePartsAuthPage } from './spare-parts-auth-page';
+import { EngineerVerifyPage } from './engineer-verify-page';
+import { EngineerChatPage } from './engineer-chat-page';
 import { SuperUserServicePage } from './super-user-service-page';
 import { UserDevicePage } from './user-device-page';
 import { WorkOrderDetailPage } from './work-order-detail-page';
@@ -28,6 +30,8 @@ type NavState =
   | { type: 'device-detail'; device: Device }
   | { type: 'repair-form'; device: Device }
   | { type: 'spare-parts-auth' }
+  | { type: 'engineer-verify' }
+  | { type: 'engineer-chat' }
   | { type: 'scan-camera' }
   | { type: 'scan-device-input' }
   | { type: 'repair-detail'; repairId: string }
@@ -108,13 +112,32 @@ export const AppShell = () => {
     );
   }
 
+  if (currentNav.type === 'engineer-verify') {
+    return (
+      <div className={shellStyles.shell}>
+        <div className={shellStyles.content}>
+          <EngineerVerifyPage onBack={goBack} />
+        </div>
+      </div>
+    );
+  }
+
+  if (currentNav.type === 'engineer-chat') {
+    return (
+      <div className={shellStyles.shell}>
+        <div className={shellStyles.content}>
+          <EngineerChatPage onBack={goBack} />
+        </div>
+      </div>
+    );
+  }
+
   if (currentNav.type === 'scan-camera') {
     return (
       <div className={shellStyles.shell}>
         <div className={shellStyles.content}>
           <ScanCameraPage
             onBack={goBack}
-            onInputFallback={() => navigate({ type: 'scan-device-input' })}
           />
         </div>
       </div>
@@ -208,6 +231,7 @@ export const AppShell = () => {
               const device = deviceList.find((d) => d.id === deviceId);
               if (device) navigate({ type: 'device-detail', device });
             }}
+            onWorkOrderPress={(orderId) => navigate({ type: 'work-order-detail', orderId })}
           />
         )}
         {activeTab === 'profile' && profileSubPage === 'messages' && (
@@ -226,9 +250,12 @@ export const AppShell = () => {
             recentMessages={recentMessages}
             onMessagesPress={() => setProfileSubPage('messages')}
             onMessagePress={(messageId) => setProfileSubPage({ type: 'message-detail', messageId, backTarget: 'profile' })}
+            onCommonDevicesPress={() => handleTabChange('devices')}
             onScanPress={() => navigate({ type: 'scan-camera' })}
             onInputDevicePress={() => navigate({ type: 'scan-device-input' })}
             onSparePartsAuthPress={() => navigate({ type: 'spare-parts-auth' })}
+            onEngineerVerifyPress={() => navigate({ type: 'engineer-verify' })}
+            onEngineerChatPress={() => navigate({ type: 'engineer-chat' })}
           />
         )}
       </div>

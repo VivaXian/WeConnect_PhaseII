@@ -2,6 +2,7 @@ import { Text } from '@filament/react/text';
 import clsx from 'clsx';
 import { useMemo, useState } from 'react';
 import { DeviceCard } from '../components/device-card';
+import { useLoadMore } from '../hooks/use-load-more';
 import type { Device, UserFilterStatus } from '../types/device';
 import { deviceList } from '../utils/device-data';
 import { useDeviceCustomNamesStore } from '../stores/device-custom-names-store';
@@ -9,18 +10,18 @@ import { userDeviceStyles } from './user-device-page.css';
 
 const USER_STAT_CHIPS: { key: UserFilterStatus; label: string }[] = [
   { key: 'all', label: '全部设备' },
-  { key: 'pm-risk', label: 'PM风险' },
+  { key: 'pm-risk', label: '保养风险' },
   { key: 'in-repair', label: '报修中' },
 ];
 
 const TODAY = new Date('2026-04-29');
 
 const MODALITY_OPTIONS = [
-  { key: 'all', label: '全部类型' },
   { key: 'CT', label: 'CT' },
   { key: '磁共振', label: '磁共振' },
   { key: '血管机', label: '血管机' },
   { key: '超声', label: '超声' },
+  { key: '其他', label: '其他' },
 ];
 
 function daysFromToday(dateStr: string): number {
@@ -56,12 +57,12 @@ function matchesUserFilter(d: Device, filter: UserFilterStatus): boolean {
 
 function statusTag(d: Device) {
   const tags: { label: string; signal?: 'success' | 'warning' | 'caution' | 'error' }[] = [];
-  if (isInRepair(d)) tags.push({ label: '报修中', signal: 'warning' });
+  if (isInRepair(d)) tags.push({ label: '报修中', signal: 'caution' });
   if (d.pmRisk) {
-    tags.push({ label: 'PM高风险', signal: 'error' });
+    tags.push({ label: '保养风险', signal: 'error' });
   } else if (pmThisMonth(d) && d.pmNextDate) {
     const [, month, day] = d.pmNextDate.split('-');
-    tags.push({ label: `本月PM · ${month}-${day}` });
+    tags.push({ label: `本月保养·${month}月${day}日` });
   }
   return tags;
 }
@@ -100,7 +101,7 @@ export const UserDevicePage = ({ onDevicePress, onScanRepair }: UserDevicePagePr
 
   const filteredDevices = useMemo(() => {
     let list = campusFilteredList.filter((d) => matchesUserFilter(d, activeFilter));
-    if (activeModality !== 'all') list = list.filter((d) => getModality(d) === activeModality);
+    if (activeModality !== 'all') list = list.filter((d) => activeModality === '其他' ? getModality(d) === null : getModality(d) === activeModality);
     if (searchValue.trim()) {
       const q = searchValue.trim().toLowerCase();
       list = list.filter(
@@ -112,6 +113,8 @@ export const UserDevicePage = ({ onDevicePress, onScanRepair }: UserDevicePagePr
     }
     return list;
   }, [campusFilteredList, activeFilter, activeModality, searchValue]);
+
+  const { visibleItems: visibleDevices, hasMore: devicesHasMore, loadMore: devicesLoadMore, total: devicesTotal } = useLoadMore(filteredDevices, 6);
 
   return (
     <div className={userDeviceStyles.page}>
@@ -207,7 +210,7 @@ export const UserDevicePage = ({ onDevicePress, onScanRepair }: UserDevicePagePr
               key={opt.key}
               type="button"
               className={clsx(userDeviceStyles.chip, activeModality === opt.key && userDeviceStyles.chipActive)}
-              onClick={() => setActiveModality(opt.key)}
+              onClick={() => setActiveModality(activeModality === opt.key ? 'all' : opt.key)}
             >
               {opt.label}
             </button>
@@ -219,14 +222,21 @@ export const UserDevicePage = ({ onDevicePress, onScanRepair }: UserDevicePagePr
 
       <div className={userDeviceStyles.listSection}>
         <div className={userDeviceStyles.sectionHeader}>
-          <Text variant="body-s" color="secondary">共 {filteredDevices.length} 台设备</Text>
+          <Text variant="body-s" color="secondary">共 {devicesTotal} 台设备</Text>
         </div>
-        {filteredDevices.map((d) => (
+        {visibleDevices.map((d) => (
           <DeviceCard key={d.id} device={d} customName={customNames[d.id]} tags={statusTag(d)} onPress={() => onDevicePress?.(d)} />
         ))}
-        {filteredDevices.length === 0 && (
+        {devicesTotal === 0 && (
           <div className={userDeviceStyles.emptyState}>
             <Text variant="body-m" color="secondary">未找到匹配设备</Text>
+          </div>
+        )}
+        {devicesHasMore && (
+          <div className={userDeviceStyles.loadMoreWrap}>
+            <button type="button" className={userDeviceStyles.loadMoreBtn} onClick={devicesLoadMore}>
+              加载更多
+            </button>
           </div>
         )}
       </div>

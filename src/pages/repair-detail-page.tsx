@@ -1,6 +1,18 @@
+import { Button } from '@filament/react/button';
+import { Call } from '@filament/react/icons/call';
+import { CheckmarkCircle } from '@filament/react/icons/checkmark-circle';
+import { Cube3D } from '@filament/react/icons/cube3-d';
+import { PersonPortrait } from '@filament/react/icons/person-portrait';
+import type { RepairStatus } from '../types/repair';
 import { WORK_ORDER_TYPE_LABEL } from '../types/work-order';
 import { repairData } from '../utils/repair-data';
 import { rdStyles } from './repair-detail-page.css';
+
+const SOURCE_LABEL: Record<string, string> = {
+  'mini-program': '小程序',
+  phone: '电话',
+  'service-account': '服务号',
+};
 
 interface RepairDetailPageProps {
   repairId: string;
@@ -9,30 +21,39 @@ interface RepairDetailPageProps {
 }
 
 const TimelineDotIcon = ({ icon }: { icon: string }) => {
-  if (icon === 'check') {
-    return (
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-        <polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
+  if (icon === 'check') return <CheckmarkCircle size="small" aria-hidden="true" />;
+  if (icon === 'person') return <PersonPortrait size="small" aria-hidden="true" />;
+  if (icon === 'cube') return <Cube3D size="small" aria-hidden="true" />;
+  return <div className={rdStyles.timelineDotSmallDot} />;
+};
+
+type StepperNode = { label: string; active: boolean };
+
+const getStepperNodes = (status: RepairStatus): StepperNode[] => {
+  if (status === 'cancelled') {
+    return [{ label: '报修', active: true }, { label: '已取消', active: true }];
   }
-  if (icon === 'person') {
-    return (
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-        <circle cx="6" cy="4" r="2" fill="#fff" />
-        <path d="M2 10c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  if (icon === 'cube') {
-    return (
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-        <rect x="2" y="2" width="8" height="8" rx="1" stroke="#fff" strokeWidth="1.2" />
-        <path d="M2 5h8M5 2v8" stroke="#fff" strokeWidth="1" />
-      </svg>
-    );
-  }
-  return <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff' }} />;
+  const activeIndex = status === 'reported' ? 0 : status === 'in-service' ? 1 : 2;
+  return ['报修', '服务中', '服务完成'].map((label, idx) => ({ label, active: idx <= activeIndex }));
+};
+
+const CoarseProgressStepper = ({ status }: { status: RepairStatus }) => {
+  const nodes = getStepperNodes(status);
+  return (
+    <div className={rdStyles.progressStepper}>
+      {nodes.flatMap((node, idx) => [
+        <div key={`n${idx}`} className={rdStyles.progressStepNode}>
+          <div className={node.active ? rdStyles.progressStepDot : rdStyles.progressStepDotInactive}>
+            <CheckmarkCircle size="small" aria-hidden="true" />
+          </div>
+          <span className={rdStyles.progressStepLabel}>{node.label}</span>
+        </div>,
+        ...(idx < nodes.length - 1
+          ? [<div key={`c${idx}`} className={node.active ? rdStyles.progressConnector : rdStyles.progressConnectorInactive} />]
+          : []),
+      ])}
+    </div>
+  );
 };
 
 export const RepairDetailPage = ({ repairId, onBack, onWorkOrderPress }: RepairDetailPageProps) => {
@@ -71,7 +92,7 @@ export const RepairDetailPage = ({ repairId, onBack, onWorkOrderPress }: RepairD
 
       <div className={rdStyles.sections}>
         {/* 服务工程师 */}
-        {record.progress.engineer && (
+        {record.progress.engineer && record.status === 'in-service' && (
           <div className={rdStyles.section}>
             <div className={rdStyles.sectionTitle}>服务工程师</div>
             <div className={rdStyles.engineerRow}>
@@ -82,21 +103,14 @@ export const RepairDetailPage = ({ repairId, onBack, onWorkOrderPress }: RepairD
                 </div>
               </div>
               {record.progress.engineer.phone && (
-                <a
-                  href={`tel:${record.progress.engineer.phone}`}
-                  className={rdStyles.callBtn}
+                <Button
+                  variant="quiet"
+                  shape="round"
                   aria-label="拨打电话"
+                  onPress={() => { window.location.href = `tel:${record.progress.engineer?.phone}`; }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path
-                      d="M3 2C3 1.4 3.4 1 4 1h2.5c.4 0 .7.3.8.7l.7 3c.1.3 0 .7-.3.9L6.2 7c.9 1.9 2.5 3.4 4.3 4.3l1.4-1.5c.2-.3.6-.4.9-.3l3 .7c.4.1.7.4.7.8V13c0 .6-.4 1-1 1C5.4 14 2 10.6 2 5c0-.6-.1-1.2-.2-1.8"
-                      stroke="#0072db"
-                      strokeWidth="1.3"
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                  </svg>
-                </a>
+                  <Call aria-hidden="true" />
+                </Button>
               )}
             </div>
           </div>
@@ -132,35 +146,49 @@ export const RepairDetailPage = ({ repairId, onBack, onWorkOrderPress }: RepairD
         )}
 
         {/* 维修进度 */}
-        {timeline.length > 0 && (
+        {(timeline.length > 0 || record.legacyProgress) && (
           <div className={rdStyles.section}>
             <div className={rdStyles.sectionTitle}>维修进度</div>
-            <div className={rdStyles.timeline}>
-              {timeline.map((node, idx) => {
-                const isLast = idx === timeline.length - 1;
-                return (
-                  <div key={idx} className={rdStyles.timelineNode}>
-                    <div className={rdStyles.timelineLeft}>
-                      <div className={node.isCompleted ? rdStyles.timelineDot : rdStyles.timelineDotInactive}>
-                        <TimelineDotIcon icon={node.icon} />
+            {record.legacyProgress ? (
+              <div className={rdStyles.legacyNotice}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }}>
+                  <circle cx="7" cy="7" r="6" stroke="#b45309" strokeWidth="1.2" />
+                  <path d="M7 4.5v3M7 9.5v.5" stroke="#b45309" strokeWidth="1.3" strokeLinecap="round" />
+                </svg>
+                <span>由于系统升级，2026年4月18日前的电话报修进度无法追溯。</span>
+              </div>
+            ) : (
+              <>
+                <CoarseProgressStepper status={record.status} />
+                <div className={rdStyles.timeline}>
+                  {[...timeline].reverse().map((node, idx, arr) => {
+                    const isLast = idx === arr.length - 1;
+                    const nextNode = arr[idx + 1];
+                    return (
+                      <div key={idx} className={rdStyles.timelineNode}>
+                        <div className={rdStyles.timelineLeft}>
+                          <div className={node.isCompleted ? rdStyles.timelineDot : rdStyles.timelineDotInactive}>
+                            <TimelineDotIcon icon={node.icon} />
+                          </div>
+                          {!isLast && (
+                            <div className={nextNode?.isCompleted ? rdStyles.timelineLine : rdStyles.timelineLineInactive} />
+                          )}
+                        </div>
+                        <div className={rdStyles.timelineContent}>
+                          <div className={rdStyles.timelineLabel}>{node.label}</div>
+                          {node.date && (
+                            <div className={rdStyles.timelineDate}>{node.date}</div>
+                          )}
+                          {node.detail && (
+                            <div className={rdStyles.timelineDetail}>{node.detail}</div>
+                          )}
+                        </div>
                       </div>
-                      {!isLast && (
-                        <div className={node.isCompleted ? rdStyles.timelineLine : rdStyles.timelineLineInactive} />
-                      )}
-                    </div>
-                    <div className={rdStyles.timelineContent}>
-                      <div className={rdStyles.timelineLabel}>{node.label}</div>
-                      {node.date && (
-                        <div className={rdStyles.timelineDate}>{node.date}</div>
-                      )}
-                      {node.detail && (
-                        <div className={rdStyles.timelineDetail}>{node.detail}</div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -202,6 +230,12 @@ export const RepairDetailPage = ({ repairId, onBack, onWorkOrderPress }: RepairD
             <div className={rdStyles.descRow}>
               <span className={rdStyles.descLabel}>报修时间</span>
               <span className={rdStyles.descValue}>{record.repairTime}</span>
+            </div>
+          )}
+          {record.source && (
+            <div className={rdStyles.descRow}>
+              <span className={rdStyles.descLabel}>报修渠道</span>
+              <span className={rdStyles.descValue}>{SOURCE_LABEL[record.source] ?? record.source}</span>
             </div>
           )}
           {record.problemDescription && (

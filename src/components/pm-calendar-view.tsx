@@ -89,7 +89,7 @@ export const PmCalendarView = ({
         <button className={calendarStyles.navBtn} onClick={prevMonth}>
           ‹
         </button>
-        <span className={calendarStyles.monthTitle}>{year}年{month}月 PM计划</span>
+        <span className={calendarStyles.monthTitle}>{year}年{month}月保养计划</span>
         <button className={calendarStyles.navBtn} onClick={nextMonth}>
           ›
         </button>

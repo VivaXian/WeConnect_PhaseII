@@ -3,8 +3,8 @@ import { BottomBar } from '@filament/react/bottom-bar';
 import { Item } from '@filament/react/common';
 import { ClipboardList } from '@filament/react/icons/clipboard-list';
 import { ClipboardPerson } from '@filament/react/icons/clipboard-person';
+import { Compass } from '@filament/react/icons/compass';
 import { PersonPortraitCircle } from '@filament/react/icons/person-portrait-circle';
-import { Placeholder } from '@filament/react/icons/placeholder';
 import { TabContext, TabPanels, Tabs } from '@filament/react/tabs';
 
 // 报修 | 设备 | 工单 | 我的 — same for both roles, role-aware content within each tab
@@ -39,7 +39,7 @@ export const SharedBottomBar = ({
     <BottomBar>
       <Tabs placement="bottom" alignment="center">
         <Item key="devices">
-          <Placeholder aria-hidden="true" />
+          <Compass aria-hidden="true" />
           设备
         </Item>
         <Item key="repair">

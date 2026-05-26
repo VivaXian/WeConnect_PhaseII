@@ -3,10 +3,9 @@ import { scanCameraStyles as s } from './scan-camera-page.css';
 
 interface ScanCameraPageProps {
   onBack: () => void;
-  onInputFallback?: () => void;
 }
 
-export const ScanCameraPage = ({ onBack, onInputFallback }: ScanCameraPageProps) => {
+export const ScanCameraPage = ({ onBack }: ScanCameraPageProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [mode, setMode] = useState<'repair' | 'bind'>('repair');
   const [cameraAvailable, setCameraAvailable] = useState(true);
@@ -72,14 +71,6 @@ export const ScanCameraPage = ({ onBack, onInputFallback }: ScanCameraPageProps)
       </div>
 
       <div className={s.hint}>将设备二维码对准框内，自动识别</div>
-
-      {onInputFallback && (
-        <div className={s.bottomActions}>
-          <button className={s.inputFallbackBtn} onClick={onInputFallback}>
-            无法扫码？改用手动输入编号
-          </button>
-        </div>
-      )}
     </div>
   );
 };

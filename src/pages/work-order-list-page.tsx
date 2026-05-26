@@ -3,9 +3,10 @@ import { Item } from '@filament/react/common';
 import { ChevronRight } from '@filament/react/icons/chevron-right';
 import { Search } from '@filament/react/search';
 import { Tag } from '@filament/react/tag';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useLoadMore } from '../hooks/use-load-more';
 import { WORK_ORDER_TYPE_LABEL } from '../types/work-order';
-import type { WorkOrder } from '../types/work-order';
+import type { WorkOrder, WorkOrderGroup } from '../types/work-order';
 import { workOrderData } from '../utils/work-order-data';
 import { useRoleStore } from '../stores/role-store';
 import { woStyles } from './work-order-list-page.css';
@@ -115,6 +116,21 @@ export const WorkOrderListPage = ({ onWorkOrderPress }: WorkOrderListPageProps) 
     }))
     .filter((g) => g.orders.length > 0);
 
+  const allOrders = useMemo(() => filteredGroups.flatMap((g) => g.orders), [filteredGroups]);
+  const { hasMore: ordersHasMore, loadMore: ordersLoadMore, total: ordersTotal, shown: ordersShown } = useLoadMore(allOrders, 5);
+
+  const visibleGroups = useMemo((): WorkOrderGroup[] => {
+    let remaining = ordersShown;
+    const result: WorkOrderGroup[] = [];
+    for (const g of filteredGroups) {
+      if (remaining <= 0) break;
+      const take = Math.min(g.orders.length, remaining);
+      result.push({ ...g, orders: g.orders.slice(0, take) });
+      remaining -= take;
+    }
+    return result;
+  }, [filteredGroups, ordersShown]);
+
   return (
     <div className={woStyles.page}>
       <div className={woStyles.topBar}>
@@ -140,7 +156,7 @@ export const WorkOrderListPage = ({ onWorkOrderPress }: WorkOrderListPageProps) 
       </div>
 
       <div className={woStyles.listSection}>
-        {filteredGroups.map((group) => (
+        {visibleGroups.map((group) => (
           <div key={group.month} className={woStyles.monthGroup}>
             <div className={woStyles.monthTitle}>{group.month}</div>
             {group.orders.map((order) => (
@@ -153,8 +169,15 @@ export const WorkOrderListPage = ({ onWorkOrderPress }: WorkOrderListPageProps) 
             ))}
           </div>
         ))}
-        {filteredGroups.length === 0 && (
+        {ordersTotal === 0 && (
           <div className={woStyles.emptyState}>暂无工单记录</div>
+        )}
+        {ordersHasMore && (
+          <div className={woStyles.loadMoreWrap}>
+            <button type="button" className={woStyles.loadMoreBtn} onClick={ordersLoadMore}>
+              加载更多
+            </button>
+          </div>
         )}
       </div>
     </div>

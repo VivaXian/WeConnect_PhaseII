@@ -1,6 +1,7 @@
 import type { WorkOrderType } from './work-order';
 
-export type RepairStatus = 'in-service' | 'completed-pending' | 'cancelled';
+export type RepairStatus = 'reported' | 'in-service' | 'completed-pending' | 'cancelled';
+export type RepairSource = 'mini-program' | 'phone' | 'service-account';
 export type ProgressIcon = 'person-headset' | 'checkmark-circle' | 'cross-circle';
 
 export interface Engineer {
@@ -48,6 +49,8 @@ export interface RepairRecord {
   statusTitle?: string;
   tagline?: string;
   status: RepairStatus;
+  source?: RepairSource;
+  legacyProgress?: boolean;
   serviceTag?: string;
   progress: RepairProgress;
   buttons: string[];

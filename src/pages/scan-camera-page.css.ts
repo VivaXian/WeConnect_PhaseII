@@ -9,7 +9,12 @@ const scanMove = keyframes({
 export const scanCameraStyles = {
   page: style({
     position: 'fixed',
-    inset: 0,
+    top: 0,
+    bottom: 0,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: 375,
+    maxWidth: '100vw',
     backgroundColor: '#000',
     display: 'flex',
     flexDirection: 'column',
@@ -19,7 +24,7 @@ export const scanCameraStyles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '52px 20px 16px',
+    padding: '16px 20px',
     gap: 12,
     zIndex: 3,
     flexShrink: 0,

@@ -16,18 +16,25 @@ export const profileStyles = {
   // ── Hero ──────────────────────────────────────────────────────────────────
   hero: style({
     backgroundColor: '#0161de',
-    padding: '36px 16px 28px',
+    padding: '24px 20px',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    color: '#ffffff',
+  }),
+  heroTextGroup: style({
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    gap: 10,
-    color: '#ffffff',
+    gap: 4,
   }),
   heroName: style({
     display: 'block',
-    textAlign: 'center',
-    marginTop: 2,
     color: '#ffffff',
+  }),
+  heroSubtext: style({
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 12,
   }),
   roleRow: style({
     display: 'flex',
@@ -35,7 +42,6 @@ export const profileStyles = {
     alignItems: 'center',
     gap: 8,
     flexWrap: 'wrap',
-    justifyContent: 'center',
   }),
   roleTagAdmin: style({
     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -60,6 +66,26 @@ export const profileStyles = {
     paddingTop: 3,
     paddingBottom: 3,
     border: '1px solid rgba(255,255,255,0.3)',
+  }),
+  deviceSummaryChip: style({
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    color: 'rgba(255,255,255,0.88)',
+    fontSize: 11,
+    fontWeight: 500,
+    borderRadius: 100,
+    paddingLeft: 8,
+    paddingRight: 8,
+    paddingTop: 2,
+    paddingBottom: 2,
+    border: '1px solid rgba(255,255,255,0.22)',
+  }),
+  deviceSummaryChipBtn: style({
+    background: 'none',
+    border: 'none',
+    padding: 0,
+    margin: 0,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
   }),
   permissionTag: style({
     display: 'inline-flex',
@@ -94,7 +120,7 @@ export const profileStyles = {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    padding: '14px 16px 8px',
+    padding: '12px 16px 8px',
     gap: 8,
   }),
   sectionLink: style({
@@ -139,7 +165,7 @@ export const profileStyles = {
     flex: 1,
     fontSize: 13,
     fontWeight: 500,
-    color: '#111',
+    color: '#1a2234',
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
@@ -152,7 +178,7 @@ export const profileStyles = {
   }),
   msgBody: style({
     fontSize: 12,
-    color: '#888',
+    color: '#8898aa',
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
@@ -165,14 +191,18 @@ export const profileStyles = {
   }),
 
   // ── Quick tools grid ──────────────────────────────────────────────────────
+  cardSectionTitle: style({
+    fontSize: 13,
+    fontWeight: 600,
+    color: '#1a2234',
+  }),
   toolSectionTitle: style({
     padding: '12px 16px 2px',
-    display: 'block',
   }),
   toolGrid: style({
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 10,
+    gap: 8,
     padding: '8px 16px 14px',
   }),
   toolItem: style({
@@ -180,8 +210,8 @@ export const profileStyles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    padding: '14px 8px',
+    gap: 6,
+    padding: '10px 6px',
     backgroundColor: '#f0f4ff',
     borderRadius: 12,
     cursor: 'pointer',
@@ -189,8 +219,8 @@ export const profileStyles = {
     fontFamily: 'inherit',
   }),
   toolIconWrap: style({
-    width: 44,
-    height: 44,
+    width: 36,
+    height: 36,
     borderRadius: '50%',
     backgroundColor: '#e0eaff',
     display: 'flex',
@@ -200,22 +230,121 @@ export const profileStyles = {
   toolLabel: style({
     fontSize: 12,
     fontWeight: 600,
-    color: '#333',
+    color: '#1a2234',
     textAlign: 'center',
     lineHeight: '16px',
   }),
   toolSub: style({
     fontSize: 11,
-    color: '#888',
+    color: '#8898aa',
     textAlign: 'center',
     lineHeight: '14px',
+  }),
+
+  // ── Tool link rows (secondary tools) ─────────────────────────────────────
+  toolLinks: style({
+    borderTop: '1px solid #edf0f4',
+    marginTop: 4,
+    display: 'flex',
+    flexDirection: 'column',
+  }),
+  toolLinkRow: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '10px 16px',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    width: '100%',
+    boxSizing: 'border-box',
+    selectors: {
+      '& + &': {
+        borderTop: '1px solid #f2f4f7',
+      },
+    },
+  }),
+  toolLinkLeft: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  }),
+  toolLinkIconWrap: style({
+    width: 30,
+    height: 30,
+    borderRadius: '50%',
+    backgroundColor: '#eff3ff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  }),
+  toolLinkInfo: style({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+    alignItems: 'flex-start',
+  }),
+  toolLinkLabel: style({
+    fontSize: 13,
+    fontWeight: 600,
+    color: '#1a2234',
+  }),
+  toolLinkSub: style({
+    fontSize: 11,
+    color: '#8898aa',
   }),
 
   // ── Account & permission list (label left, value right) ───────────────────
   infoList: style({}),
   infoValueBold: style({
     fontWeight: 600,
-    color: '#0072db',
+    color: '#0161de',
+  }),  accountHeader: style({
+    fontSize: 11,
+    color: '#8898aa',
+    fontWeight: 600,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    padding: '12px 16px 6px',
+  }),
+  accountRow: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '12px 16px',
+    borderTop: '1px solid #f2f4f7',
+    width: '100%',
+    boxSizing: 'border-box',
+  }),
+  accountRowBtn: style({
+    background: 'none',
+    border: 'none',
+    textAlign: 'left',
+    fontFamily: 'inherit',
+    cursor: 'pointer',
+  }),
+  accountLabel: style({
+    fontSize: 14,
+    color: '#1a2234',
+  }),
+  accountRight: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  }),
+  accountValue: style({
+    fontSize: 14,
+    color: '#8898aa',
+  }),
+  upgradeInAccount: style({
+    borderTop: '1px dashed #e4e8f0',
+    padding: '14px 16px 16px',
   }),
 
   // ── Upgrade section ───────────────────────────────────────────────────────
@@ -224,21 +353,120 @@ export const profileStyles = {
     flexDirection: 'column',
     gap: 12,
   }),
-  upgradeStatusPending: style({
+
+  // state 2 (pending) badge
+  upgradeStatusBadge: style({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#eff5ff',
+    border: '1px solid #b3d4ff',
+    borderRadius: 100,
+    paddingLeft: 10,
+    paddingRight: 12,
+    paddingTop: 4,
+    paddingBottom: 4,
+    alignSelf: 'flex-start',
+  }),
+  upgradeStatusDot: style({
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    backgroundColor: '#0161de',
+    flexShrink: 0,
+    animation: 'none',
+  }),
+
+  // state 4 (cooldown) badge
+  upgradeStatusBadgeCooldown: style({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#fff8f0',
+    border: '1px solid #ffd6a5',
+    borderRadius: 100,
+    paddingLeft: 10,
+    paddingRight: 12,
+    paddingTop: 4,
+    paddingBottom: 4,
+    alignSelf: 'flex-start',
+  }),
+  upgradeStatusDotCooldown: style({
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    backgroundColor: '#f59e0b',
+    flexShrink: 0,
+  }),
+
+  // meta row (submitted date / hospitals)
+  upgradeMeta: style({
     display: 'flex',
     flexDirection: 'column',
-    gap: 4,
+    gap: 6,
+    backgroundColor: '#f8f9fb',
+    borderRadius: 8,
+    padding: '10px 12px',
   }),
-  upgradeSubmitDate: style({
+  upgradeMetaRow: style({
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 8,
+  }),
+  upgradeMetaLabel: style({
     fontSize: 12,
-    color: '#aaa',
+    color: '#8898aa',
+    flexShrink: 0,
+    width: 56,
   }),
+  upgradeMetaValue: style({
+    fontSize: 12,
+    color: '#444',
+    lineHeight: '18px',
+  }),
+
   upgradeNote: style({
     fontSize: 12,
-    color: '#0072db',
+    color: '#0161de',
     borderLeft: '3px solid #b3d4ff',
     paddingLeft: 8,
     marginTop: 2,
+  }),
+
+  // demo controls row
+  demoRow: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingTop: 8,
+    borderTop: '1px dashed #e0e0e0',
+    marginTop: 4,
+  }),
+  demoLabel: style({
+    fontSize: 11,
+    color: '#aaa',
+    marginRight: 2,
+  }),
+  demoBtnApprove: style({
+    fontSize: 11,
+    color: '#1a7f37',
+    backgroundColor: '#e6f9ed',
+    border: '1px solid #a8e6bc',
+    borderRadius: 100,
+    padding: '3px 10px',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  }),
+  demoBtnReject: style({
+    fontSize: 11,
+    color: '#d0021b',
+    backgroundColor: '#fff0f0',
+    border: '1px solid #ffb3b3',
+    borderRadius: 100,
+    padding: '3px 10px',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
   }),
 
   // ── Logout button ─────────────────────────────────────────────────────────
@@ -251,6 +479,20 @@ export const profileStyles = {
     cursor: 'pointer',
     fontFamily: 'inherit',
     display: 'block',
+  }),
+  settingInlineBtn: style({
+    width: '100%',
+    border: 'none',
+    background: 'none',
+    padding: 0,
+    margin: 0,
+    fontFamily: 'inherit',
+    fontSize: 14,
+    color: '#1a2234',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    cursor: 'pointer',
   }),
 };
 

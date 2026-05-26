@@ -61,10 +61,10 @@ export const detailStyles = {
     alignItems: 'center',
     gap: 4,
     padding: '2px 8px',
-    borderRadius: 20,
-    fontSize: 11,
+    borderRadius: 4,
+    fontSize: 12,
     fontWeight: 600,
-    lineHeight: '16px',
+    lineHeight: '18px',
   }),
   chipSuccess: style({
     background: 'rgba(22,163,74,0.18)',
@@ -463,6 +463,22 @@ export const detailStyles = {
     color: '#aaa',
     textAlign: 'center',
   }),
+  contractDotUnsupported: style({
+    width: 12,
+    height: 12,
+    borderRadius: '50%',
+    backgroundColor: '#e5e7eb',
+    flexShrink: 0,
+    marginTop: 4,
+  }),
+  contractChipUnsupported: style({
+    backgroundColor: '#f5f5f5',
+    color: '#9ca3af',
+  }),
+  contractSubType: style({
+    fontWeight: 600,
+    color: '#1a2234',
+  }),
   contractPeriodRow: style({
     display: 'flex',
     flexDirection: 'row',
@@ -471,6 +487,118 @@ export const detailStyles = {
   }),
   contractPeriodRowBorder: style({
     borderBottom: '1px solid #f5f5f5',
+  }),
+  contractPeriodRowActive: style({
+    backgroundColor: '#f6faff',
+  }),
+  contractCurrentBody: style({
+    padding: '12px 16px 16px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 4,
+  }),
+  contractCurrentType: style({
+    fontSize: 16,
+    fontWeight: 700,
+    color: '#1a2234',
+  }),
+  contractCurrentSubType: style({
+    fontSize: 14,
+    fontWeight: 500,
+    color: '#6b7280',
+  }),
+  contractCurrentMeta: style({
+    fontSize: 13,
+    color: '#8898aa',
+  }),
+  contractCurrentExpiredText: style({
+    fontSize: 13,
+    color: '#dc2626',
+  }),
+  acceptanceCard: style({
+    margin: '16px 16px 10px',
+    backgroundColor: '#fffbeb',
+    border: '1px solid #fcd34d',
+    borderRadius: 12,
+    padding: '16px',
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'flex-start',
+  }),
+  acceptanceCardBody: style({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 4,
+    flex: 1,
+  }),
+  acceptanceCardTitle: style({
+    fontSize: 15,
+    fontWeight: 700,
+    color: '#92400e',
+  }),
+  acceptanceCardMeta: style({
+    fontSize: 13,
+    color: '#b45309',
+  }),
+  acceptanceCardDesc: style({
+    fontSize: 13,
+    color: '#6b7280',
+    marginTop: 2,
+  }),
+  contractHistoryNote: style({
+    padding: '10px 16px',
+    fontSize: 12,
+    color: '#9ca3af',
+    borderBottom: '1px solid #f5f5f5',
+    lineHeight: '18px',
+  }),
+  contractStatusCard: style({
+    margin: '0 16px 10px',
+    borderRadius: 12,
+    padding: '14px 16px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+  }),
+  contractStatusGood: style({
+    backgroundColor: '#f0fdf4',
+    border: '1px solid #86efac',
+  }),
+  contractStatusWarn: style({
+    backgroundColor: '#fffbeb',
+    border: '1px solid #fcd34d',
+  }),
+  contractStatusDanger: style({
+    backgroundColor: '#fff1f2',
+    border: '1px solid #fca5a5',
+  }),
+  contractStatusNone: style({
+    backgroundColor: '#f9fafb',
+    border: '1px solid #e5e7eb',
+  }),
+  contractStatusBadge: style({
+    display: 'inline-flex',
+    alignSelf: 'flex-start',
+    padding: '2px 8px',
+    borderRadius: 20,
+    fontSize: 11,
+    fontWeight: 600,
+    marginBottom: 2,
+  }),
+  contractStatusBadgeGood: style({ backgroundColor: '#dcfce7', color: '#15803d' }),
+  contractStatusBadgeWarn: style({ backgroundColor: '#fef3c7', color: '#d97706' }),
+  contractStatusBadgeDanger: style({ backgroundColor: '#fee2e2', color: '#dc2626' }),
+  contractStatusBadgeNeutral: style({ backgroundColor: '#f3f4f6', color: '#6b7280' }),
+  contractStatusTitle: style({ fontSize: 15, fontWeight: 700, color: '#1a2234' }),
+  contractStatusDetail: style({ fontSize: 13, color: '#374151', lineHeight: '20px' }),
+  contractStatusCta: style({ fontSize: 12, color: '#6b7280' }),
+  contractStatusDistNote: style({
+    fontSize: 11,
+    color: '#9ca3af',
+    paddingTop: 8,
+    marginTop: 2,
+    borderTop: '1px solid rgba(0,0,0,0.08)',
   }),
   contractTimeline: style({
     display: 'flex',
@@ -507,7 +635,7 @@ export const detailStyles = {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'space-between',
     marginBottom: 4,
   }),
   contractTypeLabel: style({
@@ -660,7 +788,7 @@ export const detailStyles = {
   headerInfoLabel: style({
     fontSize: 11,
     color: 'rgba(255,255,255,0.5)',
-    width: 38,
+    width: 50,
     flexShrink: 0,
   }),
   headerInfoValue: style({
@@ -812,6 +940,16 @@ export const detailStyles = {
     alignItems: 'center',
     flexShrink: 0,
     opacity: 0.55,
+  }),
+  headerModelRow: style({
+    paddingLeft: 34,
+    marginTop: 1,
+    marginBottom: 4,
+  }),
+  headerModelSub: style({
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 12,
+    lineHeight: '16px',
   }),
   // Location edit panel (below header, above tabs)
   locationEditPanel: style({

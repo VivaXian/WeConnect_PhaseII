@@ -14,6 +14,7 @@ export interface DeviceRef {
   id: string;
   name: string;
   department?: string;
+  campus?: string;
   summary?: string;
 }
 
@@ -28,19 +29,23 @@ export interface AppMessage {
   // single message — navigation target
   deviceId?: string;
   deviceName?: string;
+  deviceDept?: string;
+  deviceCampus?: string;
+  deviceSummary?: string;
   workOrderId?: string;
+  workOrderType?: string;
   // aggregated message — expandable device list
   isAggregated?: boolean;
   devices?: DeviceRef[];
 }
 
 export const CATEGORY_LABEL: Record<MessageCategory, string> = {
-  'contract-expiry': '合同即将出保',
-  'contract-expired': '合同出保提醒',
-  'acceptance': '待验收提醒',
-  'pm-plan': 'PM 月度计划',
-  'pm-risk': 'PM 风险提醒',
-  'permission-upgrade': '权限升级',
+  'contract-expiry': '即将出保',
+  'contract-expired': '合同到期',
+  'acceptance': '待验收',
+  'pm-plan': '保养计划',
+  'pm-risk': '保养风险',
+  'permission-upgrade': '系统通知',
   'order-update': '服务提醒',
 };
 
@@ -49,8 +54,8 @@ export const CATEGORY_FILTER_LABEL: Record<TypeFilter, string> = {
   'contract-expiry': '合同提醒',
   'contract-expired': '合同提醒',
   'acceptance': '验收提醒',
-  'pm-plan': 'PM 计划',
-  'pm-risk': 'PM 风险',
+  'pm-plan': '保养计划',
+  'pm-risk': '保养风险',
   'permission-upgrade': '服务提醒',
   'order-update': '服务提醒',
 };

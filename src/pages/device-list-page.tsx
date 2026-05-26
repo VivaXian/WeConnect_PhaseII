@@ -2,7 +2,6 @@ import { Text } from '@filament/react/text';
 import clsx from 'clsx';
 import { useMemo, useState } from 'react';
 import { DeviceCard } from '../components/device-card';
-import { PmCalendarView } from '../components/pm-calendar-view';
 import type { FilterStatus } from '../types/device';
 import type { Device } from '../types/device';
 import { deviceList } from '../utils/device-data';
@@ -12,37 +11,65 @@ import { deviceListPageStyles } from './device-list-page.css';
 const SU_STAT_CHIPS: { key: FilterStatus; label: string }[] = [
   { key: 'all', label: '全部设备' },
   { key: 'contract-risk', label: '合同风险' },
-  { key: 'pm-risk', label: 'PM风险' },
+  { key: 'pm-risk', label: '保养风险' },
   { key: 'in-repair', label: '报修中' },
   { key: 'pm-plan', label: '保养计划' },
 ];
 
-// Today: April 29, 2026
-const TODAY = new Date('2026-04-29');
+// Today computed at runtime
+const TODAY = new Date();
 
 const MODALITY_OPTIONS = [
-  { key: 'all', label: '全部类型' },
   { key: 'CT', label: 'CT' },
   { key: '磁共振', label: '磁共振' },
   { key: '血管机', label: '血管机' },
   { key: '超声', label: '超声' },
+  { key: '其他', label: '其他' },
 ];
+
+const ALL_MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 function daysFromToday(dateStr: string): number {
   const target = new Date(dateStr);
   return Math.round((target.getTime() - TODAY.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function pmThisMonth(device: Device): boolean {
+function isUltrasoundDevice(device: Device): boolean {
+  return device.type.includes('超声');
+}
+
+function isPmInMonth(device: Device, year: number, month: number): boolean {
   if (!device.pmNextDate) return false;
-  const d = daysFromToday(device.pmNextDate);
-  return d >= 0 && d <= 30;
+  if (isUltrasoundDevice(device)) return false;
+  const target = new Date(device.pmNextDate);
+  return target.getFullYear() === year && target.getMonth() + 1 === month;
+}
+
+function pmThisMonth(device: Device): boolean {
+  return isPmInMonth(device, TODAY.getFullYear(), TODAY.getMonth() + 1);
 }
 
 function pmDateLabel(device: Device): string {
-  if (!device.pmNextDate) return '本月PM';
+  if (!device.pmNextDate) return '本月保养';
   const [, month, day] = device.pmNextDate.split('-');
-  return `本月PM · ${month}-${day}`;
+  return `本月保养·${month}月${day}日`;
+}
+
+function formatPmPlanTag(dateStr: string): string {
+  const [, month, day] = dateStr.split('-');
+  return `计划保养·${parseInt(month, 10)}月${parseInt(day, 10)}日`;
+}
+
+function parseDateStart(dateStr: string): Date {
+  const d = new Date(dateStr);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function comparePmPlanDevice(a: Device, b: Device): number {
+  if (!a.pmNextDate || !b.pmNextDate) return 0;
+  const aDate = parseDateStart(a.pmNextDate);
+  const bDate = parseDateStart(b.pmNextDate);
+  return aDate.getTime() - bDate.getTime();
 }
 
 function contractRisk(device: Device): boolean {
@@ -66,7 +93,7 @@ function getModality(device: Device): '磁共振' | 'CT' | '血管机' | '超声
 function matchesFilter(device: Device, filter: FilterStatus): boolean {
   switch (filter) {
     case 'all': return true;
-    case 'contract-risk': return contractRisk(device);
+    case 'contract-risk': return contractRisk(device) || device.acceptancePending === true;
     case 'pm-risk': return device.pmRisk === true;
     case 'in-repair': return isInRepair(device);
     case 'pm-plan': return pmThisMonth(device);
@@ -75,20 +102,45 @@ function matchesFilter(device: Device, filter: FilterStatus): boolean {
 
 type DeviceTag = { label: string; signal: 'error' | 'warning' | 'caution' | 'success' | undefined };
 
-function computeDeviceTags(device: Device): DeviceTag[] {
+function computeDeviceTags(device: Device, activeFilter: FilterStatus): DeviceTag[] {
+  if (activeFilter === 'pm-plan' && device.pmNextDate) {
+    return [
+      {
+        label: formatPmPlanTag(device.pmNextDate),
+        signal: 'caution',
+      },
+    ];
+  }
+
   const tags: DeviceTag[] = [];
   const contractDays = device.contractEnd ? daysFromToday(device.contractEnd) : null;
 
-  if (contractDays !== null && contractDays < 0) {
-    tags.push({ label: '已出保', signal: 'error' });
-  } else if (contractDays !== null && contractDays <= 120) {
-    tags.push({ label: '即将出保', signal: 'warning' });
+  // Acceptance & contract tags (admin page always shows these)
+  if (device.acceptancePending) {
+    tags.push({ label: '设备待验收', signal: 'warning' });
+  } else {
+    const isUltrasoundOrIS = device.type.includes('超声') || device.type.includes('影像工作站') || device.type.includes('信息系统');
+    const isDistributedWithContract = device.isDistributedDevice === true && isUltrasoundOrIS;
+    const installDate = device.installDate ? new Date(device.installDate) : null;
+    const now = new Date();
+    const monthsSince = installDate
+      ? (now.getFullYear() - installDate.getFullYear()) * 12 + now.getMonth() - installDate.getMonth()
+      : null;
+    const isWithinSixMonths = monthsSince !== null && monthsSince < 6;
+    if (isDistributedWithContract || isWithinSixMonths) {
+      tags.push({ label: '合同未知', signal: undefined });
+    } else if (device.businessContract === 'none' || (contractDays !== null && contractDays < 0)) {
+      tags.push({ label: '无保', signal: 'error' });
+    } else if (contractDays !== null && contractDays <= 120) {
+      tags.push({ label: '即将出保', signal: 'warning' });
+    }
   }
+
   if (isInRepair(device)) {
-    tags.push({ label: '报修中', signal: 'warning' });
+    tags.push({ label: '报修中', signal: 'caution' });
   }
   if (device.pmRisk) {
-    tags.push({ label: 'PM高风险', signal: 'error' });
+    tags.push({ label: '保养风险', signal: 'error' });
   } else if (pmThisMonth(device)) {
     tags.push({ label: pmDateLabel(device), signal: undefined });
   }
@@ -118,18 +170,10 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
   const [activeModality, setActiveModality] = useState('all');
   const [calYear, setCalYear] = useState(runtimeNow.getFullYear());
   const [calMonth, setCalMonth] = useState(runtimeNow.getMonth() + 1);
-  const [selectedPmDate, setSelectedPmDate] = useState<string | null>(null);
   const customNames = useDeviceCustomNamesStore((state) => state.names);
 
   const handleFilterChange = (filter: FilterStatus) => {
     setActiveFilter(filter);
-    if (filter !== 'pm-plan') setSelectedPmDate(null);
-  };
-
-  const handleMonthChange = (year: number, month: number) => {
-    setCalYear(year);
-    setCalMonth(month);
-    setSelectedPmDate(null);
   };
 
   const campusFilteredList = useMemo(
@@ -139,19 +183,18 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
 
   const statCounts = useMemo(() => ({
     all: campusFilteredList.length,
-    'contract-risk': campusFilteredList.filter(contractRisk).length,
+    'contract-risk': campusFilteredList.filter((d) => contractRisk(d) || d.acceptancePending === true).length,
     'pm-risk': campusFilteredList.filter((d) => d.pmRisk === true).length,
     'in-repair': campusFilteredList.filter(isInRepair).length,
     'pm-plan': campusFilteredList.filter(pmThisMonth).length,
   }), [campusFilteredList]);
 
   const filteredDevices = useMemo(() => {
-    let list = campusFilteredList.filter((d) => matchesFilter(d, activeFilter));
-    if (activeFilter === 'pm-plan' && selectedPmDate) {
-      list = list.filter((d) => d.pmNextDate === selectedPmDate);
-    }
+    let list = campusFilteredList.filter((d) => (
+      activeFilter === 'pm-plan' ? isPmInMonth(d, calYear, calMonth) : matchesFilter(d, activeFilter)
+    ));
     if (activeModality !== 'all') {
-      list = list.filter((d) => getModality(d) === activeModality);
+      list = list.filter((d) => activeModality === '其他' ? getModality(d) === null : getModality(d) === activeModality);
     }
     if (searchValue.trim()) {
       const q = searchValue.trim().toLowerCase();
@@ -162,8 +205,12 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
           d.department.toLowerCase().includes(q)
       );
     }
-    return list;
-  }, [campusFilteredList, activeFilter, selectedPmDate, activeModality, searchValue]);
+    if (activeFilter === 'pm-plan') {
+      return list.sort(comparePmPlanDevice);
+    }
+
+    return list.sort((a, b) => (b.installDate ?? '').localeCompare(a.installDate ?? ''));
+  }, [campusFilteredList, activeFilter, activeModality, searchValue, calYear, calMonth]);
 
   return (
     <div className={deviceListPageStyles.page}>
@@ -263,7 +310,7 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
                   deviceListPageStyles.chip,
                   activeModality === opt.key && deviceListPageStyles.chipActive
                 )}
-                onClick={() => setActiveModality(opt.key)}
+                onClick={() => setActiveModality(activeModality === opt.key ? 'all' : opt.key)}
               >
                 {opt.label}
               </button>
@@ -271,16 +318,35 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
           </div>
         </div>
 
-        {/* PM calendar – visible when 保养计划 is active */}
+        {/* PM date picker – single row: year nav + scrollable months */}
         {activeFilter === 'pm-plan' && (
-          <PmCalendarView
-            devices={deviceList}
-            year={calYear}
-            month={calMonth}
-            onMonthChange={handleMonthChange}
-            selectedDate={selectedPmDate}
-            onDateSelect={setSelectedPmDate}
-          />
+          <div className={deviceListPageStyles.pmDatePicker}>
+            <div className={deviceListPageStyles.pmYearPart}>
+              <button type="button" className={deviceListPageStyles.pmYearArrow} onClick={() => setCalYear((y) => y - 1)} aria-label="上一年">‹</button>
+              <span className={deviceListPageStyles.pmYearLabel}>{calYear}</span>
+              <button type="button" className={deviceListPageStyles.pmYearArrow} onClick={() => setCalYear((y) => y + 1)} aria-label="下一年">›</button>
+            </div>
+            <div className={deviceListPageStyles.pmMonthStrip}>
+              {ALL_MONTHS.map((m) => {
+                const isSelected = calMonth === m;
+                const isToday = calYear === TODAY.getFullYear() && TODAY.getMonth() + 1 === m;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    className={clsx(
+                      deviceListPageStyles.pmMonthStripItem,
+                      isSelected && deviceListPageStyles.pmMonthStripItemActive,
+                      !isSelected && isToday && deviceListPageStyles.pmMonthStripItemToday
+                    )}
+                    onClick={() => setCalMonth(m)}
+                  >
+                    {m}月
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         )}
 
         <div className={deviceListPageStyles.listSection}>
@@ -289,20 +355,25 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
               共 {filteredDevices.length} 台设备
             </Text>
           </div>
+          {activeFilter === 'pm-plan' && (
+            <div className={deviceListPageStyles.pmUltrasoundNote}>
+              超声设备保养计划暂未开放，列表中不含超声设备
+            </div>
+          )}
 
           {filteredDevices.map((device) => (
             <DeviceCard
               key={device.id}
               device={device}
               customName={customNames[device.id]}
-              tags={computeDeviceTags(device)}
+              tags={computeDeviceTags(device, activeFilter)}
               onPress={() => onDevicePress?.(device)}
             />
           ))}
 
           {filteredDevices.length === 0 && (
             <Text variant="body-m" color="secondary" textAlign="center">
-              未找到匹配设备
+              {activeFilter === 'pm-plan' ? `${calMonth}月暂无保养计划` : '未找到匹配设备'}
             </Text>
           )}
         </div>

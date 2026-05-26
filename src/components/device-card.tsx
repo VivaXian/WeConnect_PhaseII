@@ -1,6 +1,6 @@
+import clsx from 'clsx';
 import { Card, CardBody } from '@filament/react/card';
 import { ChevronRight } from '@filament/react/icons/chevron-right';
-import { Tag } from '@filament/react/tag';
 import { Text } from '@filament/react/text';
 import type { Device } from '../types/device';
 import { deviceCardStyles } from './device-card.css';
@@ -49,7 +49,18 @@ export const DeviceCard = ({ device, onPress, tags, customName }: DeviceCardProp
 
           <div className={deviceCardStyles.tagsRow}>
             {tags.map((tag) => (
-              <Tag key={tag.label} signal={tag.signal}>{tag.label}</Tag>
+              <span
+                key={tag.label}
+                className={clsx(
+                  deviceCardStyles.tagChip,
+                  tag.signal === 'error' && deviceCardStyles.tagChipError,
+                  tag.signal === 'warning' && deviceCardStyles.tagChipWarn,
+                  tag.signal === 'caution' && deviceCardStyles.tagChipCaution,
+                  !tag.signal && deviceCardStyles.tagChipNeutral,
+                )}
+              >
+                {tag.label}
+              </span>
             ))}
           </div>
         </div>

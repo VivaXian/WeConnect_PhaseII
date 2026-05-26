@@ -7,26 +7,6 @@ import { useRoleStore } from '../stores/role-store';
 import { useShallow } from 'zustand/react/shallow';
 import { msgStyles } from './messages-page.css';
 
-const CATEGORY_ICON: Record<MessageCategory, string> = {
-  'contract-expired': '📋',
-  'contract-expiry': '📋',
-  'acceptance': '🔖',
-  'pm-plan': '📅',
-  'pm-risk': '⚠️',
-  'permission-upgrade': '✅',
-  'order-update': '🔔',
-};
-
-const ICON_STYLE: Record<MessageCategory, string> = {
-  'contract-expired': msgStyles.iconDanger,
-  'contract-expiry': msgStyles.iconWarn,
-  'acceptance': msgStyles.iconWarn,
-  'pm-plan': msgStyles.iconBlue,
-  'pm-risk': msgStyles.iconWarn,
-  'permission-upgrade': msgStyles.iconGreen,
-  'order-update': msgStyles.iconBlue,
-};
-
 const BADGE_STYLE: Record<MessageCategory, string> = {
   'contract-expired': msgStyles.badgeDanger,
   'contract-expiry': msgStyles.badgeWarn,
@@ -41,9 +21,8 @@ const TYPE_FILTER_GROUPS: { key: TypeFilter; label: string; adminOnly?: boolean 
   { key: 'all', label: '全部' },
   { key: 'contract-expired', label: '合同提醒', adminOnly: true },
   { key: 'acceptance', label: '验收提醒', adminOnly: true },
-  { key: 'pm-plan', label: 'PM 计划', adminOnly: true },
-  { key: 'pm-risk', label: 'PM 风险' },
-  { key: 'order-update', label: '服务提醒' },
+  { key: 'pm-plan', label: '保养计划', adminOnly: true },
+  { key: 'pm-risk', label: '保养风险' },
 ];
 
 const CONTRACT_CATS = new Set<MessageCategory>(['contract-expired', 'contract-expiry']);
@@ -53,33 +32,25 @@ const MESSAGE_BATCH_SIZE = 10;
 const DIGEST_SECTIONS: {
   cats: MessageCategory[];
   label: string;
-  icon: string;
   summaryStyle: 'danger' | 'warn' | 'neutral';
 }[] = [
-  { cats: ['contract-expired'], label: '已出保', icon: '📋', summaryStyle: 'danger' },
-  { cats: ['pm-risk'], label: 'PM 风险', icon: '⚠️', summaryStyle: 'warn' },
-  { cats: ['contract-expiry'], label: '即将出保', icon: '📋', summaryStyle: 'warn' },
-  { cats: ['acceptance'], label: '待验收', icon: '🔖', summaryStyle: 'warn' },
-  { cats: ['pm-plan'], label: '本月保养计划', icon: '📅', summaryStyle: 'neutral' },
-  { cats: ['order-update'], label: '服务提醒', icon: '🔔', summaryStyle: 'neutral' },
-  { cats: ['permission-upgrade'], label: '系统通知', icon: '✅', summaryStyle: 'neutral' },
+  { cats: ['contract-expired'], label: '已出保', summaryStyle: 'danger' },
+  { cats: ['pm-risk'], label: '保养风险', summaryStyle: 'warn' },
+  { cats: ['contract-expiry'], label: '即将出保', summaryStyle: 'warn' },
+  { cats: ['acceptance'], label: '待验收', summaryStyle: 'warn' },
+  { cats: ['pm-plan'], label: '本月保养计划', summaryStyle: 'neutral' },
+  { cats: ['permission-upgrade'], label: '系统通知', summaryStyle: 'neutral' },
 ];
 
 function groupByDate(messages: AppMessage[]): { label: string; items: AppMessage[] }[] {
-  const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
-  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const todayItems = messages.filter((m) => m.time === todayStr);
-  const weekItems = messages.filter((m) => {
-    const d = new Date(m.time);
-    return d < today && d >= weekAgo && m.time !== todayStr;
-  });
-  const olderItems = messages.filter((m) => new Date(m.time) < weekAgo);
+  const thisMonthItems = messages.filter((m) => new Date(m.time) >= thisMonthStart);
+  const olderItems = messages.filter((m) => new Date(m.time) < thisMonthStart);
 
   return [
-    todayItems.length > 0 ? { label: '今日', items: todayItems } : null,
-    weekItems.length > 0 ? { label: '本周', items: weekItems } : null,
+    thisMonthItems.length > 0 ? { label: '本月', items: thisMonthItems } : null,
     olderItems.length > 0 ? { label: '更早', items: olderItems } : null,
   ].filter(Boolean) as { label: string; items: AppMessage[] }[];
 }
@@ -97,11 +68,7 @@ interface CompactCardProps {
 const CompactCard = ({
   msg, editMode, isSelected, onToggleSelect, onMessagePress,
 }: CompactCardProps) => {
-  const devices = msg.devices ?? [];
-  const departments = devices.map((d) => d.department).filter(Boolean) as string[];
-  const metaText = msg.isAggregated && departments.length > 0
-    ? departments.slice(0, 2).join('、') + (departments.length > 2 ? ' 等' : '')
-    : (msg.deviceName ?? '');
+  const metaText = msg.body;
 
   const handleClick = () => {
     if (editMode) { onToggleSelect(msg.id); return; }
@@ -120,13 +87,9 @@ const CompactCard = ({
       aria-checked={editMode ? isSelected : undefined}
       aria-label={msg.title}
     >
-      {editMode ? (
+      {editMode && (
         <div className={isSelected ? msgStyles.selectRingChecked : msgStyles.selectRing}>
           {isSelected && '✓'}
-        </div>
-      ) : (
-        <div className={clsx(msgStyles.iconCircle, ICON_STYLE[msg.category])}>
-          {CATEGORY_ICON[msg.category]}
         </div>
       )}
       <div className={msgStyles.compactContent}>
@@ -134,17 +97,13 @@ const CompactCard = ({
           <span className={clsx(msgStyles.categoryBadge, BADGE_STYLE[msg.category])}>
             {CATEGORY_LABEL[msg.category]}
           </span>
-          {msg.isAggregated && devices.length > 0 && (
-            <span className={msgStyles.deviceCountBadge}>{devices.length} 台</span>
-          )}
           {!msg.isRead && <div className={msgStyles.unreadDot} />}
+          <span className={msgStyles.compactTime}>{msg.time.slice(5).replace('-', '/')}</span>
         </div>
         <div className={msg.isRead ? msgStyles.compactTitleRead : msgStyles.compactTitle}>
           {msg.title}
         </div>
-        <div className={msgStyles.compactMeta}>
-          {msg.time}{metaText ? ` · ${metaText}` : ''}
-        </div>
+        {metaText && <div className={msgStyles.compactMeta}>{metaText}</div>}
       </div>
       {!editMode && <span className={msgStyles.compactChevron}>›</span>}
     </button>
@@ -165,7 +124,12 @@ const DigestView = ({ messages, onDevicePress, onMessagePress }: DigestViewProps
   if (!hasAny) {
     return (
       <div className={msgStyles.emptyState}>
-        <div className={msgStyles.emptyIcon}>✅</div>
+        <div className={msgStyles.emptyIconSvg}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="#c8d0dc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M22 4L12 14.01l-3-3" stroke="#c8d0dc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
         <div>目前没有需要关注的风险</div>
       </div>
     );
@@ -173,7 +137,7 @@ const DigestView = ({ messages, onDevicePress, onMessagePress }: DigestViewProps
 
   return (
     <div className={msgStyles.digestView}>
-      {DIGEST_SECTIONS.map(({ cats, label, icon, summaryStyle }) => {
+      {DIGEST_SECTIONS.map(({ cats, label, summaryStyle }) => {
         const sectionMessages = messages.filter((m) => cats.includes(m.category));
         if (sectionMessages.length === 0) return null;
 
@@ -196,7 +160,12 @@ const DigestView = ({ messages, onDevicePress, onMessagePress }: DigestViewProps
         return (
           <div key={cats.join()} className={msgStyles.digestSection}>
             <div className={msgStyles.digestHeader}>
-              <span className={msgStyles.digestIcon}>{icon}</span>
+              <div className={clsx(
+                msgStyles.digestTypeDot,
+                summaryStyle === 'danger' ? msgStyles.digestTypeDotDanger :
+                summaryStyle === 'warn' ? msgStyles.digestTypeDotWarn :
+                msgStyles.digestTypeDotNeutral,
+              )} />
               <span className={msgStyles.digestLabel}>{label}</span>
               <span className={msgStyles.digestCount}>{deviceRows.length} 台</span>
               {hasUnread && <div className={msgStyles.digestUnreadDot} />}
@@ -278,7 +247,8 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
   }, [readFilter, typeFilter, viewMode, role]);
 
   const unreadCount = messages.filter((m) => !m.isRead && (isAdmin || !m.forAdminOnly)).length;
-  const listMessages = viewMode === 'list' ? visibleMessages.slice(0, loadedCount) : visibleMessages;
+  const sortedMessages = [...visibleMessages].sort((a, b) => b.time.localeCompare(a.time));
+  const listMessages = viewMode === 'list' ? sortedMessages.slice(0, loadedCount) : sortedMessages;
   const groups = groupByDate(listMessages);
   const canLoadMore = viewMode === 'list' && visibleMessages.length > loadedCount;
   const selectedInScopeCount = visibleMessages.filter((m) => selectedIds.has(m.id)).length;
@@ -401,15 +371,17 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
                   );
                 })}
               </div>
-              <div className={msgStyles.filterRow}>
-                {availableFilters.map((f) => (
-                  <button key={f.key}
-                    className={typeFilter === f.key || (typeFilter === 'contract-expiry' && f.key === 'contract-expired')
-                      ? msgStyles.filterChipActive : msgStyles.filterChip}
-                    onClick={() => setTypeFilter(f.key)}
-                  >{f.label}</button>
-                ))}
-              </div>
+              {isAdmin && (
+                <div className={msgStyles.filterRow}>
+                  {availableFilters.map((f) => (
+                    <button key={f.key}
+                      className={typeFilter === f.key || (typeFilter === 'contract-expiry' && f.key === 'contract-expired')
+                        ? msgStyles.filterChipActive : msgStyles.filterChip}
+                      onClick={() => setTypeFilter(f.key)}
+                    >{f.label}</button>
+                  ))}
+                </div>
+              )}
             </>
           )}
         </div>
@@ -426,7 +398,11 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
         <div className={msgStyles.listSection}>
           {groups.length === 0 ? (
             <div className={msgStyles.emptyState}>
-              <div className={msgStyles.emptyIcon}>💬</div>
+              <div className={msgStyles.emptyIconSvg}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#c8d0dc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
               <div>暂无消息</div>
               {(readFilter !== 'all' || typeFilter !== 'all') && (
                 <button
