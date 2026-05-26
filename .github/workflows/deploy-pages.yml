@@ -1,16 +1,15 @@
 name: Deploy Pages
 
+# Deployment is done locally via `yarn deploy` (requires Philips VPN for @filament packages).
+# This workflow runs type-check only as a CI safety net on pull requests.
 on:
-  push:
+  pull_request:
     branches:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  deploy:
+  typecheck:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -20,23 +19,3 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      - name: Type check
-        run: yarn type-check
-
-      - name: Build static site
-        run: yarn build:pages
-
-      - name: Deploy to gh-pages branch
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: dist
-          clean: true

@@ -11,6 +11,7 @@
     "build:pages": "vite build",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
+    "deploy": "yarn build:pages && cd dist && git init -b gh-pages && git add -A && git commit -m \"Deploy $(date +%Y-%m-%d)\" && git remote add origin https://github.com/VivaXian/WeConnect_PhaseII.git && git push -f origin gh-pages && cd .. && rm -rf dist/.git",
     "verify:pages": "yarn type-check && yarn build:pages"
   },
   "dependencies": {
