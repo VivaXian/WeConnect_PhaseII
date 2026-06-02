@@ -5,6 +5,7 @@ import type { Device } from '../types/device';
 import { useRoleStore } from '../stores/role-store';
 import { useMessageStore } from '../stores/message-store';
 import { shellStyles } from './app-shell.css';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { DeviceDetailPage } from './device-detail-page';
 import { DeviceListPage } from './device-list-page';
 import { HomePage } from './home-page';
@@ -223,8 +224,21 @@ export const AppShell = () => {
     );
   }
 
+  const navTitle = (() => {
+    if (activeTab === 'repair') return isAdmin ? '服务总览' : '报修服务';
+    if (activeTab === 'devices') return isAdmin ? '设备管理' : '我的设备';
+    if (activeTab === 'orders') return '工单中心';
+    if (activeTab === 'profile') {
+      if (profileSubPage === 'messages') return '消息通知';
+      if (typeof profileSubPage === 'object' && profileSubPage !== null) return '消息详情';
+      return '我的';
+    }
+    return 'WeConnect';
+  })();
+
   return (
     <div className={shellStyles.shell}>
+      <MiniProgramNav title={navTitle} />
       <div className={shellStyles.content}>
         {activeTab === 'repair' && (
           isAdmin

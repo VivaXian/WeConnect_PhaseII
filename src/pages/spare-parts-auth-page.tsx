@@ -22,7 +22,7 @@ export const SparePartsAuthPage = ({ onBack }: SparePartsAuthPageProps) => {
               <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <span className={sparePartsAuthStyles.headerTitle}>备件真伪验证</span>
+          <span className={sparePartsAuthStyles.headerTitle}>备件原厂验证</span>
         </div>
 
         <div className={sparePartsAuthStyles.scrollContent}>
@@ -35,17 +35,10 @@ export const SparePartsAuthPage = ({ onBack }: SparePartsAuthPageProps) => {
           </div>
 
           <div className={sparePartsAuthStyles.titleSection}>
-            <div className={sparePartsAuthStyles.brandLabel}>正品溯源</div>
-            <div className={sparePartsAuthStyles.mainTitle}>飞利浦备件{'​'}真伪验证</div>
+            <div className={sparePartsAuthStyles.brandLabel}>原厂服务 ｜ 正品溯源</div>
+            <div className={sparePartsAuthStyles.mainTitle}>飞利浦原厂备件验证</div>
             <div className={sparePartsAuthStyles.actionDesc}>
-              扫描<span className={sparePartsAuthStyles.highlight}>备件外包装上的防伪码</span>，即可查询正品认证状态，<span className={sparePartsAuthStyles.highlight}>无需注册账号</span>。
-            </div>
-            <div className={sparePartsAuthStyles.metaNote}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="12" cy="12" r="9" stroke="#8898aa" strokeWidth="1.6"/>
-                <path d="M12 8v5M12 16v.5" stroke="#8898aa" strokeWidth="1.6" strokeLinecap="round"/>
-              </svg>
-              为保障服务质量，建议在备件更换前进行核验。
+              扫描<span className={sparePartsAuthStyles.highlight}>备件外包装上的防伪码</span>，即可查询原厂备件认证信息。
             </div>
             <button
               type="button"

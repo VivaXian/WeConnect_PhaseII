@@ -87,15 +87,15 @@ export const ProfilePage = ({
       {/* ── Hero ── */}
       <div className={profileStyles.hero}>
         <div className={profileStyles.heroTop}>
-          <Avatar size={48} backgroundColor="rgba(255,255,255,0.25)" color="#ffffff">
+          <Avatar size={48} backgroundColor="rgba(255,255,255,0.2)" color="#ffffff">
             {username.charAt(0).toUpperCase() || 'U'}
           </Avatar>
           <div className={profileStyles.heroTextGroup}>
             <button type="button" className={profileStyles.heroUsernameBtn} onClick={() => setShowUsernameEdit(true)}>
               <Text variant="heading-s" color="inherit" className={profileStyles.heroName}>{username}</Text>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="rgba(255,255,255,0.75)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="rgba(255,255,255,0.75)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
             <div className={profileStyles.roleRow}>
@@ -116,11 +116,11 @@ export const ProfilePage = ({
         >
           <span className={profileStyles.heroAccountLeft}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="3" y="11" width="18" height="11" rx="2" stroke="rgba(255,255,255,0.8)" strokeWidth="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="rgba(255,255,255,0.8)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <rect x="3" y="11" width="18" height="11" rx="2" stroke="#ffffff" strokeWidth="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             账号与权限
-            <span className={isAdmin ? profileStyles.heroRoleAdmin : profileStyles.heroRoleUser}>
+            <span className={profileStyles.heroRoleUser}>
               {isAdmin ? '授权用户' : '认证用户'}
             </span>
           </span>
@@ -130,6 +130,7 @@ export const ProfilePage = ({
         </button>
       </div>
 
+      <div className={profileStyles.contentPanel}>
       {/* ── Quick tools ── */}
       <Card className={profileStyles.sectionCard}>
         <div className={profileStyles.toolSectionTitle}>
@@ -171,7 +172,7 @@ export const ProfilePage = ({
               </svg>
             </div>
             <div className={profileStyles.toolLinkInfo}>
-              <span className={profileStyles.toolLinkLabel}>备件真伪验证</span>
+              <span className={profileStyles.toolLinkLabel}>备件原厂验证</span>
               <span className={profileStyles.toolLinkSub}>验证正品</span>
             </div>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{flexShrink:0}}>
@@ -187,8 +188,8 @@ export const ProfilePage = ({
               </svg>
             </div>
             <div className={profileStyles.toolLinkInfo}>
-              <span className={profileStyles.toolLinkLabel}>工程师资质验证</span>
-              <span className={profileStyles.toolLinkSub}>资质核实</span>
+              <span className={profileStyles.toolLinkLabel}>工程师资质查询</span>
+              <span className={profileStyles.toolLinkSub}>服务资质</span>
             </div>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{flexShrink:0}}>
               <path d="M9 6l6 6-6 6" stroke="#c4c9d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -204,7 +205,7 @@ export const ProfilePage = ({
             </div>
             <div className={profileStyles.toolLinkInfo}>
               <span className={profileStyles.toolLinkLabel}>飞利浦超声微课堂</span>
-              <span className={profileStyles.toolLinkSub}>临床培训</span>
+              <span className={profileStyles.toolLinkSub}>仪器操作&临床应用</span>
             </div>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{flexShrink:0}}>
               <path d="M9 6l6 6-6 6" stroke="#c4c9d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -269,6 +270,7 @@ export const ProfilePage = ({
           <Text color="signalError">退出登录</Text>
         </button>
       </Card>
+      </div>
 
       {/* ── Contact phone modal ── */}
       {showContactPhone && (

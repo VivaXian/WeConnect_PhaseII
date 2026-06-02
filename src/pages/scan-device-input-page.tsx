@@ -218,7 +218,7 @@ export const ScanDeviceInputPage = ({
                   </div>
                   <div className={s.ultraBannerInfo}>
                     <span className={s.ultraBannerTitle}>飞利浦超声微课堂</span>
-                    <span className={s.ultraBannerSub}>临床培训资源</span>
+                    <span className={s.ultraBannerSub}>仪器操作&临床应用</span>
                   </div>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={s.ultraBannerChevron}>
                     <path d="M9 6l6 6-6 6" stroke="#8898aa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>

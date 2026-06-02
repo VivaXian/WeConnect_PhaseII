@@ -322,9 +322,9 @@ export const scanDeviceInputStyles = {
   ultraBannerInfo: style({
     flex: 1,
     display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 3,
   }),
   ultraBannerTitle: style({
     fontSize: 15,

@@ -1,0 +1,109 @@
+- generic [ref=e2]:
+  - group "切换角色（演示）" [ref=e3]:
+    - button "认证用户" [ref=e4] [cursor=pointer]
+    - button "授权用户" [ref=e5] [cursor=pointer]
+  - generic [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]: 9:41
+        - generic [ref=e11]:
+          - img [ref=e12]
+          - img [ref=e17]
+          - img [ref=e21]
+      - generic [ref=e24]:
+        - generic [ref=e25]: 我的
+        - generic [ref=e27]:
+          - button "关闭" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+          - button "更多" [ref=e32] [cursor=pointer]:
+            - img [ref=e33]
+    - generic [ref=e326]:
+      - generic [ref=e327]:
+        - generic [ref=e328]:
+          - figure "U" [ref=e329]
+          - generic [ref=e330]:
+            - button "user_1234" [ref=e331] [cursor=pointer]:
+              - generic [ref=e332]: user_1234
+              - img [ref=e333]
+            - button "关联 13 台设备 | 覆盖 3 个院区" [ref=e337] [cursor=pointer]
+        - button "账号与权限 授权用户 已授权 2 个院区 ›" [ref=e338] [cursor=pointer]:
+          - generic [ref=e339]:
+            - img [ref=e340]
+            - text: 账号与权限
+            - generic [ref=e343]: 授权用户
+          - generic [ref=e344]: 已授权 2 个院区 ›
+      - generic [ref=e345]:
+        - generic [ref=e346]: 快捷工具
+        - generic [ref=e347]:
+          - button "扫设备码 报修 / 绑定" [ref=e348] [cursor=pointer]:
+            - img [ref=e350]
+            - generic [ref=e355]: 扫设备码
+            - generic [ref=e356]: 报修 / 绑定
+          - button "输入编号 报修 / 绑定" [ref=e357] [cursor=pointer]:
+            - img [ref=e359]
+            - generic [ref=e362]: 输入编号
+            - generic [ref=e363]: 报修 / 绑定
+        - generic [ref=e364]:
+          - button "备件原厂验证 验证正品" [ref=e365] [cursor=pointer]:
+            - img [ref=e367]
+            - generic [ref=e370]:
+              - generic [ref=e371]: 备件原厂验证
+              - generic [ref=e372]: 验证正品
+            - img [ref=e373]
+          - button "工程师资质查询 服务资质" [ref=e375] [cursor=pointer]:
+            - img [ref=e377]
+            - generic [ref=e381]:
+              - generic [ref=e382]: 工程师资质查询
+              - generic [ref=e383]: 服务资质
+            - img [ref=e384]
+          - button "飞利浦超声微课堂 仪器操作&临床应用" [ref=e386] [cursor=pointer]:
+            - img [ref=e388]
+            - generic [ref=e391]:
+              - generic [ref=e392]: 飞利浦超声微课堂
+              - generic [ref=e393]: 仪器操作&临床应用
+            - img [ref=e394]
+      - generic [ref=e396]:
+        - generic [ref=e397]:
+          - generic [ref=e398]: 消息中心
+          - status "7 7条未读消息" [ref=e399]: "7"
+          - button "订阅" [ref=e400] [cursor=pointer]
+          - button "全部 ›" [ref=e401] [cursor=pointer]
+        - button "2 台设备服务合同已到期 05-01 以下设备服务合同已到期，设备处于无保障状态，建议尽快联系飞利浦销售安排续保，恢复设备保障。" [ref=e402] [cursor=pointer]:
+          - generic [ref=e403]:
+            - generic [ref=e405]: 2 台设备服务合同已到期
+            - generic [ref=e406]: 05-01
+          - generic [ref=e407]: 以下设备服务合同已到期，设备处于无保障状态，建议尽快联系飞利浦销售安排续保，恢复设备保障。
+        - button "3 台设备合同即将出保 04-28 以下设备服务合同将在 4 个月内到期，建议提前联系飞利浦销售安排续保，避免设备进入无保障状态。" [ref=e408] [cursor=pointer]:
+          - generic [ref=e409]:
+            - generic [ref=e411]: 3 台设备合同即将出保
+            - generic [ref=e412]: 04-28
+          - generic [ref=e413]: 以下设备服务合同将在 4 个月内到期，建议提前联系飞利浦销售安排续保，避免设备进入无保障状态。
+        - button "3 台设备待验收 05-01 验收前设备处于无保状态，请及时完成验收以开启保修服务。" [ref=e414] [cursor=pointer]:
+          - generic [ref=e415]:
+            - generic [ref=e417]: 3 台设备待验收
+            - generic [ref=e418]: 05-01
+          - generic [ref=e419]: 验收前设备处于无保状态，请及时完成验收以开启保修服务。
+      - generic [ref=e420]:
+        - button "隐私政策" [ref=e421] [cursor=pointer]:
+          - generic [ref=e422]: 隐私政策
+          - img [ref=e423]
+        - button "联系飞利浦" [ref=e425] [cursor=pointer]:
+          - generic [ref=e426]: 联系飞利浦
+          - img [ref=e427]
+      - button "退出登录" [ref=e430] [cursor=pointer]
+    - contentinfo [ref=e303]:
+      - tablist [ref=e305]:
+        - tab "设备" [ref=e306] [cursor=pointer]:
+          - img [ref=e307]
+          - text: 设备
+        - tab "报修" [ref=e310] [cursor=pointer]:
+          - img [ref=e311]
+          - text: 报修
+        - tab "工单，3条待签字" [ref=e315] [cursor=pointer]:
+          - img [ref=e316]
+          - status [ref=e320]: "3"
+          - text: 工单
+        - tab "我的，7条未读消息" [active] [selected] [ref=e321] [cursor=pointer]:
+          - img [ref=e322]
+          - status [ref=e325]: "7"
+          - text: 我的

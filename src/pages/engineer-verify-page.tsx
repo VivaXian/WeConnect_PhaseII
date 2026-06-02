@@ -19,7 +19,7 @@ export const EngineerVerifyPage = ({ onBack }: EngineerVerifyPageProps) => {
               <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <span className={engineerVerifyStyles.headerTitle}>工程师资质验证</span>
+          <span className={engineerVerifyStyles.headerTitle}>工程师资质查询</span>
         </div>
 
         <div className={engineerVerifyStyles.scrollContent}>
@@ -32,17 +32,17 @@ export const EngineerVerifyPage = ({ onBack }: EngineerVerifyPageProps) => {
           </div>
 
           <div className={engineerVerifyStyles.titleSection}>
-            <div className={engineerVerifyStyles.brandLabel}>资质核验</div>
-            <div className={engineerVerifyStyles.mainTitle}>飞利浦客户服务{'​'}工程师资质验证</div>
+            <div className={engineerVerifyStyles.brandLabel}>原厂服务 ｜ 安心保障</div>
+            <div className={engineerVerifyStyles.mainTitle}>飞利浦客户服务工程师资质查询</div>
             <div className={engineerVerifyStyles.actionDesc}>
-              扫描<span className={engineerVerifyStyles.highlight}>工程师卡上的二维码</span>，即可查询服务资质详情，<span className={engineerVerifyStyles.highlight}>无需注册账号</span>。
+              扫描<span className={engineerVerifyStyles.highlight}>工程师卡上的二维码</span>，即可查询该工程师的服务资质详情。
             </div>
             <div className={engineerVerifyStyles.metaNote}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <circle cx="12" cy="12" r="9" stroke="#8898aa" strokeWidth="1.6"/>
                 <path d="M12 8v5M12 16v.5" stroke="#8898aa" strokeWidth="1.6" strokeLinecap="round"/>
               </svg>
-              为保障服务质量，建议在服务前对工程师资质进行核验。
+              为保障服务质量，建议在服务前对工程师资质进行查询。
             </div>
             <button
               type="button"
@@ -50,7 +50,7 @@ export const EngineerVerifyPage = ({ onBack }: EngineerVerifyPageProps) => {
               onClick={() => setScanned(true)}
             >
               <Scan size="small" />
-              扫描工程师码
+              扫描工程师二维码
             </button>
           </div>
         </div>
