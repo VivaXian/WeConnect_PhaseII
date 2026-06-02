@@ -4,8 +4,10 @@ import type { AppMessage, MessageCategory, ReadFilter, TypeFilter } from '../typ
 import { CATEGORY_LABEL } from '../types/message';
 import { useMessageStore } from '../stores/message-store';
 import { useRoleStore } from '../stores/role-store';
+import { useSubscriptionStore } from '../stores/subscription-store';
 import { useShallow } from 'zustand/react/shallow';
 import { msgStyles } from './messages-page.css';
+import { SubscriptionSheet } from '../components/subscription-sheet';
 
 const BADGE_STYLE: Record<MessageCategory, string> = {
   'contract-expired': msgStyles.badgeDanger,
@@ -23,6 +25,7 @@ const TYPE_FILTER_GROUPS: { key: TypeFilter; label: string; adminOnly?: boolean 
   { key: 'acceptance', label: '验收提醒', adminOnly: true },
   { key: 'pm-plan', label: '保养计划', adminOnly: true },
   { key: 'pm-risk', label: '保养风险' },
+  { key: 'permission-upgrade', label: '账号通知' },
 ];
 
 const CONTRACT_CATS = new Set<MessageCategory>(['contract-expired', 'contract-expiry']);
@@ -39,7 +42,7 @@ const DIGEST_SECTIONS: {
   { cats: ['contract-expiry'], label: '即将出保', summaryStyle: 'warn' },
   { cats: ['acceptance'], label: '待验收', summaryStyle: 'warn' },
   { cats: ['pm-plan'], label: '本月保养计划', summaryStyle: 'neutral' },
-  { cats: ['permission-upgrade'], label: '系统通知', summaryStyle: 'neutral' },
+  { cats: ['permission-upgrade'], label: '账号通知', summaryStyle: 'neutral' },
 ];
 
 function groupByDate(messages: AppMessage[]): { label: string; items: AppMessage[] }[] {
@@ -246,6 +249,44 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
     setEditMode(false);
   }, [readFilter, typeFilter, viewMode, role]);
 
+  const { hasSeenPrompt, markPromptSeen, subscriptions } = useSubscriptionStore(
+    useShallow((state) => ({
+      hasSeenPrompt: state.hasSeenPrompt,
+      markPromptSeen: state.markPromptSeen,
+      subscriptions: state.subscriptions,
+    }))
+  );
+  const [showSubscriptionSheet, setShowSubscriptionSheet] = useState(false);
+  const [pendingMessageId, setPendingMessageId] = useState<string | null>(null);
+
+  const nothingSubscribed = Object.values(subscriptions).every((v) => !v);
+
+  const handleMessagePress = (id: string) => {
+    if (nothingSubscribed) {
+      setPendingMessageId(id);
+      setShowSubscriptionSheet(true);
+      return;
+    }
+    onMessagePress?.(id);
+  };
+
+  const handleSubscriptionClose = () => {
+    setShowSubscriptionSheet(false);
+    if (pendingMessageId) {
+      onMessagePress?.(pendingMessageId);
+      setPendingMessageId(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!hasSeenPrompt) {
+      setShowSubscriptionSheet(true);
+      markPromptSeen();
+    }
+  // run once on mount only
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const unreadCount = messages.filter((m) => !m.isRead && (isAdmin || !m.forAdminOnly)).length;
   const sortedMessages = [...visibleMessages].sort((a, b) => b.time.localeCompare(a.time));
   const listMessages = viewMode === 'list' ? sortedMessages.slice(0, loadedCount) : sortedMessages;
@@ -279,6 +320,12 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
 
   return (
     <div className={msgStyles.page}>
+      {showSubscriptionSheet && (
+        <SubscriptionSheet
+          role={role}
+          onClose={handleSubscriptionClose}
+        />
+      )}
       {/* Top bar */}
       <div className={msgStyles.topBar}>
         <div className={msgStyles.topBarLeft}>
@@ -334,6 +381,9 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
                   编辑
                 </button>
               )}
+              <button className={msgStyles.subscribeBtn} onClick={() => setShowSubscriptionSheet(true)}>
+                订阅
+              </button>
             </>
           )}
         </div>
@@ -359,30 +409,26 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
             </div>
           )}
           {viewMode === 'list' && (
-            <>
-              <div className={msgStyles.filterRow}>
-                {(['all', 'unread', 'read'] as ReadFilter[]).map((key) => {
-                  const label = key === 'all' ? '全部' : key === 'unread' ? '未读' : '已读';
-                  return (
-                    <button key={key}
-                      className={readFilter === key ? msgStyles.filterChipActive : msgStyles.filterChip}
-                      onClick={() => setReadFilter(key)}
-                    >{label}</button>
-                  );
-                })}
-              </div>
-              {isAdmin && (
-                <div className={msgStyles.filterRow}>
-                  {availableFilters.map((f) => (
-                    <button key={f.key}
-                      className={typeFilter === f.key || (typeFilter === 'contract-expiry' && f.key === 'contract-expired')
-                        ? msgStyles.filterChipActive : msgStyles.filterChip}
-                      onClick={() => setTypeFilter(f.key)}
-                    >{f.label}</button>
-                  ))}
-                </div>
-              )}
-            </>
+            <div className={msgStyles.filterRow}>
+              <span className={msgStyles.filterGroupLabel}>状态</span>
+              {(['unread', 'read'] as const).map((key) => {
+                const label = key === 'unread' ? '未读' : '已读';
+                return (
+                  <button key={key}
+                    className={readFilter === key ? msgStyles.filterChipActive : msgStyles.filterChip}
+                    onClick={() => setReadFilter((prev) => prev === key ? 'all' : key)}
+                  >{label}</button>
+                );
+              })}
+              <div className={msgStyles.filterDivider} />
+              <span className={msgStyles.filterGroupLabel}>类型</span>
+              {availableFilters.filter((f) => f.key !== 'all').map((f) => (
+                <button key={f.key}
+                  className={typeFilter === f.key ? msgStyles.filterChipActive : msgStyles.filterChip}
+                  onClick={() => setTypeFilter((prev) => prev === f.key ? 'all' : f.key)}
+                >{f.label}</button>
+              ))}
+            </div>
           )}
         </div>
       )}
@@ -392,7 +438,7 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
         <DigestView
           messages={visibleMessages}
           onDevicePress={onDevicePress ?? (() => undefined)}
-          onMessagePress={onMessagePress ?? (() => undefined)}
+          onMessagePress={handleMessagePress}
         />
       ) : (
         <div className={msgStyles.listSection}>
@@ -424,7 +470,7 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
                     editMode={editMode}
                     isSelected={selectedIds.has(msg.id)}
                     onToggleSelect={toggleSelect}
-                    onMessagePress={onMessagePress ?? (() => undefined)}
+                    onMessagePress={handleMessagePress}
                   />
                 ))}
               </div>

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Scan } from '@filament/react/icons/scan';
+import illustrationSrc from '../assets/icons/工程师资质验证引导插画.png';
 import { engineerVerifyStyles } from './engineer-verify-page.css';
 
 interface EngineerVerifyPageProps {
@@ -20,56 +22,37 @@ export const EngineerVerifyPage = ({ onBack }: EngineerVerifyPageProps) => {
           <span className={engineerVerifyStyles.headerTitle}>工程师资质验证</span>
         </div>
 
-        <div className={engineerVerifyStyles.content}>
-          <div className={engineerVerifyStyles.icon}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-              <circle cx="10" cy="7" r="3.5" stroke="#0161de" strokeWidth="1.8"/>
-              <path d="M3 20c0-3.87 3.13-7 7-7" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M15 13.5l2 2 4-4" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+        <div className={engineerVerifyStyles.scrollContent}>
+          <div className={engineerVerifyStyles.illustrationWrap}>
+            <img
+              src={illustrationSrc}
+              className={engineerVerifyStyles.illustration}
+              alt="扫描工程师卡二维码示意图"
+            />
           </div>
 
-          <div className={engineerVerifyStyles.title}>飞利浦工程师资质验证</div>
-          <div className={engineerVerifyStyles.desc}>
-            扫描工程师服务证或名片上的二维码，<br/>
-            验证其飞利浦授权工程师资质
-          </div>
-
-          <div className={engineerVerifyStyles.statusCard}>
-            <div className={engineerVerifyStyles.statusLabel}>二维码在哪里？</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
-              {['工程师服务证正面', '名片右下角或服务单末尾', '飞利浦工程师 App 个人页'].map((hint) => (
-                <div key={hint} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 5, height: 5, borderRadius: '50%', backgroundColor: '#0161de', flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, color: '#555' }}>{hint}</span>
-                </div>
-              ))}
+          <div className={engineerVerifyStyles.titleSection}>
+            <div className={engineerVerifyStyles.brandLabel}>资质核验</div>
+            <div className={engineerVerifyStyles.mainTitle}>飞利浦客户服务{'​'}工程师资质验证</div>
+            <div className={engineerVerifyStyles.actionDesc}>
+              扫描<span className={engineerVerifyStyles.highlight}>工程师卡上的二维码</span>，即可查询服务资质详情，<span className={engineerVerifyStyles.highlight}>无需注册账号</span>。
             </div>
+            <div className={engineerVerifyStyles.metaNote}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="#8898aa" strokeWidth="1.6"/>
+                <path d="M12 8v5M12 16v.5" stroke="#8898aa" strokeWidth="1.6" strokeLinecap="round"/>
+              </svg>
+              为保障服务质量，建议在服务前对工程师资质进行核验。
+            </div>
+            <button
+              type="button"
+              className={engineerVerifyStyles.scanBtn}
+              onClick={() => setScanned(true)}
+            >
+              <Scan size="small" />
+              扫描工程师码
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setScanned(true)}
-            style={{
-              marginTop: 8, backgroundColor: '#0161de', color: '#ffffff',
-              border: 'none', borderRadius: 10, padding: '14px 0',
-              fontSize: 15, fontWeight: 600, cursor: 'pointer',
-              fontFamily: 'inherit', width: '100%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="3" y="3" width="7" height="7" rx="1" stroke="white" strokeWidth="1.8"/>
-              <rect x="3" y="14" width="7" height="7" rx="1" stroke="white" strokeWidth="1.8"/>
-              <rect x="14" y="3" width="7" height="7" rx="1" stroke="white" strokeWidth="1.8"/>
-              <rect x="5" y="5" width="3" height="3" fill="white"/>
-              <rect x="5" y="16" width="3" height="3" fill="white"/>
-              <rect x="16" y="5" width="3" height="3" fill="white"/>
-              <rect x="14" y="14" width="3" height="3" fill="white"/>
-              <rect x="17" y="17" width="3" height="3" fill="white"/>
-            </svg>
-            开始扫描
-          </button>
         </div>
       </div>
     );

@@ -1,0 +1,20 @@
+- generic [ref=e2]:
+  - group "切换角色（演示）" [ref=e3]:
+    - button "认证用户" [ref=e4] [cursor=pointer]
+    - button "授权用户" [ref=e5] [cursor=pointer]
+  - generic [ref=e295]:
+    - generic [ref=e296]:
+      - button "返回" [ref=e297] [cursor=pointer]:
+        - img [ref=e298]
+      - generic [ref=e300]: 验证结果
+    - generic [ref=e301]:
+      - img [ref=e315]
+      - generic [ref=e304]: 正品验证通过
+      - generic [ref=e318]: 此备件已通过飞利浦正品认证
+      - generic [ref=e319]:
+        - generic [ref=e320]: 验证状态
+        - generic [ref=e321]: ✓ 飞利浦原厂正品
+      - generic [ref=e322]:
+        - generic [ref=e323]: 备件信息
+        - generic [ref=e324]: 飞利浦原厂认证备件
+      - button "再次扫描" [ref=e325] [cursor=pointer]

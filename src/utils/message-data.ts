@@ -14,7 +14,7 @@ export const messageData: AppMessage[] = [
     isAggregated: true,
     devices: [
       { id: 'dev-004', name: 'MR 5300', department: '放射科', campus: '主院区', summary: '合同于 2025-12-31 到期' },
-      { id: 'dev-007', name: 'Lumify 便携超声', department: '急诊科', campus: '东院区', summary: '暂无服务合同' },
+      { id: 'dev-007', name: 'Lumify 便携超声', department: '急诊科', campus: '东院区', summary: '合同于 2023-04-14 到期' },
     ],
   },
   {
@@ -132,7 +132,7 @@ export const messageData: AppMessage[] = [
     deviceName: 'Lumify 便携超声',
     deviceDept: '急诊科',
     deviceCampus: '东院区',
-    deviceSummary: '合同于 5 月 3 日到期',
+    deviceSummary: '合同于 2023-04-14 到期',
   },
 ];
 

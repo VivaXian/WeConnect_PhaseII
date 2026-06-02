@@ -45,7 +45,7 @@ export const CATEGORY_LABEL: Record<MessageCategory, string> = {
   'acceptance': '待验收',
   'pm-plan': '保养计划',
   'pm-risk': '保养风险',
-  'permission-upgrade': '系统通知',
+  'permission-upgrade': '账号通知',
   'order-update': '服务提醒',
 };
 

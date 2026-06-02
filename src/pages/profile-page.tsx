@@ -1,26 +1,19 @@
 import { useMemo, useState } from 'react';
 import { Avatar } from '@filament/react/avatar';
 import { Badge } from '@filament/react/badge';
-import { Button } from '@filament/react/button';
 import { Card } from '@filament/react/card';
-import { Item, ItemSuffix, Section } from '@filament/react/common';
 import { ChevronRight } from '@filament/react/icons/chevron-right';
-import { List } from '@filament/react/list';
 import { Text } from '@filament/react/text';
 import { useShallow } from 'zustand/react/shallow';
 import type { AppMessage } from '../types/message';
 import { useRoleStore } from '../stores/role-store';
-import { repairData } from '../utils/repair-data';
 import { deviceList } from '../utils/device-data';
-import { UpgradeFormSheet } from '../components/upgrade-form-sheet';
+import { AccountSheet } from '../components/account-sheet';
+import { SubscriptionSheet } from '../components/subscription-sheet';
 import { UsernameEditSheet } from '../components/username-edit-sheet';
 import { profileStyles } from './profile-page.css';
 
-const SETTINGS_ITEMS = [
-  { key: 'devices', label: '常用设备管理' },
-  { key: 'notifications', label: '消息通知设置' },
-  { key: 'feedback', label: '帮助与反馈' },
-];
+
 
 interface ProfilePageProps {
   unreadMessageCount?: number;
@@ -32,7 +25,7 @@ interface ProfilePageProps {
   onInputDevicePress?: () => void;
   onSparePartsAuthPress?: () => void;
   onEngineerVerifyPress?: () => void;
-  onEngineerChatPress?: () => void;
+  onPrivacyPolicyPress?: () => void;
 }
 
 export const ProfilePage = ({
@@ -45,76 +38,36 @@ export const ProfilePage = ({
   onInputDevicePress,
   onSparePartsAuthPress,
   onEngineerVerifyPress,
-  onEngineerChatPress,
+  onPrivacyPolicyPress,
 }: ProfilePageProps) => {
-  const {
-    role,
-    upgradeStatus,
-    upgradeSubmittedAt,
-    upgradeHospitals,
-    submitUpgrade,
-    approveUpgrade,
-    rejectUpgrade,
-    resetUpgrade,
-    username,
-    setUsername,
-  } = useRoleStore(
+  const { role, username, setUsername, adminCampuses } = useRoleStore(
     useShallow((state) => ({
       role: state.role,
-      upgradeStatus: state.upgradeStatus,
-      upgradeSubmittedAt: state.upgradeSubmittedAt,
-      upgradeHospitals: state.upgradeHospitals,
-      submitUpgrade: state.submitUpgrade,
-      approveUpgrade: state.approveUpgrade,
-      rejectUpgrade: state.rejectUpgrade,
-      resetUpgrade: state.resetUpgrade,
       username: state.username,
       setUsername: state.setUsername,
+      adminCampuses: state.adminCampuses,
     }))
   );
 
-  const [showForm, setShowForm] = useState(false);
+  const [showAccountSheet, setShowAccountSheet] = useState(false);
   const [showUsernameEdit, setShowUsernameEdit] = useState(false);
+  const [showContactPhone, setShowContactPhone] = useState(false);
+  const [showSubscriptionSheet, setShowSubscriptionSheet] = useState(false);
   const isAdmin = role === 'admin';
   const deviceSummaryLabel = useMemo(() => {
     const campusCount = new Set(deviceList.map((d) => d.campus).filter(Boolean)).size;
-    return `${campusCount}个院区 | ${deviceList.length}台设备`;
+    return `关联 ${deviceList.length} 台设备 | 覆盖 ${campusCount} 个院区`;
   }, []);
-
-  /** 显示条件：认证用户且有至少一条服务完成的报修记录 */
-  const hasCompletedRepair = useMemo(
-    () =>
-      repairData.some((group) =>
-        group.records.some((r) => r.status === 'completed-pending')
-      ),
-    []
-  );
-
-  /** Unique hospitals derived from repair records — available for selection */
-  const hospitalOptions = useMemo(() => {
-    const seen = new Set<string>();
-    repairData.forEach((group) => group.records.forEach((r) => seen.add(r.hospital)));
-    return Array.from(seen);
-  }, []);
-
-  const handleFormSubmit = (hospitals: string[]) => {
-    submitUpgrade(hospitals);
-    setShowForm(false);
-  };
 
   return (
     <div className={profileStyles.page}>
 
-      {/* ── Form sheet overlay ── */}
-      {showForm && (
-        <UpgradeFormSheet
-          availableHospitals={hospitalOptions}
-          onClose={() => setShowForm(false)}
-          onSubmit={handleFormSubmit}
-        />
+      {/* ── Account sheet ── */}
+      {showAccountSheet && (
+        <AccountSheet onClose={() => setShowAccountSheet(false)} />
       )}
 
-      {/* ── Username edit overlay ── */}
+      {/* ── Username edit sheet ── */}
       {showUsernameEdit && (
         <UsernameEditSheet
           currentUsername={username}
@@ -123,26 +76,58 @@ export const ProfilePage = ({
         />
       )}
 
+      {/* ── Subscription sheet ── */}
+      {showSubscriptionSheet && (
+        <SubscriptionSheet
+          role={role}
+          onClose={() => setShowSubscriptionSheet(false)}
+        />
+      )}
+
       {/* ── Hero ── */}
       <div className={profileStyles.hero}>
-        <Avatar size={48} backgroundColor="rgba(255,255,255,0.25)" color="#ffffff">
-          {username.charAt(0).toUpperCase() || 'U'}
-        </Avatar>
-        <div className={profileStyles.heroTextGroup}>
-          <Text variant="heading-s" color="inherit" className={profileStyles.heroName}>{username}</Text>
-          <div className={profileStyles.roleRow}>
-            <span className={isAdmin ? profileStyles.roleTagAdmin : profileStyles.roleTagUser}>
-              {isAdmin ? '授权用户' : '认证用户'}
-            </span>
-            <button
-              type="button"
-              className={profileStyles.deviceSummaryChipBtn}
-              onClick={onCommonDevicesPress}
-            >
-              <span className={profileStyles.deviceSummaryChip}>{deviceSummaryLabel}</span>
+        <div className={profileStyles.heroTop}>
+          <Avatar size={48} backgroundColor="rgba(255,255,255,0.25)" color="#ffffff">
+            {username.charAt(0).toUpperCase() || 'U'}
+          </Avatar>
+          <div className={profileStyles.heroTextGroup}>
+            <button type="button" className={profileStyles.heroUsernameBtn} onClick={() => setShowUsernameEdit(true)}>
+              <Text variant="heading-s" color="inherit" className={profileStyles.heroName}>{username}</Text>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
+            <div className={profileStyles.roleRow}>
+              <button
+                type="button"
+                className={profileStyles.deviceSummaryChipBtn}
+                onClick={onCommonDevicesPress}
+              >
+                <span className={profileStyles.deviceSummaryChip}>{deviceSummaryLabel}</span>
+              </button>
+            </div>
           </div>
         </div>
+        <button
+          type="button"
+          className={profileStyles.heroAccountRow}
+          onClick={() => setShowAccountSheet(true)}
+        >
+          <span className={profileStyles.heroAccountLeft}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2" stroke="rgba(255,255,255,0.8)" strokeWidth="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="rgba(255,255,255,0.8)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            账号与权限
+            <span className={isAdmin ? profileStyles.heroRoleAdmin : profileStyles.heroRoleUser}>
+              {isAdmin ? '授权用户' : '认证用户'}
+            </span>
+          </span>
+          <span className={profileStyles.heroAccountRight}>
+            {isAdmin ? `已授权 ${adminCampuses.length} 个院区` : '账号升级'} ›
+          </span>
+        </button>
       </div>
 
       {/* ── Quick tools ── */}
@@ -175,50 +160,55 @@ export const ProfilePage = ({
             <span className={profileStyles.toolLabel}>输入编号</span>
             <span className={profileStyles.toolSub}>报修 / 绑定</span>
           </button>
-
-          <button type="button" className={profileStyles.toolItem} onClick={onEngineerChatPress}>
-            <div className={profileStyles.toolIconWrap}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M8 9h8M8 13h5" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <span className={profileStyles.toolLabel}>对话工程师</span>
-            <span className={profileStyles.toolSub}>在线聊天室</span>
-          </button>
         </div>
 
         <div className={profileStyles.toolLinks}>
           <button type="button" className={profileStyles.toolLinkRow} onClick={onSparePartsAuthPress}>
-            <div className={profileStyles.toolLinkLeft}>
-              <div className={profileStyles.toolLinkIconWrap}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M12 2L4 6v6c0 4.42 3.45 8.56 8 9.56C16.55 20.56 20 16.42 20 12V6l-8-4z" stroke="#0161de" strokeWidth="1.8" strokeLinejoin="round"/>
-                  <path d="M9 12l2 2 4-4" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <div className={profileStyles.toolLinkInfo}>
-                <span className={profileStyles.toolLinkLabel}>备件防伪</span>
-                <span className={profileStyles.toolLinkSub}>验证正品</span>
-              </div>
+            <div className={profileStyles.toolLinkIconWrap}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2L4 6v6c0 4.42 3.45 8.56 8 9.56C16.55 20.56 20 16.42 20 12V6l-8-4z" stroke="#0161de" strokeWidth="1.8" strokeLinejoin="round"/>
+                <path d="M9 12l2 2 4-4" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
-            <ChevronRight />
+            <div className={profileStyles.toolLinkInfo}>
+              <span className={profileStyles.toolLinkLabel}>备件真伪验证</span>
+              <span className={profileStyles.toolLinkSub}>验证正品</span>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{flexShrink:0}}>
+              <path d="M9 6l6 6-6 6" stroke="#c4c9d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
           <button type="button" className={profileStyles.toolLinkRow} onClick={onEngineerVerifyPress}>
-            <div className={profileStyles.toolLinkLeft}>
-              <div className={profileStyles.toolLinkIconWrap}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle cx="10" cy="7" r="3.5" stroke="#0161de" strokeWidth="1.8"/>
-                  <path d="M3 20c0-3.87 3.13-7 7-7" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round"/>
-                  <path d="M15 13.5l2 2 4-4" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <div className={profileStyles.toolLinkInfo}>
-                <span className={profileStyles.toolLinkLabel}>工程师验证</span>
-                <span className={profileStyles.toolLinkSub}>资质核实</span>
-              </div>
+            <div className={profileStyles.toolLinkIconWrap}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="10" cy="7" r="3.5" stroke="#0161de" strokeWidth="1.8"/>
+                <path d="M3 20c0-3.87 3.13-7 7-7" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round"/>
+                <path d="M15 13.5l2 2 4-4" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
-            <ChevronRight />
+            <div className={profileStyles.toolLinkInfo}>
+              <span className={profileStyles.toolLinkLabel}>工程师资质验证</span>
+              <span className={profileStyles.toolLinkSub}>资质核实</span>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{flexShrink:0}}>
+              <path d="M9 6l6 6-6 6" stroke="#c4c9d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <button type="button" className={`${profileStyles.toolLinkRow} ${profileStyles.toolLinkWide}`}>
+            <div className={profileStyles.toolLinkIconWrap}>
+              <svg width="18" height="18" viewBox="0 -2.5 24 24" fill="none" aria-hidden="true">
+                <path d="M3 6.5L12 3l9 3.5L12 10 3 6.5z" stroke="#0161de" strokeWidth="1.8" strokeLinejoin="round"/>
+                <path d="M7 8.5V13c0 1.66 2.24 3 5 3s5-1.34 5-3V8.5" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M21 6.5V12" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div className={profileStyles.toolLinkInfo}>
+              <span className={profileStyles.toolLinkLabel}>飞利浦超声微课堂</span>
+              <span className={profileStyles.toolLinkSub}>临床培训</span>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{flexShrink:0}}>
+              <path d="M9 6l6 6-6 6" stroke="#c4c9d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
         </div>
       </Card>
@@ -230,6 +220,10 @@ export const ProfilePage = ({
           {unreadMessageCount > 0 && (
             <Badge value={unreadMessageCount} aria-label={`${unreadMessageCount}条未读消息`} />
           )}
+          <div className={profileStyles.sectionSpacer} />
+          <button type="button" className={profileStyles.subscribeBtn} onClick={() => setShowSubscriptionSheet(true)}>
+            订阅
+          </button>
           <button type="button" className={profileStyles.sectionLink} onClick={onMessagesPress}>
             全部 ›
           </button>
@@ -257,85 +251,16 @@ export const ProfilePage = ({
         )}
       </Card>
 
-      {/* ── Account & Permission ── */}
+      {/* ── About ── */}
       <Card className={profileStyles.sectionCard}>
-        <div className={profileStyles.accountHeader}>账户与权限</div>
-        <button
-          type="button"
-          className={`${profileStyles.accountRow} ${profileStyles.accountRowBtn}`}
-          onClick={() => setShowUsernameEdit(true)}
-        >
-          <span className={profileStyles.accountLabel}>用户名</span>
-          <span className={profileStyles.accountRight}>
-            <span className={profileStyles.accountValue}>{username}</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="#aab0bc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#aab0bc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </span>
+        <button type="button" className={profileStyles.aboutRow} onClick={onPrivacyPolicyPress}>
+          <span>隐私政策</span>
+          <ChevronRight />
         </button>
-        <div className={profileStyles.accountRow}>
-          <span className={profileStyles.accountLabel}>手机号</span>
-          <span className={profileStyles.accountValue}>138****8888</span>
-        </div>
-        <div className={profileStyles.accountRow}>
-          <span className={profileStyles.accountLabel}>角色</span>
-          <span className={`${profileStyles.accountValue} ${profileStyles.infoValueBold}`}>
-            {isAdmin ? '授权用户' : '认证用户'}
-          </span>
-        </div>
-        <div className={profileStyles.accountRow}>
-          <span className={profileStyles.accountLabel}>权限范围</span>
-          <span className={profileStyles.accountValue}>
-            {isAdmin ? 'WeConnect医院 · 全院' : '与本人相关'}
-          </span>
-        </div>
-        {isAdmin && (
-          <div className={profileStyles.accountRow}>
-            <span className={profileStyles.accountLabel}>权限有效期</span>
-            <span className={profileStyles.accountValue}>至 2025-12-31</span>
-          </div>
-        )}
-        {!isAdmin && hasCompletedRepair && (
-          <div className={profileStyles.upgradeInAccount}>
-            <UpgradeBlock
-              upgradeStatus={upgradeStatus}
-              upgradeSubmittedAt={upgradeSubmittedAt}
-              upgradeHospitals={upgradeHospitals}
-              onApply={() => setShowForm(true)}
-              onApprove={approveUpgrade}
-              onReject={rejectUpgrade}
-              onReset={resetUpgrade}
-            />
-          </div>
-        )}
-      </Card>
-
-      {/* ── Settings ── */}
-      <Card className={profileStyles.sectionCard}>
-        <List selectionMode="none" aria-label="设置">
-          <Section title="设置">
-            {SETTINGS_ITEMS.map((item) => (
-              <Item key={item.key} textValue={item.label}>
-                {item.key === 'devices' ? (
-                  <button
-                    type="button"
-                    className={profileStyles.settingInlineBtn}
-                    onClick={onCommonDevicesPress}
-                  >
-                    <span>{item.label}</span>
-                    <ChevronRight />
-                  </button>
-                ) : (
-                  <>
-                    {item.label}
-                    <ItemSuffix><ChevronRight /></ItemSuffix>
-                  </>
-                )}
-              </Item>
-            ))}
-          </Section>
-        </List>
+        <button type="button" className={profileStyles.aboutRow} onClick={() => setShowContactPhone(true)}>
+          <span>联系飞利浦</span>
+          <ChevronRight />
+        </button>
       </Card>
 
       {/* ── Logout ── */}
@@ -345,82 +270,21 @@ export const ProfilePage = ({
         </button>
       </Card>
 
+      {/* ── Contact phone modal ── */}
+      {showContactPhone && (
+        <div className={profileStyles.modalBackdrop} onClick={() => setShowContactPhone(false)}>
+          <div className={profileStyles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <div className={profileStyles.modalTitle}>联系飞利浦</div>
+            <div className={profileStyles.modalPhoneLabel}>售后服务热线</div>
+            <div className={profileStyles.modalPhoneNumber}>400-810-0038</div>
+            <div className={profileStyles.modalBtnRow}>
+              <a href="tel:4008100038" className={profileStyles.modalCallBtn}>拨打电话</a>
+              <button type="button" className={profileStyles.modalCancelBtn} onClick={() => setShowContactPhone(false)}>取消</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
-
-// ─── Upgrade block (extracted for clarity) ────────────────────────────────────
-
-interface UpgradeBlockProps {
-  upgradeStatus: ReturnType<typeof useRoleStore.getState>['upgradeStatus'];
-  upgradeSubmittedAt: string | null;
-  upgradeHospitals: string[];
-  onApply: () => void;
-  onApprove: () => void;
-  onReject: () => void;
-  onReset: () => void;
-}
-
-const UpgradeBlock = ({
-  upgradeStatus,
-  upgradeSubmittedAt,
-  upgradeHospitals,
-  onApply,
-  onApprove,
-  onReject,
-  onReset,
-}: UpgradeBlockProps) => (
-  <div className={profileStyles.upgradeContent}>
-    <span className={profileStyles.cardSectionTitle}>申请升级账号权限</span>
-
-    {/* ── State 1: can apply ── */}
-    {upgradeStatus === 'not-applied' && (
-      <>
-        <Text variant="body-s" color="secondary">
-          升级后可查看授权院区的全院设备与报修、合同及保养计划。申请由飞利浦售后服务团队审批，预计需 1–7 个工作日。
-        </Text>
-        <Button variant="primary" onPress={onApply}>申请升级账号</Button>
-      </>
-    )}
-
-    {/* ── Pending or silently-rejected — user always sees "审核中" ── */}
-    {(upgradeStatus === 'pending' || upgradeStatus === 'cooldown') && (
-      <>
-        <div className={profileStyles.upgradeStatusBadge}>
-          <span className={profileStyles.upgradeStatusDot} />
-          <Text variant="body-s">审核中</Text>
-        </div>
-        <div className={profileStyles.upgradeMeta}>
-          <div className={profileStyles.upgradeMetaRow}>
-            <span className={profileStyles.upgradeMetaLabel}>提交日期</span>
-            <span className={profileStyles.upgradeMetaValue}>{upgradeSubmittedAt}</span>
-          </div>
-          {upgradeHospitals.length > 0 && (
-            <div className={profileStyles.upgradeMetaRow}>
-              <span className={profileStyles.upgradeMetaLabel}>申请院区</span>
-              <span className={profileStyles.upgradeMetaValue}>{upgradeHospitals.join('、')}</span>
-            </div>
-          )}
-        </div>
-        <div className={profileStyles.upgradeNote}>
-          <Text variant="body-s">等待飞利浦团队完成资质核实，审批结果将通过消息中心通知您</Text>
-        </div>
-        <div className={profileStyles.demoRow}>
-          <span className={profileStyles.demoLabel}>演示</span>
-          <button type="button" className={profileStyles.demoBtnApprove} onClick={onApprove}>
-            模拟通过
-          </button>
-          {upgradeStatus === 'pending' ? (
-            <button type="button" className={profileStyles.demoBtnReject} onClick={onReject}>
-              模拟拒绝
-            </button>
-          ) : (
-            <button type="button" className={profileStyles.demoBtnApprove} onClick={onReset}>
-              重置申请
-            </button>
-          )}
-        </div>
-      </>
-    )}
-  </div>
-);

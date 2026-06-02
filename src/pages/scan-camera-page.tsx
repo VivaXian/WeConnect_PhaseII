@@ -7,7 +7,6 @@ interface ScanCameraPageProps {
 
 export const ScanCameraPage = ({ onBack }: ScanCameraPageProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [mode, setMode] = useState<'repair' | 'bind'>('repair');
   const [cameraAvailable, setCameraAvailable] = useState(true);
 
   useEffect(() => {
@@ -35,20 +34,6 @@ export const ScanCameraPage = ({ onBack }: ScanCameraPageProps) => {
           </svg>
         </button>
         <span className={s.title}>扫描设备二维码</span>
-        <div className={s.modeToggle}>
-          <button
-            className={mode === 'repair' ? s.modeBtnActive : s.modeBtn}
-            onClick={() => setMode('repair')}
-          >
-            报修
-          </button>
-          <button
-            className={mode === 'bind' ? s.modeBtnActive : s.modeBtn}
-            onClick={() => setMode('bind')}
-          >
-            绑定
-          </button>
-        </div>
       </div>
 
       <div className={s.viewfinderWrap}>
@@ -70,7 +55,7 @@ export const ScanCameraPage = ({ onBack }: ScanCameraPageProps) => {
         </div>
       </div>
 
-      <div className={s.hint}>将设备二维码对准框内，自动识别</div>
+      <div className={s.hint}>将设备二维码对准框内，识别后选择报修或绑定</div>
     </div>
   );
 };

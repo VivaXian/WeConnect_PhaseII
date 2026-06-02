@@ -4,6 +4,7 @@ import { messageData } from '../utils/message-data';
 
 type MessageState = {
   messages: AppMessage[];
+  addMessage: (message: AppMessage) => void;
   markRead: (id: string) => void;
   markAllRead: (ids: string[]) => void;
   deleteMessage: (id: string) => void;
@@ -12,6 +13,9 @@ type MessageState = {
 
 export const useMessageStore = create<MessageState>((set) => ({
   messages: messageData,
+  addMessage: (message) => set((state) => ({
+    messages: [message, ...state.messages],
+  })),
   markRead: (id) => set((state) => ({
     messages: state.messages.map((message) => (
       message.id === id ? { ...message, isRead: true } : message

@@ -6,7 +6,7 @@ import { sheetStyles } from './upgrade-form-sheet.css';
 interface UpgradeFormSheetProps {
   availableHospitals: string[];
   onClose: () => void;
-  onSubmit: (hospitals: string[]) => void;
+  onSubmit: (hospitals: string[], salesName: string, salesPhone: string) => void;
 }
 
 export const UpgradeFormSheet = ({
@@ -26,7 +26,7 @@ export const UpgradeFormSheet = ({
 
   const handleSubmit = () => {
     if (selectedHospitals.length === 0) return;
-    onSubmit(selectedHospitals);
+    onSubmit(selectedHospitals, salesName, salesPhone);
   };
 
   return (
@@ -93,7 +93,7 @@ export const UpgradeFormSheet = ({
             对接销售
             <span className={sheetStyles.optionalTag}>选填</span>
           </span>
-          <span className={sheetStyles.fieldHint}>如有飞利浦销售联系人可填写，有助于加快审批</span>
+          <span className={sheetStyles.fieldHint}>如有飞利浦销售联系人可填写，有助于加快审核</span>
           <input
             type="text"
             className={sheetStyles.textInput}
@@ -113,7 +113,7 @@ export const UpgradeFormSheet = ({
         {/* ── Footer note ── */}
         <div className={sheetStyles.footerNote}>
           <p className={sheetStyles.footerNoteText}>
-            提交后由飞利浦售后服务团队审批，结果将通过消息中心通知您。
+            提交后由飞利浦售后服务团队审核，预计需 1-7 个工作日，结果将通过消息中心通知您。
           </p>
         </div>
 

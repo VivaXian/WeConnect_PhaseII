@@ -28,12 +28,13 @@ interface DeviceDetailPageProps {
   onRepairDetailPress?: (repairId: string) => void;
   onWorkOrderPress?: (orderId: string) => void;
   onQuickRepair?: () => void;
+  initialTab?: DetailTab;
 }
 
-export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOrderPress, onQuickRepair }: DeviceDetailPageProps) => {
+export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOrderPress, onQuickRepair, initialTab }: DeviceDetailPageProps) => {
   const { role } = useRoleStore();
   const isAdmin = role === 'admin';
-  const [activeTab, setActiveTab] = useState<DetailTab>('info');
+  const [activeTab, setActiveTab] = useState<DetailTab>(initialTab ?? 'info');
   const { names: customNames } = useDeviceCustomNamesStore(
     useShallow((state) => ({ names: state.names }))
   );

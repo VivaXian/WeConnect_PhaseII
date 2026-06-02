@@ -1,0 +1,182 @@
+- generic [ref=e2]:
+  - group "切换角色（演示）" [ref=e3]:
+    - button "认证用户" [ref=e4] [cursor=pointer]
+    - button "授权用户" [ref=e5] [cursor=pointer]
+  - generic [ref=e7]:
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: 设备管理
+        - button "全部院区 ▾" [ref=e13] [cursor=pointer]:
+          - text: 全部院区
+          - generic [ref=e14]: ▾
+        - generic [ref=e16]:
+          - button "13 全部设备" [ref=e17] [cursor=pointer]:
+            - generic [ref=e18]: "13"
+            - generic [ref=e19]: 全部设备
+          - button "4 合同风险" [ref=e20] [cursor=pointer]:
+            - generic [ref=e21]: "4"
+            - generic [ref=e22]: 合同风险
+          - button "3 保养风险" [ref=e23] [cursor=pointer]:
+            - generic [ref=e24]: "3"
+            - generic [ref=e25]: 保养风险
+          - button "4 报修中" [ref=e26] [cursor=pointer]:
+            - generic [ref=e27]: "4"
+            - generic [ref=e28]: 报修中
+          - button "0 保养计划" [ref=e29] [cursor=pointer]:
+            - generic [ref=e30]: "0"
+            - generic [ref=e31]: 保养计划
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - img
+            - textbox "搜索设备" [ref=e35]:
+              - /placeholder: 搜索设备名称 / 科室 / 型号
+          - button "扫码报修/绑定" [ref=e36] [cursor=pointer]:
+            - img [ref=e37]
+            - text: 报修/绑定
+        - generic [ref=e43]:
+          - button "CT" [ref=e44] [cursor=pointer]
+          - button "磁共振" [ref=e45] [cursor=pointer]
+          - button "血管机" [ref=e46] [cursor=pointer]
+          - button "超声" [ref=e47] [cursor=pointer]
+          - button "其他" [ref=e48] [cursor=pointer]
+        - generic [ref=e49]:
+          - generic [ref=e51]: 共 13 台设备
+          - generic [ref=e54] [cursor=pointer]:
+            - img [ref=e56]
+            - generic [ref=e59]:
+              - generic [ref=e60]: Affiniti 70
+              - generic [ref=e61]:
+                - generic [ref=e62]: 超声科
+                - generic [ref=e64]: 门诊楼2层
+              - generic [ref=e66]: 设备待验收
+            - img [ref=e67]
+          - generic [ref=e71] [cursor=pointer]:
+            - img [ref=e73]
+            - generic [ref=e76]:
+              - generic [ref=e77]: EPIQ Elite
+              - generic [ref=e78]:
+                - generic [ref=e79]: 心内科
+                - generic [ref=e81]: 主楼5层
+              - generic [ref=e82]:
+                - generic [ref=e83]: 合同未知
+                - generic [ref=e84]: 报修中
+            - img [ref=e85]
+          - generic [ref=e89] [cursor=pointer]:
+            - img [ref=e91]
+            - generic [ref=e94]:
+              - generic [ref=e95]: EPIQ 7
+              - generic [ref=e96]:
+                - generic [ref=e97]: 心脏超声科
+                - generic [ref=e99]: 门诊楼2层
+            - img [ref=e100]
+          - generic [ref=e104] [cursor=pointer]:
+            - img [ref=e106]
+            - generic [ref=e109]:
+              - generic [ref=e110]: Elition 磁共振
+              - generic [ref=e111]:
+                - generic [ref=e112]: 影像科
+                - generic [ref=e114]: 南楼2层
+              - generic [ref=e116]: 报修中
+            - img [ref=e117]
+          - generic [ref=e121] [cursor=pointer]:
+            - img [ref=e123]
+            - generic [ref=e126]:
+              - generic [ref=e127]: Sparq 超声
+              - generic [ref=e128]:
+                - generic [ref=e129]: 全科门诊
+                - generic [ref=e131]: 门诊楼1层
+              - generic [ref=e132]:
+                - generic [ref=e133]: 合同未知
+                - generic [ref=e134]: 保养风险
+            - img [ref=e135]
+          - generic [ref=e139] [cursor=pointer]:
+            - img [ref=e141]
+            - generic [ref=e144]:
+              - generic [ref=e145]: Vereos PET/CT
+              - generic [ref=e146]:
+                - generic [ref=e147]: 核医学科
+                - generic [ref=e149]: 主楼地下1层
+              - generic [ref=e151]: 报修中
+            - img [ref=e152]
+          - generic [ref=e156] [cursor=pointer]:
+            - img [ref=e158]
+            - generic [ref=e161]:
+              - generic [ref=e162]: Lumify 便携超声
+              - generic [ref=e163]:
+                - generic [ref=e164]: 急诊科
+                - generic [ref=e166]: 急诊楼1层
+              - generic [ref=e167]:
+                - generic [ref=e168]: 无保
+                - generic [ref=e169]: 保养风险
+            - img [ref=e170]
+          - generic [ref=e174] [cursor=pointer]:
+            - img [ref=e176]
+            - generic [ref=e179]:
+              - generic [ref=e180]: Ingenia 3.0T
+              - generic [ref=e181]:
+                - generic [ref=e182]: 影像科
+                - generic [ref=e184]: 南楼2层
+              - generic [ref=e186]: 报修中
+            - img [ref=e187]
+          - generic [ref=e191] [cursor=pointer]:
+            - img [ref=e193]
+            - generic [ref=e196]:
+              - generic [ref=e197]: IDS 7 放射信息系统
+              - generic [ref=e198]:
+                - generic [ref=e199]: 影像科
+                - generic [ref=e201]: 南楼2层
+            - img [ref=e202]
+          - generic [ref=e206] [cursor=pointer]:
+            - img [ref=e208]
+            - generic [ref=e211]:
+              - generic [ref=e212]: BigBore CT 7500
+              - generic [ref=e213]:
+                - generic [ref=e214]: 放射科
+                - generic [ref=e216]: 主楼3层
+            - img [ref=e217]
+          - generic [ref=e221] [cursor=pointer]:
+            - img [ref=e223]
+            - generic [ref=e226]:
+              - generic [ref=e227]: Azurion M3
+              - generic [ref=e228]:
+                - generic [ref=e229]: 介入手术室
+                - generic [ref=e231]: 外科楼4层
+              - generic [ref=e233]: 即将出保
+            - img [ref=e234]
+          - generic [ref=e238] [cursor=pointer]:
+            - img [ref=e240]
+            - generic [ref=e243]:
+              - generic [ref=e244]: MR 5300
+              - generic [ref=e245]:
+                - generic [ref=e246]: 影像科一室
+                - generic [ref=e248]: 南院楼1层
+              - generic [ref=e249]:
+                - generic [ref=e250]: 无保
+                - generic [ref=e251]: 保养风险
+            - img [ref=e252]
+          - generic [ref=e256] [cursor=pointer]:
+            - img [ref=e258]
+            - generic [ref=e261]:
+              - generic [ref=e262]: EPIQ 5
+              - generic [ref=e263]:
+                - generic [ref=e264]: 产科
+                - generic [ref=e266]: 门诊楼4层
+              - generic [ref=e268]: 合同未知
+            - img [ref=e269]
+    - contentinfo [ref=e272]:
+      - tablist [ref=e274]:
+        - tab "设备" [selected] [ref=e275] [cursor=pointer]:
+          - img [ref=e276]
+          - text: 设备
+        - tab "报修" [ref=e279] [cursor=pointer]:
+          - img [ref=e280]
+          - text: 报修
+        - tab "工单，3条待签字" [ref=e284] [cursor=pointer]:
+          - img [ref=e285]
+          - status [ref=e289]: "3"
+          - text: 工单
+        - tab "我的，7条未读消息" [ref=e290] [cursor=pointer]:
+          - img [ref=e291]
+          - status [ref=e294]: "7"
+          - text: 我的

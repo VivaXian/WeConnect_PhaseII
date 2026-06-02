@@ -23,20 +23,22 @@ import { SuperUserServicePage } from './super-user-service-page';
 import { UserDevicePage } from './user-device-page';
 import { WorkOrderDetailPage } from './work-order-detail-page';
 import { WorkOrderListPage } from './work-order-list-page';
+import { PrivacyPolicyPage } from './privacy-policy-page';
 import { deviceList } from '../utils/device-data';
 
 type NavState =
   | { type: 'tab-content' }
-  | { type: 'device-detail'; device: Device }
+  | { type: 'device-detail'; device: Device; initialTab?: 'repair' | 'pm' | 'workorder' | 'contract' | 'info' }
   | { type: 'repair-form'; device: Device }
   | { type: 'spare-parts-auth' }
   | { type: 'engineer-verify' }
   | { type: 'engineer-chat' }
   | { type: 'scan-camera' }
-  | { type: 'scan-device-input' }
+  | { type: 'scan-device-input'; confirmDevice?: Device }
   | { type: 'repair-detail'; repairId: string }
   | { type: 'work-order-detail'; orderId: string }
-  | { type: 'service-eval'; repairId: string };
+  | { type: 'service-eval'; repairId: string }
+  | { type: 'privacy-policy' };
 
 type ProfileSubPage = null | 'messages' | { type: 'message-detail'; messageId: string; backTarget: 'profile' | 'messages' };
 
@@ -52,6 +54,8 @@ export const AppShell = () => {
 
   const navigate = (state: NavState) => setNavStack((prev) => [...prev, state]);
   const goBack = () => setNavStack((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+  const replaceCurrentAndNavigate = (current: NavState, next: NavState) =>
+    setNavStack((prev) => [...prev.slice(0, -1), current, next]);
 
   const handleTabChange = (tab: AppTab) => {
     setActiveTab(tab);
@@ -78,6 +82,7 @@ export const AppShell = () => {
         <div className={shellStyles.content}>
           <DeviceDetailPage
             device={currentNav.device}
+            initialTab={currentNav.initialTab}
             onBack={goBack}
             onRepairDetailPress={(repairId) => navigate({ type: 'repair-detail', repairId })}
             onWorkOrderPress={(orderId) => navigate({ type: 'work-order-detail', orderId })}
@@ -151,6 +156,19 @@ export const AppShell = () => {
           <ScanDeviceInputPage
             onBack={goBack}
             onScanPress={() => navigate({ type: 'scan-camera' })}
+            onRepairPress={(device) =>
+              replaceCurrentAndNavigate(
+                { type: 'scan-device-input', confirmDevice: device },
+                { type: 'repair-form', device }
+              )
+            }
+            onRepairProgressPress={(device) =>
+              replaceCurrentAndNavigate(
+                { type: 'scan-device-input', confirmDevice: device },
+                { type: 'device-detail', device, initialTab: 'repair' }
+              )
+            }
+            initialDevice={currentNav.confirmDevice}
           />
         </div>
       </div>
@@ -190,6 +208,16 @@ export const AppShell = () => {
       <div className={shellStyles.shell}>
         <div className={shellStyles.content}>
           <ServiceEvaluationPage repairId={currentNav.repairId} onBack={goBack} />
+        </div>
+      </div>
+    );
+  }
+
+  if (currentNav.type === 'privacy-policy') {
+    return (
+      <div className={shellStyles.shell}>
+        <div className={shellStyles.content}>
+          <PrivacyPolicyPage onBack={goBack} />
         </div>
       </div>
     );
@@ -255,7 +283,7 @@ export const AppShell = () => {
             onInputDevicePress={() => navigate({ type: 'scan-device-input' })}
             onSparePartsAuthPress={() => navigate({ type: 'spare-parts-auth' })}
             onEngineerVerifyPress={() => navigate({ type: 'engineer-verify' })}
-            onEngineerChatPress={() => navigate({ type: 'engineer-chat' })}
+            onPrivacyPolicyPress={() => navigate({ type: 'privacy-policy' })}
           />
         )}
       </div>

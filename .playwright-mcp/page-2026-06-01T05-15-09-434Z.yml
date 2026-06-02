@@ -1,0 +1,21 @@
+- generic [ref=e2]:
+  - group "切换角色（演示）" [ref=e3]:
+    - button "认证用户" [ref=e4] [cursor=pointer]
+    - button "授权用户" [ref=e5] [cursor=pointer]
+  - generic [ref=e295]:
+    - generic [ref=e296]:
+      - button "返回" [active] [ref=e297] [cursor=pointer]:
+        - img [ref=e298]
+      - generic [ref=e300]: 备件真伪验证
+    - generic [ref=e301]:
+      - img "扫描备件防伪二维码示意图" [ref=e303]
+      - generic [ref=e304]:
+        - generic [ref=e305]: PHILIPS · 正品溯源
+        - generic [ref=e306]: 飞利浦备件真伪验证
+        - generic [ref=e307]: 扫描备件外包装上的防伪码，即可查询正品认证状态，无需注册账号。
+        - generic [ref=e308]:
+          - img [ref=e309]
+          - text: 为保障服务质量，建议在备件更换前进行核验。
+    - button "扫描防伪码" [ref=e312] [cursor=pointer]:
+      - img [ref=e313]
+      - text: 扫描防伪码
