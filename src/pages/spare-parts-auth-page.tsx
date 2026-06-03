@@ -3,6 +3,7 @@ import { PhilipsShield } from '@filament/react/icons/philips-shield';
 import { Scan } from '@filament/react/icons/scan';
 import illustrationSrc from '../assets/icons/备件防伪扫描引导插画.png';
 import weConnectLogoSrc from '../assets/icons/WeConnect小程序LOGO.svg';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { sparePartsAuthStyles } from './spare-parts-auth-page.css';
 
 interface SparePartsAuthPageProps {
@@ -16,14 +17,7 @@ export const SparePartsAuthPage = ({ onBack }: SparePartsAuthPageProps) => {
   if (!scanning) {
     return (
       <div className={sparePartsAuthStyles.page}>
-        <div className={sparePartsAuthStyles.header}>
-          <button className={sparePartsAuthStyles.backBtn} onClick={onBack} aria-label="返回">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-          <span className={sparePartsAuthStyles.headerTitle}>备件原厂验证</span>
-        </div>
+        <MiniProgramNav variant="back" title="备件原厂验证" onBack={onBack} />
 
         <div className={sparePartsAuthStyles.scrollContent}>
           <div className={sparePartsAuthStyles.illustrationWrap}>
@@ -39,6 +33,13 @@ export const SparePartsAuthPage = ({ onBack }: SparePartsAuthPageProps) => {
             <div className={sparePartsAuthStyles.mainTitle}>飞利浦原厂备件验证</div>
             <div className={sparePartsAuthStyles.actionDesc}>
               扫描<span className={sparePartsAuthStyles.highlight}>备件外包装上的防伪码</span>，即可查询原厂备件认证信息。
+            </div>
+            <div className={sparePartsAuthStyles.metaNote}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="#8898aa" strokeWidth="1.6"/>
+                <path d="M12 8v5M12 16v.5" stroke="#8898aa" strokeWidth="1.6" strokeLinecap="round"/>
+              </svg>
+              为保障服务质量，建议在备件更换前进行核验。
             </div>
             <button
               type="button"

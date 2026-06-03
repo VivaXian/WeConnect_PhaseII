@@ -10,7 +10,7 @@ export const woStyles = {
   }),
   topBar: style({
     backgroundColor: '#0161de',
-    padding: '14px 16px',
+    padding: '8px 16px',
     flexShrink: 0,
   }),
   topBarTitle: style({
@@ -23,7 +23,6 @@ export const woStyles = {
     color: 'rgba(255,255,255,0.7)',
     fontSize: 13,
     lineHeight: '18px',
-    marginTop: 2,
   }),
   viewTabsRow: style({
     backgroundColor: '#ffffff',

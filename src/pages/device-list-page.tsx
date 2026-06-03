@@ -1,4 +1,6 @@
 import { Text } from '@filament/react/text';
+import { Item } from '@filament/react/common';
+import { Search } from '@filament/react/search';
 import clsx from 'clsx';
 import { useMemo, useState } from 'react';
 import { DeviceCard } from '../components/device-card';
@@ -7,6 +9,8 @@ import type { Device } from '../types/device';
 import { deviceList } from '../utils/device-data';
 import { useDeviceCustomNamesStore } from '../stores/device-custom-names-store';
 import { deviceListPageStyles } from './device-list-page.css';
+
+const EMPTY_RESULTS: never[] = [];
 
 const SU_STAT_CHIPS: { key: FilterStatus; label: string }[] = [
   { key: 'all', label: '全部设备' },
@@ -268,20 +272,16 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
 
       <div className={deviceListPageStyles.content}>
         <div className={deviceListPageStyles.searchRow}>
-          <div className={deviceListPageStyles.searchWrap}>
-            <svg className={deviceListPageStyles.searchIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
-              <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            <input
-              type="text"
-              className={deviceListPageStyles.searchInput}
-              placeholder="搜索设备名称 / 科室 / 型号"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              aria-label="搜索设备"
-            />
-          </div>
+          <Search
+            items={EMPTY_RESULTS}
+            aria-label="搜索设备"
+            placeholder="搜索设备名称 / 科室 / 型号"
+            onInputChange={setSearchValue}
+            inputValue={searchValue}
+            isFullWidth
+          >
+            {() => <Item key="empty">{null}</Item>}
+          </Search>
           <button
             type="button"
             className={deviceListPageStyles.scanBtn}

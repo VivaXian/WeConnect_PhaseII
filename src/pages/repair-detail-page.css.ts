@@ -8,36 +8,26 @@ export const rdStyles = {
     overflowY: 'auto',
     background: '#f5f7fa',
   }),
-  header: style({
-    background: 'linear-gradient(180deg, #0161de 0%, #0072db 100%)',
-    padding: '16px 16px 20px',
-    color: '#fff',
+  subHeader: style({
+    background: '#ffffff',
+    padding: '12px 16px 14px',
+    borderBottom: '1px solid #f0f0f0',
+    flexShrink: 0,
   }),
-  backBtn: style({
-    background: 'none',
-    border: 'none',
-    color: '#fff',
-    fontSize: 14,
-    padding: '4px 0',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 12,
-  }),
-  headerMeta: style({
+  subHeaderMeta: style({
     fontSize: 12,
-    opacity: 0.8,
+    color: '#6b7280',
     marginBottom: 4,
   }),
-  headerTitle: style({
+  subHeaderTitle: style({
     fontSize: 20,
     fontWeight: 700,
+    color: '#0a0a0a',
     marginBottom: 4,
   }),
-  headerTagline: style({
-    fontSize: 12,
-    opacity: 0.7,
+  subHeaderTagline: style({
+    fontSize: 13,
+    color: '#374151',
   }),
   sections: style({
     display: 'flex',

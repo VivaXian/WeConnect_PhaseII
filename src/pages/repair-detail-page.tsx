@@ -6,6 +6,7 @@ import { PersonPortrait } from '@filament/react/icons/person-portrait';
 import type { RepairStatus } from '../types/repair';
 import { WORK_ORDER_TYPE_LABEL } from '../types/work-order';
 import { repairData } from '../utils/repair-data';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { rdStyles } from './repair-detail-page.css';
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -63,7 +64,7 @@ export const RepairDetailPage = ({ repairId, onBack, onWorkOrderPress }: RepairD
   if (!record) {
     return (
       <div style={{ padding: 32, textAlign: 'center', color: '#6a7282' }}>
-        <button className={rdStyles.backBtn} onClick={onBack}>← 返回</button>
+        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0161de', fontSize: 14 }} onClick={onBack}>← 返回</button>
         <p>报修记录不存在</p>
       </div>
     );
@@ -74,19 +75,14 @@ export const RepairDetailPage = ({ repairId, onBack, onWorkOrderPress }: RepairD
 
   return (
     <div className={rdStyles.page}>
-      {/* Header */}
-      <div className={rdStyles.header}>
-        <button className={rdStyles.backBtn} onClick={onBack}>
-          ← 返回
-        </button>
-        <div className={rdStyles.headerMeta}>
+      <MiniProgramNav variant="back" title="报修详情" onBack={onBack} />
+      <div className={rdStyles.subHeader}>
+        <div className={rdStyles.subHeaderMeta}>
           报修编号 &nbsp;{record.repairId}
         </div>
-        <div className={rdStyles.headerTitle}>
-          {record.statusTitle ?? record.status}
-        </div>
+        <div className={rdStyles.subHeaderTitle}>{record.statusTitle ?? record.status}</div>
         {record.tagline && (
-          <div className={rdStyles.headerTagline}>{record.tagline}</div>
+          <div className={rdStyles.subHeaderTagline}>{record.tagline}</div>
         )}
       </div>
 

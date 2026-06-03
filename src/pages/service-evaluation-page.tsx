@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { seStyles } from './service-evaluation-page.css';
 
 interface Questionnaire {
@@ -82,10 +83,7 @@ export const ServiceEvaluationPage = ({ repairId, onBack }: ServiceEvaluationPag
   if (currentView === 'rating' && selectedQuestionnaire) {
     return (
       <div className={seStyles.page}>
-        <div className={seStyles.header}>
-          <button className={seStyles.backBtn} onClick={() => setCurrentView('list')}>← 返回</button>
-          <div className={seStyles.headerTitle}>评价服务</div>
-        </div>
+        <MiniProgramNav variant="back" title="服务评价" onBack={() => setCurrentView('list')} />
         <div className={seStyles.metaBar}>
           <div className={seStyles.metaRepairId}>报修编号 &nbsp;{repairId}</div>
           <div className={seStyles.metaTitle}>邀您为服务评价</div>
@@ -149,10 +147,7 @@ export const ServiceEvaluationPage = ({ repairId, onBack }: ServiceEvaluationPag
 
   return (
     <div className={seStyles.page}>
-      <div className={seStyles.header}>
-        <button className={seStyles.backBtn} onClick={onBack}>← 返回</button>
-        <div className={seStyles.headerTitle}>评价服务</div>
-      </div>
+      <MiniProgramNav variant="back" title="服务评价" onBack={onBack} />
       <div className={seStyles.metaBar}>
         <div className={seStyles.metaRepairId}>报修编号 &nbsp;{repairId}</div>
         <div className={seStyles.metaTitle}>服务评价</div>

@@ -12,7 +12,7 @@ export const suServiceStyles = {
   topBar: style({
     width: '100%',
     backgroundColor: '#0161de',
-    padding: '12px 16px 16px',
+    padding: '8px 16px',
     flexShrink: 0,
   }),
   topBarTitle: style({
@@ -24,8 +24,7 @@ export const suServiceStyles = {
   topBarSub: style({
     color: 'rgba(255,255,255,0.75)',
     fontSize: 13,
-    lineHeight: '20px',
-    marginTop: 2,
+    lineHeight: '18px',
   }),
   body: style({
     flex: 1,
@@ -38,11 +37,14 @@ export const suServiceStyles = {
     padding: '12px 16px 0',
   }),
   searchRow: style({
-    padding: '10px 16px 0',
+    padding: '10px 16px',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    backgroundColor: '#ffffff',
+    borderBottom: '1px solid #f0f0f0',
+    flexShrink: 0,
   }),
   searchInput: style({
     flex: 1,
@@ -65,7 +67,7 @@ export const suServiceStyles = {
   }),
   filterToggleBtn: style({
     flexShrink: 0,
-    height: 36,
+    height: 40,
     paddingLeft: 12,
     paddingRight: 12,
     border: '1px solid #d0d7e0',

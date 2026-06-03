@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { engineerChatStyles as s } from './engineer-chat-page.css';
 
 interface ChatMessage {
@@ -61,13 +62,8 @@ export const EngineerChatPage = ({ onBack }: EngineerChatPageProps) => {
   if (view === 'join') {
     return (
       <div className={s.page}>
+        <MiniProgramNav variant="back" title="工程师助手" onBack={onBack} />
         <div className={s.joinBackdrop}>
-          <button className={s.joinCloseBtn} onClick={onBack} aria-label="返回">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-              <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span className={s.joinCloseBtnText}>返回</span>
-          </button>
           <div className={s.joinBannerArea}>
             <div className={s.joinBannerIcon}>
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -115,19 +111,10 @@ export const EngineerChatPage = ({ onBack }: EngineerChatPageProps) => {
 
   return (
     <div className={s.page}>
-      <div className={s.header}>
-        <button className={s.backBtn} onClick={onBack} aria-label="返回">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <div className={s.headerCenter}>
-          <span className={s.headerTitle}>对话工程师</span>
-          <span className={s.statusRow}>
-            <span className={s.onlineDot} />
-            <span className={s.statusText}>客服在线 · 聊天室 {roomNumber}</span>
-          </span>
-        </div>
+      <MiniProgramNav variant="back" title="对话工程师" onBack={onBack} />
+      <div className={s.statusRow}>
+        <span className={s.onlineDot} />
+        <span className={s.statusText}>客服在线 · 聊天室 {roomNumber}</span>
       </div>
 
       <div className={s.messages}>

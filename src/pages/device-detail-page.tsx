@@ -7,6 +7,7 @@ import type { LinkedWorkOrder } from '../types/repair';
 import { useRoleStore } from '../stores/role-store';
 import { useDeviceCustomNamesStore } from '../stores/device-custom-names-store';
 import { repairData } from '../utils/repair-data';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { detailStyles } from './device-detail-page.css';
 import { DeviceDetailInfoTab } from './device-detail-info-tab';
 import { DeviceDetailContractTab } from './device-detail-contract-tab';
@@ -102,18 +103,11 @@ export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOr
 
   return (
     <div className={detailStyles.page}>
+      <MiniProgramNav variant="back" title="设备详情" onBack={onBack} />
       <div className={detailStyles.header}>
-        <div className={detailStyles.headerTop}>
-          <button className={detailStyles.backBtn} onClick={onBack} aria-label="返回">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <div className={detailStyles.headerNameRow}>
-            <span className={detailStyles.headerName}>{displayName}</span>
-          </div>
+        <div className={detailStyles.headerNameRow}>
+          <span className={detailStyles.headerName}>{displayName}</span>
         </div>
-
         {customName && (
           <div className={detailStyles.headerModelRow}>
             <span className={detailStyles.headerModelSub}>{device.name}</span>

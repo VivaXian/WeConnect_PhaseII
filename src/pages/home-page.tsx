@@ -10,7 +10,7 @@ interface HomePageProps {
 export const HomePage = ({ onDevicePress, onRepairDetailPress, onServiceEvalPress }: HomePageProps) => (
   <SuperUserServicePage
     title="我的报修"
-    subtitle="WeConnect医院"
+    subtitle="我的记录"
     onDevicePress={onDevicePress}
     onRepairDetailPress={onRepairDetailPress}
     onServiceEvalPress={onServiceEvalPress}

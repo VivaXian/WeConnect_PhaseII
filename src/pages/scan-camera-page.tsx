@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { scanCameraStyles as s } from './scan-camera-page.css';
 
 interface ScanCameraPageProps {
@@ -27,14 +28,7 @@ export const ScanCameraPage = ({ onBack }: ScanCameraPageProps) => {
 
   return (
     <div className={s.page}>
-      <div className={s.header}>
-        <button className={s.closeBtn} onClick={onBack} aria-label="关闭">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M2 2L14 14M14 2L2 14" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </button>
-        <span className={s.title}>扫描设备二维码</span>
-      </div>
+      <MiniProgramNav variant="back" title="扫描设备二维码" onBack={onBack} />
 
       <div className={s.viewfinderWrap}>
         {cameraAvailable ? (

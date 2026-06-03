@@ -1,4 +1,6 @@
 import { Text } from '@filament/react/text';
+import { Item } from '@filament/react/common';
+import { Search } from '@filament/react/search';
 import clsx from 'clsx';
 import { useMemo, useState } from 'react';
 import { RepairList } from '../components/repair-list';
@@ -8,6 +10,8 @@ import type { MonthGroup, RepairSource, RepairStatus } from '../types/repair';
 import { deviceList } from '../utils/device-data';
 import { repairData } from '../utils/repair-data';
 import { suServiceStyles } from './super-user-service-page.css';
+
+const EMPTY_RESULTS: never[] = [];
 
 type StatusFilter = 'all' | RepairStatus;
 type TimeFilter = 'all' | '3m' | '6m' | '1y';
@@ -78,7 +82,7 @@ interface SuperUserServicePageProps {
 
 export const SuperUserServicePage = ({
   title = '报修',
-  subtitle = 'WeConnect医院 · 全院视图',
+  subtitle = '全院视图',
   onDevicePress,
   onRepairDetailPress,
   onServiceEvalPress,
@@ -131,7 +135,6 @@ export const SuperUserServicePage = ({
   return (
     <div className={suServiceStyles.page}>
       <div className={suServiceStyles.topBar}>
-        <div className={suServiceStyles.topBarTitle}>{title}</div>
         <div className={suServiceStyles.topBarSub}>{subtitle}</div>
       </div>
 
@@ -147,14 +150,16 @@ export const SuperUserServicePage = ({
         </div>
 
         <div className={suServiceStyles.searchRow}>
-          <input
-            type="search"
-            placeholder="搜索设备名称 / 医院"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={suServiceStyles.searchInput}
+          <Search
+            items={EMPTY_RESULTS}
             aria-label="搜索报修记录"
-          />
+            placeholder="搜索设备名称 / 医院"
+            onInputChange={setSearch}
+            inputValue={search}
+            isFullWidth
+          >
+            {() => <Item key="empty">{null}</Item>}
+          </Search>
           <button
             className={clsx(
               suServiceStyles.filterToggleBtn,

@@ -134,7 +134,6 @@ export const WorkOrderListPage = ({ onWorkOrderPress }: WorkOrderListPageProps) 
   return (
     <div className={woStyles.page}>
       <div className={woStyles.topBar}>
-        <div className={woStyles.topBarTitle}>工单</div>
         <div className={woStyles.topBarSub}>
           {isAdmin
             ? `全院视图 · ${pendingCount} 条待签字`

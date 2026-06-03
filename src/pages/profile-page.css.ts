@@ -37,7 +37,7 @@ export const profileStyles = {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    padding: '24px 20px 16px',
+    padding: '4px 20px 16px',
   }),
   heroTextGroup: style({
     display: 'flex',
@@ -47,6 +47,9 @@ export const profileStyles = {
   heroName: style({
     display: 'block',
     color: '#ffffff',
+    fontSize: 20,
+    fontWeight: 700,
+    lineHeight: '28px',
   }),
   heroUsernameBtn: style({
     display: 'flex',

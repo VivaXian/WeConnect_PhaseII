@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Scan } from '@filament/react/icons/scan';
 import illustrationSrc from '../assets/icons/工程师资质验证引导插画.png';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { engineerVerifyStyles } from './engineer-verify-page.css';
 
 interface EngineerVerifyPageProps {
@@ -13,14 +14,7 @@ export const EngineerVerifyPage = ({ onBack }: EngineerVerifyPageProps) => {
   if (!scanned) {
     return (
       <div className={engineerVerifyStyles.page}>
-        <div className={engineerVerifyStyles.header}>
-          <button className={engineerVerifyStyles.backBtn} onClick={onBack} aria-label="返回">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-          <span className={engineerVerifyStyles.headerTitle}>工程师资质查询</span>
-        </div>
+        <MiniProgramNav variant="back" title="工程师资质查询" onBack={onBack} />
 
         <div className={engineerVerifyStyles.scrollContent}>
           <div className={engineerVerifyStyles.illustrationWrap}>
@@ -60,14 +54,7 @@ export const EngineerVerifyPage = ({ onBack }: EngineerVerifyPageProps) => {
 
   return (
     <div className={engineerVerifyStyles.page}>
-      <div className={engineerVerifyStyles.header}>
-        <button className={engineerVerifyStyles.backBtn} onClick={() => setScanned(false)} aria-label="返回">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <span className={engineerVerifyStyles.headerTitle}>验证结果</span>
-      </div>
+      <MiniProgramNav variant="back" title="验证结果" onBack={() => setScanned(false)} />
 
       <div className={engineerVerifyStyles.content}>
         <div style={{

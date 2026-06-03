@@ -33,16 +33,22 @@ export const navStyles = {
 
   // ── Navigation bar ────────────────────────────────────────────────────────
   navBar: style({
-    height: 44,
+    height: 48,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 18,
   }),
   navLeft: style({
     width: 100,
     display: 'flex',
     alignItems: 'center',
     paddingLeft: 8,
+  }),
+  logoWrap: style({
+    paddingLeft: 12,
+    display: 'flex',
+    alignItems: 'center',
   }),
   backBtn: style({
     background: 'none',
@@ -58,10 +64,20 @@ export const navStyles = {
     flex: 1,
     textAlign: 'center',
     color: '#ffffff',
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: 600,
     opacity: 0.9,
     lineHeight: '24px',
+    whiteSpace: 'nowrap',
+  }),
+  navTitleLeft: style({
+    flex: 1,
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 700,
+    lineHeight: '24px',
+    whiteSpace: 'nowrap',
+    paddingLeft: 20,
   }),
   navRight: style({
     width: 100,
@@ -77,8 +93,8 @@ export const navStyles = {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.2)',
-    borderRadius: 100,
-    border: '0.5px solid rgba(255,255,255,0.25)',
+    borderRadius: 25,
+    border: '0.5px solid rgba(255,255,255,0.2)',
     height: 32,
     overflow: 'hidden',
   }),

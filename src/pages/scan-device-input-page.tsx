@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { Button } from '@filament/react/button';
 import { LinkAdd } from '@filament/react/icons/link-add';
 import { ReportSearch } from '@filament/react/icons/report-search';
@@ -127,14 +128,7 @@ export const ScanDeviceInputPage = ({
   if (view === 'confirm') {
     return (
       <div className={s.page}>
-        <div className={s.header}>
-          <button className={s.backBtn} onClick={handleBack} aria-label="返回">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-          <span className={s.headerTitle}>飞利浦设备报修</span>
-        </div>
+        <MiniProgramNav variant="back" title="飞利浦设备报修" onBack={handleBack} />
 
         <div className={s.confirmContent}>
           <div className={s.pictogramWrap}>
@@ -245,14 +239,7 @@ export const ScanDeviceInputPage = ({
 
   return (
     <div className={s.page}>
-      <div className={s.header}>
-        <button className={s.backBtn} onClick={handleBack} aria-label="返回">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <span className={s.headerTitle}>输入设备编号</span>
-      </div>
+      <MiniProgramNav variant="back" title="输入设备编号" onBack={handleBack} />
 
       <div className={s.content}>
         <div className={s.inputCard}>

@@ -224,21 +224,38 @@ export const AppShell = () => {
     );
   }
 
-  const navTitle = (() => {
-    if (activeTab === 'repair') return isAdmin ? '服务总览' : '报修服务';
-    if (activeTab === 'devices') return isAdmin ? '设备管理' : '我的设备';
-    if (activeTab === 'orders') return '工单中心';
+  const navVariant: 'logo' | 'back' | 'page' = (() => {
+    if (activeTab === 'devices') return 'logo';
     if (activeTab === 'profile') {
-      if (profileSubPage === 'messages') return '消息通知';
-      if (typeof profileSubPage === 'object' && profileSubPage !== null) return '消息详情';
-      return '我的';
+      if (profileSubPage === null) return 'page';
+      return 'back'; // messages or message-detail
     }
-    return 'WeConnect';
+    return 'page'; // repair, orders
+  })();
+  const navTitle = (() => {
+    if (activeTab === 'repair') return isAdmin ? '报修记录' : '我的报修';
+    if (activeTab === 'orders') return '工单列表';
+    if (activeTab === 'profile') {
+      if (profileSubPage === 'messages') return '消息中心';
+      if (typeof profileSubPage === 'object' && profileSubPage !== null) return '消息详情';
+      return '个人中心';
+    }
+    return '飞利浦医疗在线服务';
+  })();
+  const navOnBack = (() => {
+    if (activeTab === 'profile') {
+      if (profileSubPage === 'messages') return () => setProfileSubPage(null);
+      if (typeof profileSubPage === 'object' && profileSubPage !== null) {
+        const target = profileSubPage.backTarget;
+        return () => setProfileSubPage(target === 'profile' ? null : 'messages');
+      }
+    }
+    return undefined;
   })();
 
   return (
     <div className={shellStyles.shell}>
-      <MiniProgramNav title={navTitle} />
+      <MiniProgramNav variant={navVariant} title={navTitle} onBack={navOnBack} />
       <div className={shellStyles.content}>
         {activeTab === 'repair' && (
           isAdmin
@@ -278,7 +295,6 @@ export const AppShell = () => {
         )}
         {activeTab === 'profile' && profileSubPage === 'messages' && (
           <MessagesPage
-            onBack={() => setProfileSubPage(null)}
             onMessagePress={(messageId) => setProfileSubPage({ type: 'message-detail', messageId, backTarget: 'messages' })}
             onDevicePress={(deviceId) => {
               const device = deviceList.find((d) => d.id === deviceId);

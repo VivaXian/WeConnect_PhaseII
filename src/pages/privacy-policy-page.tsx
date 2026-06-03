@@ -1,4 +1,5 @@
 import { ChevronRight } from '@filament/react/icons/chevron-right';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { privacyPolicyStyles } from './privacy-policy-page.css';
 
 const PRIVACY_ITEMS = [
@@ -14,12 +15,7 @@ interface PrivacyPolicyPageProps {
 
 export const PrivacyPolicyPage = ({ onBack }: PrivacyPolicyPageProps) => (
   <div className={privacyPolicyStyles.page}>
-    <div className={privacyPolicyStyles.header}>
-      <button type="button" className={privacyPolicyStyles.backBtn} onClick={onBack}>
-        ‹
-      </button>
-      <span className={privacyPolicyStyles.title}>隐私政策</span>
-    </div>
+    <MiniProgramNav variant="back" title="隐私政策" onBack={onBack} />
     <div className={privacyPolicyStyles.list}>
       {PRIVACY_ITEMS.map((item) => (
         <button key={item.key} type="button" className={privacyPolicyStyles.listItem}>

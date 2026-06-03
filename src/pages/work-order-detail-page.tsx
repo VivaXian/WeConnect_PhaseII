@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { WORK_ORDER_TYPE_LABEL } from '../types/work-order';
 import { workOrderData } from '../utils/work-order-data';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { wdStyles } from './work-order-detail-page.css';
 
 type SigningState = 'idle' | 'signing' | 'signed';
@@ -62,10 +63,7 @@ export const WorkOrderDetailPage = ({ orderId, onBack, onServiceEvalPress }: Wor
 
   return (
     <div className={wdStyles.page}>
-      <div className={wdStyles.header}>
-        <button className={wdStyles.backBtn} onClick={onBack}>← 返回</button>
-        <div className={wdStyles.headerTitle}>工单详情</div>
-      </div>
+      <MiniProgramNav variant="back" title="工单详情" onBack={onBack} />
 
       {/* Work order meta */}
       <div className={wdStyles.woMeta}>

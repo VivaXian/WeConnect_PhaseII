@@ -1,20 +1,9 @@
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import type { MessageCategory } from '../types/message';
-import { CATEGORY_LABEL } from '../types/message';
 import { useMessageStore } from '../stores/message-store';
 import { useDeviceCustomNamesStore } from '../stores/device-custom-names-store';
 import { detailStyles } from './message-detail-page.css';
-
-const HEADER_BADGE_BG: Record<MessageCategory, string> = {
-  'contract-expired': 'rgba(255,80,80,0.2)',
-  'contract-expiry': 'rgba(255,165,0,0.2)',
-  'acceptance': 'rgba(255,165,0,0.2)',
-  'pm-plan': 'rgba(255,255,255,0.15)',
-  'pm-risk': 'rgba(255,165,0,0.2)',
-  'permission-upgrade': 'rgba(80,220,120,0.2)',
-  'order-update': 'rgba(255,255,255,0.15)',
-};
 
 // Summary text color for device risk notes
 const SUMMARY_STYLE: Record<MessageCategory, keyof typeof detailStyles> = {
@@ -59,21 +48,6 @@ export const MessageDetailPage = ({ messageId, onBack, onDevicePress, onWorkOrde
 
   return (
     <div className={detailStyles.page}>
-      {/* Blue header */}
-      <div className={detailStyles.header}>
-        <button className={detailStyles.backBtn} onClick={onBack} aria-label="返回消息中心">
-          ‹ 消息中心
-        </button>
-        <div
-          className={detailStyles.headerBadge}
-          style={{ backgroundColor: HEADER_BADGE_BG[msg.category] }}
-        >
-          {CATEGORY_LABEL[msg.category]}
-        </div>
-        <div className={detailStyles.headerTitle}>{msg.title}</div>
-        <div className={detailStyles.headerMeta}>{msg.time}</div>
-      </div>
-
       {/* Body */}
       <div className={detailStyles.body}>
         {msg.category === 'order-update' && msg.workOrderId ? (

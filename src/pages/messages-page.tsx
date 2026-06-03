@@ -329,14 +329,6 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
       {/* Top bar */}
       <div className={msgStyles.topBar}>
         <div className={msgStyles.topBarLeft}>
-          {onBack && !editMode && (
-            <button className={msgStyles.backBtn} onClick={onBack} aria-label="返回">
-              ‹ 返回
-            </button>
-          )}
-          <div className={msgStyles.topBarTitle}>
-            消息中心{!editMode && unreadCount > 0 ? ` (${unreadCount})` : ''}
-          </div>
           <div className={msgStyles.topBarSub}>
             {editMode
               ? selectedIds.size > 0 ? `已选 ${selectedIds.size} 条` : '点击消息以选择'

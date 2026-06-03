@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import { useState } from 'react';
 import type { Device } from '../types/device';
+import { MiniProgramNav } from '../components/mini-program-nav';
 import { formStyles } from './repair-form-page.css';
 
 interface RepairFormPageProps {
@@ -36,14 +37,7 @@ export const RepairFormPage = ({ device, onBack, onSubmitSuccess }: RepairFormPa
 
   return (
     <div className={formStyles.page}>
-      <div className={formStyles.header}>
-        <button className={formStyles.backBtn} onClick={onBack} aria-label="返回">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M12 4L6 10L12 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <span className={formStyles.headerTitle}>极速报修</span>
-      </div>
+      <MiniProgramNav variant="back" title="极速报修" onBack={onBack} />
 
       <div className={formStyles.deviceBanner}>
         <div className={formStyles.deviceBannerName}>{device.name}</div>

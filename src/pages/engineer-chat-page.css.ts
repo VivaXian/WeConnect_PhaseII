@@ -175,6 +175,9 @@ export const engineerChatStyles = {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    backgroundColor: '#0161de',
+    padding: '6px 16px 10px',
+    flexShrink: 0,
   }),
 
   onlineDot: style({
