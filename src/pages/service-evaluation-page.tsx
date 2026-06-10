@@ -91,7 +91,7 @@ export const ServiceEvaluationPage = ({ repairId, onBack }: ServiceEvaluationPag
 
         {submitted ? (
           <div className={seStyles.successBanner}>
-            <div style={{ fontSize: 48 }}>✅</div>
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#dcfce7"/><path d="M14 24l8 8 12-14" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#16a34a' }}>感谢您的评价！</div>
             <div style={{ fontSize: 14, color: '#6a7282' }}>您的反馈对我们非常重要</div>
           </div>

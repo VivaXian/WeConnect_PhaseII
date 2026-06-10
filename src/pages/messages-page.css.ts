@@ -570,7 +570,7 @@ export const msgStyles = {
     flexShrink: 0,
   }),
   digestTypeDotDanger: style({ backgroundColor: '#e53e3e' }),
-  digestTypeDotWarn: style({ backgroundColor: '#d97706' }),
+  digestTypeDotWarn: style({ backgroundColor: '#c97800' }),
   digestTypeDotNeutral: style({ backgroundColor: '#0161de' }),
   digestHeader: style({
     display: 'flex',

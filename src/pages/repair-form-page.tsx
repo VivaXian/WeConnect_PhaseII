@@ -13,9 +13,9 @@ interface RepairFormPageProps {
 type UrgencyLevel = 'high' | 'medium' | 'low';
 
 const URGENCY_OPTIONS: { value: UrgencyLevel; label: string }[] = [
-  { value: 'high', label: '🔴 停机急修' },
-  { value: 'medium', label: '🟡 影响使用' },
-  { value: 'low', label: '🟢 轻微异常' },
+  { value: 'high', label: '停机急修' },
+  { value: 'medium', label: '影响使用' },
+  { value: 'low', label: '轻微异常' },
 ];
 
 export const RepairFormPage = ({ device, onBack, onSubmitSuccess }: RepairFormPageProps) => {

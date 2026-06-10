@@ -5,7 +5,7 @@ export const formStyles = {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    backgroundColor: '#f5f7fa',
+    backgroundColor: '#F0F9FF',
     overflowY: 'auto',
   }),
   header: style({

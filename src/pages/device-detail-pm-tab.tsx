@@ -3,10 +3,11 @@ import clsx from 'clsx';
 import type { Device, PmWorkOrderEntry } from '../types/device';
 import { workOrderData } from '../utils/work-order-data';
 import { detailStyles } from './device-detail-page.css';
+import { BizConsultSheet } from '../components/biz-consult-sheet';
 
 interface PmTabProps {
   device: Device;
-  pmRiskLevel: 'ok' | 'concern' | 'high';
+  pmRiskLevel: 'ok' | 'high';
   daysSincePm: number | null;
   showPmSoon: boolean;
   isAdmin: boolean;
@@ -37,6 +38,22 @@ const DATE_RANGE_OPTIONS: { key: DateRange; label: string }[] = [
 const BATCH_SIZE = 5;
 const REF_DATE = new Date('2026-04-29');
 
+function consultKey(deviceId: string): string {
+  return `pmConsult_${deviceId}`;
+}
+
+function isConsultActive(deviceId: string): boolean {
+  const stored = localStorage.getItem(consultKey(deviceId));
+  if (!stored) return false;
+  const reset = new Date(stored);
+  reset.setDate(reset.getDate() + 1);
+  while (reset.getDay() === 0 || reset.getDay() === 6) {
+    reset.setDate(reset.getDate() + 1);
+  }
+  reset.setHours(0, 0, 0, 0);
+  return new Date() < reset;
+}
+
 function cutoffDate(range: DateRange): Date {
   const d = new Date(REF_DATE);
   d.setDate(d.getDate() - (range === '3m' ? 90 : range === '6m' ? 180 : 365));
@@ -46,6 +63,8 @@ function cutoffDate(range: DateRange): Date {
 export const DeviceDetailPmTab = ({ device, pmRiskLevel, daysSincePm, showPmSoon, isAdmin, pmWorkOrders, onWorkOrderPress }: PmTabProps) => {
   const [dateRange, setDateRange] = useState<DateRange>('3m');
   const [loadedCount, setLoadedCount] = useState(BATCH_SIZE);
+  const [showBizConsult, setShowBizConsult] = useState(false);
+  const [bizConsultDone, setBizConsultDone] = useState(() => isConsultActive(device.id));
   const navigableIds = new Set(workOrderData.flatMap((g) => g.orders.map((o) => o.id)));
 
   const cutoff = cutoffDate(dateRange);
@@ -58,59 +77,70 @@ export const DeviceDetailPmTab = ({ device, pmRiskLevel, daysSincePm, showPmSoon
     setLoadedCount(BATCH_SIZE);
   };
 
+  const isUltrasound = device.type.includes('超声');
+
   return (
     <div className={detailStyles.tabContent}>
-      {device.pmRisk && (
-        <div className={detailStyles.alertBannerDanger}>
-          <span>⚠️</span>
-          <span className={detailStyles.alertText}>
-            {isAdmin ? '合同已出保，保养计划存在风险，建议尽快续约' : '该设备保养间隔较长，建议联系服务团队'}
-          </span>
+      {isUltrasound && (
+        <div className={clsx(detailStyles.contractStatusCard, detailStyles.contractStatusNone)}>
+          <span className={clsx(detailStyles.contractStatusBadge, detailStyles.contractStatusBadgeNeutral)}>功能完善中</span>
+          <span className={detailStyles.contractStatusTitle}>超声设备保养数据完善中</span>
+          <span className={detailStyles.contractStatusDetail}>部分功能暂未上线，敬请期待。保养记录以实际情况为准。</span>
         </div>
       )}
-      {showPmSoon && !device.pmRisk && (
-        <div className={detailStyles.alertBannerInfo}>
-          <span>📅</span>
-          <span className={detailStyles.alertText}>
-            本月有保养计划，预计 {device.pmNextDate ? formatPmDate(device.pmNextDate) : ''} 执行
+      {pmRiskLevel !== 'ok' && (
+        <div className={clsx(detailStyles.contractStatusCard, detailStyles.contractStatusCaution)}>
+          <span className={clsx(detailStyles.contractStatusBadge, detailStyles.contractStatusBadgeCaution)}>保养风险</span>
+          <span className={detailStyles.contractStatusTitle}>
+            {daysSincePm !== null ? `设备已 ${daysSincePm} 天未保养` : '设备长时间未保养'}
           </span>
+          <div className={detailStyles.contractCtaRow}>
+            <span className={detailStyles.contractStatusCta}>建议尽快采购专业保养服务</span>
+            <button type="button" className={detailStyles.pmContactBtn} onClick={() => setShowBizConsult(true)}>
+              {bizConsultDone ? '再次咨询' : '保养咨询'}
+            </button>
+          </div>
         </div>
       )}
-
+      {pmRiskLevel === 'ok' && showPmSoon && device.pmNextDate && (
+        <div className={clsx(detailStyles.contractStatusCard, detailStyles.contractStatusInfo)}>
+          <span className={clsx(detailStyles.contractStatusBadge, detailStyles.contractStatusBadgeInfo)}>本月保养</span>
+          <span className={detailStyles.contractStatusTitle}>
+            计划于 {formatPmDate(device.pmNextDate)} 进行保养
+          </span>
+          <span className={detailStyles.contractStatusCta}>建议提前安排相关工作</span>
+        </div>
+      )}
+      <div className={detailStyles.pmLabelRow}>
+        <span className={detailStyles.pmLabelTitle}>保养状态</span>
+      </div>
       <div className={detailStyles.section}>
-        <div className={detailStyles.sectionHead}>
-          <span className={detailStyles.sectionTitle}>保养状态</span>
-          {pmRiskLevel !== 'ok' && (
-            <span className={clsx(
-              detailStyles.daysChip,
-              pmRiskLevel === 'concern' && detailStyles.chipWarn,
-              pmRiskLevel === 'high' && detailStyles.chipDanger,
-            )}>
-              保养风险
-            </span>
-          )}
-        </div>
         <div className={detailStyles.infoRow}>
           <span className={detailStyles.infoLabel}>上次保养</span>
-          <span className={detailStyles.infoValue}>{device.pmLastDate ?? '暂无记录'}</span>
+          <span className={detailStyles.infoValue}>
+            {device.pmLastDate ?? '暂无记录'}
+            {daysSincePm !== null && (
+              <span className={detailStyles.infoValueMuted}> · {daysSincePm} 天前</span>
+            )}
+          </span>
         </div>
-        {daysSincePm !== null && (
-          <div className={detailStyles.infoRow}>
-            <span className={detailStyles.infoLabel}>距上次</span>
-            <span className={detailStyles.infoValue}>{daysSincePm} 天前</span>
-          </div>
-        )}
         <div className={detailStyles.infoRowLast}>
           <span className={detailStyles.infoLabel}>下次计划</span>
-          <span className={detailStyles.infoValue}>{device.pmNextDate ?? '待排期'}</span>
+          {isUltrasound ? (
+            <span className={clsx(detailStyles.infoValue, detailStyles.infoValueMuted)}>功能暂未上线</span>
+          ) : device.pmNextDate ? (
+            <span className={detailStyles.infoValue}>{device.pmNextDate}</span>
+          ) : (
+            <span className={clsx(detailStyles.infoValue, detailStyles.infoValueMuted)}>—</span>
+          )}
         </div>
       </div>
 
+      <div className={detailStyles.pmLabelRow}>
+        <span className={detailStyles.pmLabelTitle}>保养工单</span>
+        <span className={detailStyles.sectionCount}>{filteredPmWOs.length} 条</span>
+      </div>
       <div className={detailStyles.section}>
-        <div className={detailStyles.sectionHead}>
-          <span className={detailStyles.sectionTitle}>保养工单</span>
-          <span className={detailStyles.sectionCount}>{pmWorkOrders.length} 条</span>
-        </div>
         <div className={detailStyles.dateRangeRow}>
           {DATE_RANGE_OPTIONS.map((opt) => (
             <button
@@ -123,11 +153,7 @@ export const DeviceDetailPmTab = ({ device, pmRiskLevel, daysSincePm, showPmSoon
             </button>
           ))}
         </div>
-        {!isAdmin && (
-          <div className={detailStyles.pmScopeNotice}>
-            ℹ️ 仅显示与您账号相关的保养工单，完整记录请联系管理员查看
-          </div>
-        )}
+        <div className={detailStyles.pmScopeNotice}>{isAdmin ? '完整历史请联系飞利浦销售团队' : '仅显示本账号相关工单，完整历史请联系飞利浦销售团队'}</div>
         {visiblePmWOs.length === 0 ? (
           <div className={detailStyles.emptyHistory}>该时间段内暂无保养记录</div>
         ) : (
@@ -181,6 +207,7 @@ export const DeviceDetailPmTab = ({ device, pmRiskLevel, daysSincePm, showPmSoon
           </div>
         )}
       </div>
+      {showBizConsult && <BizConsultSheet onClose={() => setShowBizConsult(false)} defaultDescription="咨询保养服务" onSubmitted={() => { localStorage.setItem(consultKey(device.id), new Date().toISOString()); setBizConsultDone(true); setShowBizConsult(false); }} />}
     </div>
   );
 };

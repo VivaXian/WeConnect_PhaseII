@@ -66,10 +66,9 @@ export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOr
 
   const hasActiveContract = contractStatus === 'good' || contractStatus === 'warning';
   const daysSincePm = device.pmLastDate ? Math.abs(daysFromToday(device.pmLastDate)) : null;
-  const pmRiskLevel =
-    device.pmRisk ? 'high'
-    : (daysSincePm !== null && daysSincePm > 180 && (!hasActiveContract || !device.pmNextDate)) ? 'concern'
-    : 'ok';
+  const pmRiskLevel = (
+    !device.type.includes('超声') && !hasActiveContract && !device.pmNextDate
+  ) ? 'high' : 'ok';
   const showPmSoon = (() => {
     if (!device.pmNextDate) return false;
     const d = daysFromToday(device.pmNextDate);
@@ -88,10 +87,10 @@ export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOr
 
   const tabs: { key: DetailTab; label: string }[] = [
     { key: 'info' as DetailTab, label: '总览' },
-    ...(isAdmin ? [{ key: 'contract' as DetailTab, label: '合同信息' }] : []),
-    { key: 'repair', label: '报修记录' },
-    { key: 'pm', label: '保养记录' },
-    { key: 'workorder', label: '全部工单' },
+    ...(isAdmin ? [{ key: 'contract' as DetailTab, label: '合同' }] : []),
+    { key: 'repair', label: '报修' },
+    { key: 'pm', label: '保养' },
+    { key: 'workorder', label: '工单' },
   ];
 
   const displayName = customName || device.name;
@@ -105,38 +104,24 @@ export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOr
     <div className={detailStyles.page}>
       <MiniProgramNav variant="back" title="设备详情" onBack={onBack} />
       <div className={detailStyles.header}>
-        <div className={detailStyles.headerNameRow}>
-          <span className={detailStyles.headerName}>{displayName}</span>
-        </div>
-        {customName && (
-          <div className={detailStyles.headerModelRow}>
-            <span className={detailStyles.headerModelSub}>{device.name}</span>
+        <div className={detailStyles.headerMain}>
+          <div className={detailStyles.headerTextCol}>
+            <span className={detailStyles.headerName}>{displayName}</span>
+            {customName && (
+              <span className={detailStyles.headerModelSub}>{device.name}</span>
+            )}
           </div>
-        )}
-
-        <div className={detailStyles.headerActions}>
-          <a
-            href="tel:400-800-8008"
-            className={detailStyles.headerActionBtnOutline}
-            aria-label="电话咨询"
-          >
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M3 2h3l1.5 3.5-1.75 1.05A9.5 9.5 0 008.45 9.25L9.5 7.5 13 9v3a1 1 0 01-1 1C5.82 13 2 9.18 2 4a1 1 0 011-2z" fill="rgba(255,255,255,0.65)"/>
-            </svg>
-            电话咨询
-          </a>
           <button
-            className={detailStyles.headerActionBtnFill}
+            className={detailStyles.heroRepairBtn}
             onClick={onQuickRepair}
             aria-label="极速报修"
           >
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M9 1L3 9h5l-1 6 7-9h-5L9 1z" fill="#0161de"/>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M9 1L3 9h5l-1 6 7-9h-5L9 1z" fill="currentColor"/>
             </svg>
             极速报修
           </button>
         </div>
-
       </div>
 
       <div className={detailStyles.tabBar}>

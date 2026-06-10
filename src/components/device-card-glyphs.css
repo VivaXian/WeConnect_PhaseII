@@ -1,0 +1,36 @@
+.glyph {
+  width: 30px;
+  height: 30px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.glyph-mr {
+  -webkit-mask-image: url('../assets/icons/MR_core.svg');
+  mask-image: url('../assets/icons/MR_core.svg');
+  background-color: #1d68b3;
+}
+.glyph-ct {
+  -webkit-mask-image: url('../assets/icons/CT_core.svg');
+  mask-image: url('../assets/icons/CT_core.svg');
+  background-color: #14857a;
+}
+.glyph-igt {
+  -webkit-mask-image: url('../assets/icons/igt_core.svg');
+  mask-image: url('../assets/icons/igt_core.svg');
+  background-color: #4a57c4;
+}
+.glyph-us {
+  -webkit-mask-image: url('../assets/icons/US_core.svg');
+  mask-image: url('../assets/icons/US_core.svg');
+  background-color: #137f9c;
+}
+.glyph-other {
+  -webkit-mask-image: url('../assets/icons/Compass_core.svg');
+  mask-image: url('../assets/icons/Compass_core.svg');
+  background-color: #5a6b7b;
+}

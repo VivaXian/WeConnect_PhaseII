@@ -2,8 +2,11 @@ import { Text } from '@filament/react/text';
 import { Item } from '@filament/react/common';
 import { Search } from '@filament/react/search';
 import clsx from 'clsx';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { DeviceCard } from '../components/device-card';
+import { useLoadMore } from '../hooks/use-load-more';
+import { useDeviceListFilterStore, SORT_OPTIONS } from '../stores/device-list-filter-store';
+import { useShallow } from 'zustand/react/shallow';
 import type { FilterStatus } from '../types/device';
 import type { Device } from '../types/device';
 import { deviceList } from '../utils/device-data';
@@ -85,6 +88,12 @@ function isInRepair(device: Device): boolean {
   return device.status === 'under-repair' || device.status === 'pending-repair';
 }
 
+function isPmRisk(device: Device): boolean {
+  if (isUltrasoundDevice(device)) return false;
+  const hasContract = device.contractEnd ? daysFromToday(device.contractEnd) > 0 : false;
+  return !hasContract && !device.pmNextDate;
+}
+
 function getModality(device: Device): '磁共振' | 'CT' | '血管机' | '超声' | null {
   const t = device.type;
   if (t.includes('磁共振')) return '磁共振';
@@ -98,20 +107,20 @@ function matchesFilter(device: Device, filter: FilterStatus): boolean {
   switch (filter) {
     case 'all': return true;
     case 'contract-risk': return contractRisk(device) || device.acceptancePending === true;
-    case 'pm-risk': return device.pmRisk === true;
+    case 'pm-risk': return isPmRisk(device);
     case 'in-repair': return isInRepair(device);
     case 'pm-plan': return pmThisMonth(device);
   }
 }
 
-type DeviceTag = { label: string; signal: 'error' | 'warning' | 'caution' | 'success' | undefined };
+type DeviceTag = { label: string; signal: 'error' | 'warning' | 'caution' | 'success' | 'information' | undefined };
 
 function computeDeviceTags(device: Device, activeFilter: FilterStatus): DeviceTag[] {
   if (activeFilter === 'pm-plan' && device.pmNextDate) {
     return [
       {
         label: formatPmPlanTag(device.pmNextDate),
-        signal: 'caution',
+        signal: 'information',
       },
     ];
   }
@@ -141,12 +150,12 @@ function computeDeviceTags(device: Device, activeFilter: FilterStatus): DeviceTa
   }
 
   if (isInRepair(device)) {
-    tags.push({ label: '报修中', signal: 'caution' });
+    tags.push({ label: '报修中', signal: 'information' });
   }
-  if (device.pmRisk) {
-    tags.push({ label: '保养风险', signal: 'error' });
+  if (isPmRisk(device)) {
+    tags.push({ label: '保养风险', signal: 'caution' });
   } else if (pmThisMonth(device)) {
-    tags.push({ label: pmDateLabel(device), signal: undefined });
+    tags.push({ label: pmDateLabel(device), signal: 'information' });
   }
   return tags;
 }
@@ -158,23 +167,48 @@ interface DeviceListPageProps {
 
 const allCampuses = Array.from(
   new Set(deviceList.map((d) => d.campus).filter(Boolean))
-) as string[];
+).sort((a, b) => (a as string).localeCompare(b as string, 'zh-Hans-CN')) as string[];
 const CAMPUS_OPTIONS = [
   { key: 'all', label: '全部院区' },
   ...allCampuses.map((c) => ({ key: c, label: c })),
 ];
+const hasMultipleCampuses = allCampuses.length > 1;
 
 const runtimeNow = new Date();
 
 export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPageProps) => {
   const [searchValue, setSearchValue] = useState('');
-  const [activeFilter, setActiveFilter] = useState<FilterStatus>('all');
-  const [activeCampus, setActiveCampus] = useState('all');
+  const { activeFilter, activeCampus, activeModality, sortBy, setActiveFilter, setActiveCampus, setActiveModality, setSortBy } = useDeviceListFilterStore(
+    useShallow((s) => ({
+      activeFilter: s.activeFilter,
+      activeCampus: s.activeCampus,
+      activeModality: s.activeModality,
+      sortBy: s.sortBy,
+      setActiveFilter: s.setActiveFilter,
+      setActiveCampus: s.setActiveCampus,
+      setActiveModality: s.setActiveModality,
+      setSortBy: s.setSortBy,
+    }))
+  );
   const [campusOpen, setCampusOpen] = useState(false);
-  const [activeModality, setActiveModality] = useState('all');
+  const [sortOpen, setSortOpen] = useState(false);
   const [calYear, setCalYear] = useState(runtimeNow.getFullYear());
   const [calMonth, setCalMonth] = useState(runtimeNow.getMonth() + 1);
   const customNames = useDeviceCustomNamesStore((state) => state.names);
+  const chipScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (activeModality === 'all') return;
+    const container = chipScrollRef.current;
+    if (!container) return;
+    const activeChip = container.querySelector('[data-active="true"]') as HTMLElement | null;
+    if (!activeChip) return;
+    const chipLeft = activeChip.offsetLeft;
+    const chipWidth = activeChip.offsetWidth;
+    const containerWidth = container.offsetWidth;
+    container.scrollLeft = chipLeft - (containerWidth - chipWidth) / 2;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleFilterChange = (filter: FilterStatus) => {
     setActiveFilter(filter);
@@ -188,7 +222,7 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
   const statCounts = useMemo(() => ({
     all: campusFilteredList.length,
     'contract-risk': campusFilteredList.filter((d) => contractRisk(d) || d.acceptancePending === true).length,
-    'pm-risk': campusFilteredList.filter((d) => d.pmRisk === true).length,
+    'pm-risk': campusFilteredList.filter(isPmRisk).length,
     'in-repair': campusFilteredList.filter(isInRepair).length,
     'pm-plan': campusFilteredList.filter(pmThisMonth).length,
   }), [campusFilteredList]);
@@ -202,52 +236,93 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
     }
     if (searchValue.trim()) {
       const q = searchValue.trim().toLowerCase();
-      list = list.filter(
-        (d) =>
-          d.name.toLowerCase().includes(q) ||
-          d.type.toLowerCase().includes(q) ||
-          d.department.toLowerCase().includes(q)
-      );
+      list = list.filter((d) => {
+        const haystack = [
+          d.name,
+          customNames[d.id] ?? d.customName ?? '',
+          d.type,
+          getModality(d) ?? '',
+          d.department,
+          d.location,
+          d.campus ?? '',
+          d.serialNumber ?? '',
+          d.eqNumber ?? '',
+        ];
+        return haystack.some((field) => field.toLowerCase().includes(q));
+      });
     }
     if (activeFilter === 'pm-plan') {
       return list.sort(comparePmPlanDevice);
     }
+    switch (sortBy) {
+      case 'name-asc':
+        return list.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
+      case 'install-date-desc':
+        return list.sort((a, b) => (b.installDate ?? '').localeCompare(a.installDate ?? ''));
+      case 'created-date-desc':
+        return list.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+      default:
+        return list.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
+    }
+  }, [campusFilteredList, activeFilter, activeModality, searchValue, calYear, calMonth, customNames, sortBy]);
 
-    return list.sort((a, b) => (b.installDate ?? '').localeCompare(a.installDate ?? ''));
-  }, [campusFilteredList, activeFilter, activeModality, searchValue, calYear, calMonth]);
+  const { visibleItems: visibleDevices, hasMore: devicesHasMore, loadMore: devicesLoadMore, total: devicesTotal } = useLoadMore(filteredDevices, 6);
 
   return (
     <div className={deviceListPageStyles.page}>
       <div className={deviceListPageStyles.topBar}>
-        <div className={deviceListPageStyles.topBarTitle}>设备管理</div>
-        <div className={deviceListPageStyles.campusSelectorRow}>
+        <div className={deviceListPageStyles.topBarHeaderRow}>
+          <div className={deviceListPageStyles.topBarTitle}>设备管理</div>
           <button
             type="button"
-            className={deviceListPageStyles.campusSelectorBtn}
-            onClick={() => setCampusOpen((prev) => !prev)}
+            className={deviceListPageStyles.scanBtnTop}
+            onClick={onScanRepair}
+            aria-label="扫码报修/绑定"
           >
-            {activeCampus === 'all' ? '全部院区' : activeCampus}
-            <span className={deviceListPageStyles.campusChevron}>▾</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M2 7V4a1 1 0 0 1 1-1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <path d="M22 7V4a1 1 0 0 0-1-1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <path d="M2 17v3a1 1 0 0 0 1 1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <path d="M22 17v3a1 1 0 0 1-1 1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+            扫码报修/绑定
           </button>
-          {campusOpen && (
+        </div>
+        <div className={deviceListPageStyles.campusSelectorRow}>
+          {hasMultipleCampuses ? (
             <>
-              <div className={deviceListPageStyles.campusBackdrop} onClick={() => setCampusOpen(false)} />
-              <div className={deviceListPageStyles.campusDropdown}>
-                {CAMPUS_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.key}
-                    type="button"
-                    className={clsx(
-                      deviceListPageStyles.campusDropdownItem,
-                      activeCampus === opt.key && deviceListPageStyles.campusDropdownItemActive
-                    )}
-                    onClick={() => { setActiveCampus(opt.key); setCampusOpen(false); }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
+              <button
+                type="button"
+                className={deviceListPageStyles.campusSelectorBtn}
+                onClick={() => setCampusOpen((prev) => !prev)}
+              >
+                {activeCampus === 'all' ? '全部院区' : activeCampus}
+                <span className={deviceListPageStyles.campusChevron}>▾</span>
+              </button>
+              {campusOpen && (
+                <>
+                  <div className={deviceListPageStyles.campusBackdrop} onClick={() => setCampusOpen(false)} />
+                  <div className={deviceListPageStyles.campusDropdown}>
+                    {CAMPUS_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        className={clsx(
+                          deviceListPageStyles.campusDropdownItem,
+                          activeCampus === opt.key && deviceListPageStyles.campusDropdownItemActive
+                        )}
+                        onClick={() => { setActiveCampus(opt.key); setCampusOpen(false); }}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </>
+          ) : (
+            <span className={deviceListPageStyles.campusSelectorSingle}>{allCampuses[0] ?? ''}</span>
           )}
         </div>
         <div className={deviceListPageStyles.statsScrollRow}>
@@ -271,50 +346,37 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
       </div>
 
       <div className={deviceListPageStyles.content}>
-        <div className={deviceListPageStyles.searchRow}>
-          <Search
-            items={EMPTY_RESULTS}
-            aria-label="搜索设备"
-            placeholder="搜索设备名称 / 科室 / 型号"
-            onInputChange={setSearchValue}
-            inputValue={searchValue}
-            isFullWidth
-          >
-            {() => <Item key="empty">{null}</Item>}
-          </Search>
-          <button
-            type="button"
-            className={deviceListPageStyles.scanBtn}
-            onClick={onScanRepair}
-            aria-label="扫码报修/绑定"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M2 7V4a1 1 0 0 1 1-1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M22 7V4a1 1 0 0 0-1-1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M2 17v3a1 1 0 0 0 1 1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M22 17v3a1 1 0 0 1-1 1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-            报修/绑定
-          </button>
-        </div>
-
-        {/* 设备类型 filter */}
-        <div className={deviceListPageStyles.filterRow}>
-          <div className={deviceListPageStyles.chipGroup}>
-            {MODALITY_OPTIONS.map((opt) => (
-              <button
-                key={opt.key}
-                type="button"
-                className={clsx(
-                  deviceListPageStyles.chip,
-                  activeModality === opt.key && deviceListPageStyles.chipActive
-                )}
-                onClick={() => setActiveModality(activeModality === opt.key ? 'all' : opt.key)}
-              >
-                {opt.label}
-              </button>
-            ))}
+        {/* 搜索 + 设备类型 filter 同行 */}
+        <div className={deviceListPageStyles.searchFilterRow}>
+          <div className={deviceListPageStyles.searchBox}>
+            <Search
+              items={EMPTY_RESULTS}
+              aria-label="搜索设备"
+              placeholder="搜索设备"
+              onInputChange={setSearchValue}
+              inputValue={searchValue}
+              isFullWidth
+            >
+              {() => <Item key="empty">{null}</Item>}
+            </Search>
+          </div>
+          <div className={deviceListPageStyles.chipScroll} ref={chipScrollRef}>
+            <div className={deviceListPageStyles.chipGroupInline}>
+              {MODALITY_OPTIONS.map((opt) => (
+                <button
+                  key={opt.key}
+                  type="button"
+                  data-active={activeModality === opt.key ? 'true' : undefined}
+                  className={clsx(
+                    deviceListPageStyles.chip,
+                    activeModality === opt.key && deviceListPageStyles.chipActive
+                  )}
+                  onClick={() => setActiveModality(activeModality === opt.key ? 'all' : opt.key)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -352,29 +414,74 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
         <div className={deviceListPageStyles.listSection}>
           <div className={deviceListPageStyles.sectionHeader}>
             <Text variant="body-s" color="secondary">
-              共 {filteredDevices.length} 台设备
+              共 {devicesTotal} 台设备
             </Text>
+            <div className={deviceListPageStyles.sortBtnWrap}>
+              <button
+                type="button"
+                className={deviceListPageStyles.sortBtn}
+                onClick={() => setSortOpen((prev) => !prev)}
+              >
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                按{SORT_OPTIONS.find((o) => o.key === sortBy)?.label ?? '设备名称'}排序
+              </button>
+              {sortOpen && (
+                <>
+                  <div className={deviceListPageStyles.sortBackdrop} onClick={() => setSortOpen(false)} />
+                  <div className={deviceListPageStyles.sortDropdown}>
+                    {SORT_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        className={clsx(
+                          deviceListPageStyles.sortDropdownItem,
+                          sortBy === opt.key && deviceListPageStyles.sortDropdownItemActive
+                        )}
+                        onClick={() => { setSortBy(opt.key); setSortOpen(false); }}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
           {activeFilter === 'pm-plan' && (
             <div className={deviceListPageStyles.pmUltrasoundNote}>
-              超声设备保养计划暂未开放，列表中不含超声设备
+              超声设备保养计划暂未接入系统，列表中不含超声设备
+            </div>
+          )}
+          {activeFilter === 'pm-risk' && (
+            <div className={deviceListPageStyles.pmUltrasoundNote}>
+              超声设备保养计划暂未接入系统，不参与保养风险筛选
             </div>
           )}
 
-          {filteredDevices.map((device) => (
+          {visibleDevices.map((device) => (
             <DeviceCard
               key={device.id}
               device={device}
               customName={customNames[device.id]}
               tags={computeDeviceTags(device, activeFilter)}
+              showHospital={hasMultipleCampuses && activeCampus === 'all'}
               onPress={() => onDevicePress?.(device)}
             />
           ))}
 
-          {filteredDevices.length === 0 && (
+          {devicesTotal === 0 && (
             <Text variant="body-m" color="secondary" textAlign="center">
               {activeFilter === 'pm-plan' ? `${calMonth}月暂无保养计划` : '未找到匹配设备'}
             </Text>
+          )}
+          {devicesHasMore && (
+            <div className={deviceListPageStyles.loadMoreWrap}>
+              <button type="button" className={deviceListPageStyles.loadMoreBtn} onClick={devicesLoadMore}>
+                加载更多
+              </button>
+            </div>
           )}
         </div>
       </div>

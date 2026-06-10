@@ -61,11 +61,7 @@ export const DeviceDetailRepairTab = ({ records, isAdmin, onRepairDetailPress }:
           </button>
         ))}
       </div>
-      {!isAdmin && (
-        <div className={detailStyles.pmScopeNotice}>
-          ℹ️ 仅显示与您账号相关的报修记录，完整记录请联系管理员查看
-        </div>
-      )}
+      <div className={detailStyles.pmScopeNotice}>{isAdmin ? '完整历史请联系飞利浦销售团队' : '仅显示本账号相关记录，完整历史请联系飞利浦销售团队'}</div>
       {visible.length === 0 ? (
         <div className={detailStyles.emptyHistory}>该时间段内暂无报修记录</div>
       ) : (

@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import clsx from 'clsx';
 import type { ContractPeriod, Device } from '../types/device';
 import { CONTRACT_PERIOD_LABEL } from '../types/device';
 import { detailStyles } from './device-detail-page.css';
+import { BizConsultSheet } from '../components/biz-consult-sheet';
 
 interface ContractTabProps {
   device: Device;
@@ -41,7 +43,26 @@ function addSixMonths(dateStr: string): string {
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
+function consultKey(deviceId: string): string {
+  return `contractConsult_${deviceId}`;
+}
+
+function isConsultActive(deviceId: string): boolean {
+  const stored = localStorage.getItem(consultKey(deviceId));
+  if (!stored) return false;
+  const reset = new Date(stored);
+  reset.setDate(reset.getDate() + 1);
+  while (reset.getDay() === 0 || reset.getDay() === 6) {
+    reset.setDate(reset.getDate() + 1);
+  }
+  reset.setHours(0, 0, 0, 0);
+  return new Date() < reset;
+}
+
 export const DeviceDetailContractTab = ({ device, contractStatus, contractDays, warrantyUnsupported }: ContractTabProps) => {
+  const [showBizConsult, setShowBizConsult] = useState(false);
+  const [contractConsultDone, setContractConsultDone] = useState(() => isConsultActive(device.id));
+
   const allPeriods = [...(device.contractHistory ?? [])].sort(
     (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
   );
@@ -66,14 +87,7 @@ export const DeviceDetailContractTab = ({ device, contractStatus, contractDays, 
           <span className={detailStyles.contractStatusDetail}>
             {device.installDate && `装机日期：${formatDateCN(device.installDate)}。`}完成验收后质保将自动开始计算，建议尽快安排验收以获得服务保障。
           </span>
-          <span className={detailStyles.contractStatusCta}>如需了解详情，请联系相关销售人员</span>
-        </div>
-      ) : isDistributed && contractStatus === 'none' ? (
-        <div className={clsx(detailStyles.contractStatusCard, detailStyles.contractStatusNone)}>
-          <span className={clsx(detailStyles.contractStatusBadge, detailStyles.contractStatusBadgeNeutral)}>合同未知</span>
-          <span className={detailStyles.contractStatusTitle}>合同信息暂时无法查询</span>
-          <span className={detailStyles.contractStatusDetail}>部分设备合同信息暂未同步至系统，功能正在逐步完善中</span>
-          <span className={detailStyles.contractStatusCta}>如需了解详情，请联系相关销售人员</span>
+          <span className={detailStyles.contractStatusCta}>如需了解详情，请联系飞利浦销售团队</span>
         </div>
       ) : isWithinSixMonths ? (
         <div className={clsx(detailStyles.contractStatusCard, detailStyles.contractStatusNone)}>
@@ -88,21 +102,19 @@ export const DeviceDetailContractTab = ({ device, contractStatus, contractDays, 
               合同文件通常在装机后 6 个月内完成录入，届时可在此查看保障信息
             </span>
           )}
-          <span className={detailStyles.contractStatusCta}>如需提前了解保障方案，请联系 Philips 销售人员</span>
-        </div>
-      ) : contractStatus === 'none' ? (
-        <div className={clsx(detailStyles.contractStatusCard, detailStyles.contractStatusNone)}>
-          <span className={clsx(detailStyles.contractStatusBadge, detailStyles.contractStatusBadgeNeutral)}>无保</span>
-          <span className={detailStyles.contractStatusTitle}>当前无有效合同记录</span>
-          <span className={detailStyles.contractStatusCta}>如需了解服务保障方案，请联系 Philips 销售团队</span>
+          <span className={detailStyles.contractStatusCta}>如需提前了解保障方案，请联系飞利浦销售团队</span>
         </div>
       ) : contractStatus === 'expired' ? (
         <div className={clsx(detailStyles.contractStatusCard, detailStyles.contractStatusDanger)}>
           <span className={clsx(detailStyles.contractStatusBadge, detailStyles.contractStatusBadgeDanger)}>无保</span>
           <span className={detailStyles.contractStatusTitle}>设备当前无厂商服务保障</span>
-          <span className={detailStyles.contractStatusDetail}>
-            服务合同已到期，建议尽快联系 Philips 销售团队续签，以恢复设备的服务保障
-          </span>
+          <span className={detailStyles.contractStatusDetail}>服务合同已到期</span>
+          <div className={detailStyles.contractCtaRow}>
+            <span className={detailStyles.contractStatusCta}>建议尽快联系飞利浦销售团队续保</span>
+            <button type="button" className={detailStyles.contractWarnBtn} onClick={() => setShowBizConsult(true)}>
+              {contractConsultDone ? '再次咨询' : '续保咨询'}
+            </button>
+          </div>
         </div>
       ) : contractStatus === 'warning' ? (
         <div className={clsx(detailStyles.contractStatusCard, detailStyles.contractStatusWarn)}>
@@ -113,9 +125,19 @@ export const DeviceDetailContractTab = ({ device, contractStatus, contractDays, 
               {CONTRACT_PERIOD_LABEL[activePeriod.type]}{activePeriod.subType && ` · ${activePeriod.subType}`}，有效期至 {activePeriod.endDate}
             </span>
           )}
-          <span className={detailStyles.contractStatusCta}>建议提前联系 Philips 销售团队，安排合同续签</span>
-        </div>
-      ) : (
+          <div className={detailStyles.contractCtaRow}>
+            <span className={detailStyles.contractStatusCta}>建议尽快联系飞利浦销售团队续保</span>
+            <button type="button" className={detailStyles.contractWarnBtn} onClick={() => setShowBizConsult(true)}>
+              {contractConsultDone ? '再次咨询' : '续保咨询'}
+            </button>
+          </div>
+        </div>      ) : contractStatus === 'none' ? (
+        <div className={clsx(detailStyles.contractStatusCard, detailStyles.contractStatusNone)}>
+          <span className={clsx(detailStyles.contractStatusBadge, detailStyles.contractStatusBadgeNeutral)}>合同未知</span>
+          <span className={detailStyles.contractStatusTitle}>暂无合同信息</span>
+          <span className={detailStyles.contractStatusDetail}>当前设备无在保合同记录，如需了解服务保障方案，请联系飞利浦销售团队</span>
+          <span className={detailStyles.contractStatusCta}>如需了解详情，请联系飞利浦销售团队</span>
+        </div>      ) : (
         <div className={clsx(detailStyles.contractStatusCard, detailStyles.contractStatusGood)}>
           <span className={clsx(detailStyles.contractStatusBadge, detailStyles.contractStatusBadgeGood)}>在保中</span>
           {activePeriod && (
@@ -128,54 +150,96 @@ export const DeviceDetailContractTab = ({ device, contractStatus, contractDays, 
               有效期至 {activePeriod.endDate}{contractDays !== null && ` · 还有 ${contractDays} 天`}
             </span>
           )}
-          <span className={detailStyles.contractStatusCta}>如需了解合同详情或续签方案，请联系 Philips 销售团队</span>
+          <span className={detailStyles.contractStatusCta}>如需了解详情，请联系飞利浦销售团队</span>
         </div>
       )}
 
-      {/* Contract history — reverse chronological, no status chips on rows */}
+      {/* Contract history — reverse chronological */}
       {showHistory && (
-        <div className={detailStyles.section}>
-          <div className={detailStyles.sectionHead}>
-            <span className={detailStyles.sectionTitle}>服务合同历程</span>
+        <>
+          <div className={detailStyles.pmLabelRow}>
+            <span className={detailStyles.pmLabelTitle}>服务合同历程</span>
           </div>
-          {showUnsupportedNote && (
-            <div className={detailStyles.contractHistoryNote}>
-              部分合同记录暂未同步至系统，此处仅展示已归档的合同信息
-            </div>
-          )}
-          {visiblePeriods.map((period, idx) => {
-            const status = periodStatus(period);
-            const isLast = idx === visiblePeriods.length - 1;
-            return (
-              <div
-                key={idx}
-                className={clsx(detailStyles.contractPeriodRow, !isLast && detailStyles.contractPeriodRowBorder)}
-              >
-                <div className={detailStyles.contractTimeline}>
-                  <div className={clsx(
-                    detailStyles.contractDot,
-                    status === 'active' && detailStyles.contractDotActive,
-                    status === 'expired' && detailStyles.contractDotExpired,
-                    status === 'upcoming' && detailStyles.contractDotUpcoming,
-                  )} />
-                  {!isLast && <div className={detailStyles.contractLine} />}
-                </div>
-                <div className={detailStyles.contractPeriodInfo}>
-                  <span className={detailStyles.contractTypeLabel}>
-                    {CONTRACT_PERIOD_LABEL[period.type]}
-                    {period.subType && <span className={detailStyles.contractSubType}> · {period.subType}</span>}
-                  </span>
-                  <div className={detailStyles.contractPeriodDates}>
-                    {period.type === 'warranty'
-                      ? `截止 ${period.endDate}`
-                      : `${period.startDate} ~ ${period.endDate}`
-                    }
+          <div className={detailStyles.section}>
+            {showUnsupportedNote && (
+              <div className={detailStyles.contractHistoryNote}>
+                部分合同记录暂未同步至系统，此处仅展示已归档的合同信息
+              </div>
+            )}
+            <div className={detailStyles.contractHistoryList}>
+            {visiblePeriods.map((period, idx) => {
+              const status = periodStatus(period);
+              const isLast = idx === visiblePeriods.length - 1;
+              return (
+                <div
+                  key={idx}
+                  className={clsx(
+                    detailStyles.contractPeriodRow,
+                    !isLast && detailStyles.contractPeriodRowBorder,
+                    status === 'active' && detailStyles.contractPeriodRowActive,
+                  )}
+                >
+                  <div className={detailStyles.contractTimeline}>
+                    <div className={clsx(
+                      detailStyles.contractTimelineTopLine,
+                      idx === 0 && detailStyles.contractTimelineLineHidden,
+                    )} />
+                    <div className={clsx(
+                      detailStyles.contractDot,
+                      status === 'active' && detailStyles.contractDotActive,
+                      status === 'expired' && detailStyles.contractDotExpired,
+                      status === 'upcoming' && detailStyles.contractDotUpcoming,
+                    )} />
+                    <div className={clsx(
+                      detailStyles.contractTimelineBottomLine,
+                      isLast && detailStyles.contractTimelineLineHidden,
+                    )} />
+                  </div>
+                  <div className={detailStyles.contractPeriodInfo}>
+                    <div className={detailStyles.contractPeriodHeader}>
+                      <span className={clsx(
+                        detailStyles.contractTypeLabel,
+                        status === 'expired' && detailStyles.contractTypeLabelExpired,
+                      )}>
+                        {CONTRACT_PERIOD_LABEL[period.type]}
+                        {period.subType && <span className={clsx(
+                          detailStyles.contractSubType,
+                          status === 'expired' && detailStyles.contractSubTypeExpired,
+                        )}> · {period.subType}</span>}
+                      </span>
+                      <span className={clsx(
+                        detailStyles.contractStatusChip,
+                        status === 'active' && detailStyles.contractChipActive,
+                        status === 'expired' && detailStyles.contractChipExpired,
+                        status === 'upcoming' && detailStyles.contractChipUpcoming,
+                      )}>
+                        {status === 'active' ? '当前' : status === 'expired' ? '已到期' : '未开始'}
+                      </span>
+                    </div>
+                    <div className={detailStyles.contractPeriodDates}>
+                      {period.type === 'warranty'
+                        ? `截止 ${period.endDate}`
+                        : `${period.startDate} ~ ${period.endDate}`
+                      }
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+            </div>
+          </div>
+        </>
+      )}
+      {showBizConsult && (
+        <BizConsultSheet
+          onClose={() => setShowBizConsult(false)}
+          defaultDescription="咨询服务合同续保"
+          onSubmitted={() => {
+            localStorage.setItem(consultKey(device.id), new Date().toISOString());
+            setContractConsultDone(true);
+            setShowBizConsult(false);
+          }}
+        />
       )}
     </div>
   );

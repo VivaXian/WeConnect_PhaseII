@@ -6,7 +6,7 @@ export const rdStyles = {
     flexDirection: 'column',
     height: '100%',
     overflowY: 'auto',
-    background: '#f5f7fa',
+    background: '#F0F9FF',
   }),
   subHeader: style({
     background: '#ffffff',

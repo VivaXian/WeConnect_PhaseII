@@ -5,7 +5,7 @@ export const wdStyles = {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    background: '#f5f7fa',
+    background: '#F0F9FF',
   }),
   header: style({
     background: 'linear-gradient(180deg, #0161de 0%, #0072db 100%)',

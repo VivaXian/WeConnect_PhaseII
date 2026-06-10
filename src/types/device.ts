@@ -6,7 +6,7 @@ export type BusinessContract = 'warranty' | 'csa' | 'pos' | 'none';
 export type ContractPeriodType = 'warranty' | 'pos' | 'csa';
 // Stat-card filter keys
 export type FilterStatus = 'all' | 'contract-risk' | 'pm-risk' | 'in-repair' | 'pm-plan';
-export type UserFilterStatus = 'all' | 'pm-risk' | 'in-repair';
+export type UserFilterStatus = 'all' | 'pm-risk' | 'in-repair' | 'pm-plan';
 
 export interface ContractPeriod {
   type: ContractPeriodType;
@@ -49,13 +49,13 @@ export interface Device {
   campus?: string;
   pmLastDate?: string;
   pmNextDate?: string;
-  pmRisk?: boolean;
   acceptancePending?: boolean;
   installDate?: string;
   isDistributedDevice?: boolean;
   canShowInstallDate?: boolean;
   pmWorkOrders?: PmWorkOrderEntry[];
   deviceWorkOrders?: DeviceWorkOrderEntry[];
+  createdAt?: string;
 }
 
 export const DEVICE_STATUS_LABEL: Record<DeviceStatus, string> = {

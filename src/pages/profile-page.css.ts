@@ -100,7 +100,7 @@ export const profileStyles = {
   deviceSummaryChip: style({
     backgroundColor: 'rgba(255, 255, 255, 0.18)',
     color: '#ffffff',
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 500,
     borderRadius: 100,
     paddingLeft: 8,
@@ -230,7 +230,9 @@ export const profileStyles = {
   }),
   msgRow: style({
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
     padding: '10px 16px',
     cursor: 'pointer',
     background: 'none',
@@ -243,11 +245,22 @@ export const profileStyles = {
   msgRowBordered: style({
     borderTop: '1px solid #f0f0f0',
   }),
+  msgUnreadDotSlot: style({
+    width: 7,
+    flexShrink: 0,
+    paddingTop: 5,
+  }),
+  msgContent: style({
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 3,
+  }),
   msgRowTop: style({
     display: 'flex',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 3,
   }),
   msgUnreadDot: style({
     width: 7,
@@ -258,7 +271,7 @@ export const profileStyles = {
   }),
   msgTitle: style({
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: 500,
     color: '#1a2234',
     overflow: 'hidden',
@@ -277,7 +290,6 @@ export const profileStyles = {
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
-    paddingLeft: 13,
   }),
   msgEmpty: style({
     padding: '12px 16px 16px',
@@ -287,7 +299,7 @@ export const profileStyles = {
 
   // ── Quick tools grid ──────────────────────────────────────────────────────
   cardSectionTitle: style({
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: 600,
     color: '#1a2234',
   }),
@@ -323,14 +335,14 @@ export const profileStyles = {
     justifyContent: 'center',
   }),
   toolLabel: style({
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 600,
     color: '#1a2234',
     textAlign: 'center',
     lineHeight: '16px',
   }),
   toolSub: style({
-    fontSize: 11,
+    fontSize: 12,
     color: '#8898aa',
     textAlign: 'center',
     lineHeight: '14px',
@@ -392,7 +404,7 @@ export const profileStyles = {
     overflow: 'hidden',
   }),
   toolLinkLabel: style({
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 600,
     color: '#1a2234',
     lineHeight: '16px',
@@ -402,7 +414,7 @@ export const profileStyles = {
     width: '100%',
   }),
   toolLinkSub: style({
-    fontSize: 11,
+    fontSize: 12,
     color: '#8898aa',
     lineHeight: '14px',
   }),

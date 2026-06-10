@@ -6,7 +6,7 @@ export const woStyles = {
     flexDirection: 'column',
     width: '100%',
     minHeight: '100%',
-    backgroundColor: '#f5f7fa',
+    backgroundColor: '#F0F9FF',
   }),
   topBar: style({
     backgroundColor: '#0161de',

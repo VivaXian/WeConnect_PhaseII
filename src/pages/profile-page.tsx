@@ -241,12 +241,16 @@ export const ProfilePage = ({
               className={`${profileStyles.msgRow} ${profileStyles.msgRowBordered}`}
               onClick={() => onMessagePress?.(msg.id)}
             >
-              <div className={profileStyles.msgRowTop}>
+              <div className={profileStyles.msgUnreadDotSlot}>
                 {!msg.isRead && <div className={profileStyles.msgUnreadDot} />}
-                <span className={profileStyles.msgTitle}>{msg.title}</span>
-                <span className={profileStyles.msgTime}>{msg.time.slice(5)}</span>
               </div>
-              <div className={profileStyles.msgBody}>{msg.body}</div>
+              <div className={profileStyles.msgContent}>
+                <div className={profileStyles.msgRowTop}>
+                  <span className={profileStyles.msgTitle}>{msg.title}</span>
+                  <span className={profileStyles.msgTime}>{msg.time.slice(5)}</span>
+                </div>
+                <div className={profileStyles.msgBody}>{msg.body}</div>
+              </div>
             </button>
           ))
         )}

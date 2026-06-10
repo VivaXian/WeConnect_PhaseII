@@ -8,7 +8,7 @@ export const repairData: MonthGroup[] = [
         id: 'may26-1',
         repairId: 'D-12126615',
         deviceName: 'EPIQ Elite',
-        hospital: 'WeConnect医院',
+        hospital: 'WeConnect医院主院区',
         department: '妇产科',
         eq: '2093820',
         serialNo: 'SN20220031001',
