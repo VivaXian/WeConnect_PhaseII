@@ -119,7 +119,7 @@ export const CampusExpansionSheet = ({
 
         <div className={sheetStyles.footerNote}>
           <p className={sheetStyles.footerNoteText}>
-            提交后由飞利浦售后服务团队审核，预计需 1-7 个工作日，结果将通过消息中心通知您。
+            提交后由飞利浦售后服务团队审核，预计需 1-7 个工作日，结果将通过通知中心告知您。
           </p>
         </div>
 

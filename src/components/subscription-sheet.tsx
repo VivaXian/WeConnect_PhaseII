@@ -50,11 +50,11 @@ export const SubscriptionSheet = ({ role, onClose, filterKeys }: SubscriptionShe
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="消息订阅"
+        aria-label="通知订阅"
       >
         <div className={s.handle} />
         <div className={s.header}>
-          <span className={s.title}>消息订阅</span>
+          <span className={s.title}>通知订阅</span>
           <button type="button" className={s.closeBtn} onClick={onClose} aria-label="关闭">
             ✕
           </button>

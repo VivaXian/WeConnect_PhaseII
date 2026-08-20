@@ -18,10 +18,20 @@ const TIME_OPTIONS: { key: PreferTime; label: string }[] = [
 interface BizConsultSheetProps {
   onClose: () => void;
   onSubmitted?: () => void;
+  onOnlineConsult?: () => void;
+  title?: string;
+  ticketPrefix?: string;
   defaultDescription?: string;
 }
 
-export const BizConsultSheet = ({ onClose, onSubmitted, defaultDescription = '咨询保养服务' }: BizConsultSheetProps) => {
+export const BizConsultSheet = ({
+  onClose,
+  onSubmitted,
+  onOnlineConsult,
+  title = '商务咨询登记',
+  ticketPrefix,
+  defaultDescription = '咨询保养服务',
+}: BizConsultSheetProps) => {
   const { username } = useRoleStore(
     useShallow((s) => ({ username: s.username }))
   );
@@ -31,6 +41,9 @@ export const BizConsultSheet = ({ onClose, onSubmitted, defaultDescription = '�
   const [preferTime, setPreferTime] = useState<PreferTime | null>(null);
   const [description, setDescription] = useState(defaultDescription);
   const [submitted, setSubmitted] = useState(false);
+  const [ticketNo] = useState(() =>
+    ticketPrefix ? `${ticketPrefix}${Date.now().toString().slice(-8)}` : ''
+  );
 
   const canSubmit = contactName.trim().length > 0;
 
@@ -45,6 +58,7 @@ export const BizConsultSheet = ({ onClose, onSubmitted, defaultDescription = '�
             <span className={bizConsultStyles.successDesc}>
               专员将在1个工作日内回电联系您，请保持电话畅通。
             </span>
+            {ticketNo && <span className={bizConsultStyles.ticket}>受理编号 {ticketNo}</span>}
             <button type="button" className={bizConsultStyles.closePrimary} onClick={onClose}>
               关闭
             </button>
@@ -61,7 +75,7 @@ export const BizConsultSheet = ({ onClose, onSubmitted, defaultDescription = '�
 
         <div className={bizConsultStyles.header}>
           <div className={bizConsultStyles.headerTextCol}>
-            <span className={bizConsultStyles.title}>商务咨询登记</span>
+            <span className={bizConsultStyles.title}>{title}</span>
             <span className={bizConsultStyles.subtitle}>
               提交后专员优先跟进，通常1个工作日内回电
             </span>
@@ -164,8 +178,18 @@ export const BizConsultSheet = ({ onClose, onSubmitted, defaultDescription = '�
           </div>
 
           <div className={bizConsultStyles.callRow}>
-            <span className={bizConsultStyles.callNote}>如需立即沟通，也可直接拨打服务热线</span>
-            <a className={bizConsultStyles.callLink} href={`tel:${HOTLINE}`}>{HOTLINE}</a>
+            <span className={bizConsultStyles.callNote}>服务热线</span>
+            <div className={bizConsultStyles.altRow}>
+              {onOnlineConsult && (
+                <>
+                  <button type="button" className={bizConsultStyles.altLink} onClick={onOnlineConsult}>
+                    在线咨询
+                  </button>
+                  <span className={bizConsultStyles.altSeparator} />
+                </>
+              )}
+              <a className={bizConsultStyles.altLink} href={`tel:${HOTLINE}`}>{HOTLINE}</a>
+            </div>
           </div>
         </div>
       </div>

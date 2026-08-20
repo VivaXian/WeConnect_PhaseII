@@ -3,13 +3,10 @@ import { Card } from '@filament/react/card';
 import { ChevronRight } from '@filament/react/icons/chevron-right';
 import { Text } from '@filament/react/text';
 import type { Device } from '../types/device';
+import type { ModalityKey } from '../utils/device-modality';
+import { getModality } from '../utils/device-modality';
 import { useDeviceLocationsStore } from '../stores/device-locations-store';
 import { deviceCardStyles } from './device-card.css';
-import mrIcon from '../assets/icons/MR_core.svg?url';
-import ctIcon from '../assets/icons/CT_core.svg?url';
-import igtIcon from '../assets/icons/igt_core.svg?url';
-import usIcon from '../assets/icons/US_core.svg?url';
-import compassIcon from '../assets/icons/Compass_core.svg?url';
 
 type TagItem = { label: string; signal?: 'error' | 'warning' | 'caution' | 'success' | 'information' };
 
@@ -19,22 +16,8 @@ interface DeviceCardProps {
   tags: TagItem[];
   customName?: string;
   showHospital?: boolean;
-}
-
-type ModalityKey = 'mr' | 'ct' | 'igt' | 'us' | 'other';
-
-interface Modality {
-  key: ModalityKey;
-  label: string;
-  icon: string;
-}
-
-function getModality(type: string): Modality {
-  if (type.includes('磁共振')) return { key: 'mr', label: '磁共振', icon: mrIcon };
-  if (type.includes('CT') || type.includes('PET')) return { key: 'ct', label: 'CT', icon: ctIcon };
-  if (type.includes('血管')) return { key: 'igt', label: '血管机', icon: igtIcon };
-  if (type.includes('超声')) return { key: 'us', label: '超声', icon: usIcon };
-  return { key: 'other', label: '其他', icon: compassIcon };
+  selectable?: boolean;
+  isSelected?: boolean;
 }
 
 const BLOCK_CLASS: Record<ModalityKey, string> = {
@@ -53,14 +36,25 @@ const LABEL_CLASS: Record<ModalityKey, string> = {
   other: deviceCardStyles.iconBlockLabelOther,
 };
 
-export const DeviceCard = ({ device, onPress, tags, customName, showHospital }: DeviceCardProps) => {
+export const DeviceCard = ({
+  device,
+  onPress,
+  tags,
+  customName,
+  showHospital,
+  selectable,
+  isSelected,
+}: DeviceCardProps) => {
   const locationOverride = useDeviceLocationsStore((state) => state.locations[device.id]);
   const displayDept = locationOverride?.department ?? device.department;
   const displayLocation = locationOverride?.location ?? device.location;
   const modality = getModality(device.type);
 
   return (
-    <Card className={deviceCardStyles.card} onPress={onPress}>
+    <Card
+      className={clsx(deviceCardStyles.card, selectable && isSelected && deviceCardStyles.cardSelected)}
+      onPress={onPress}
+    >
       <div className={deviceCardStyles.inner}>
         <div className={clsx(deviceCardStyles.iconBlock, BLOCK_CLASS[modality.key])}>
           <img src={modality.icon} width={44} height={44} alt="" aria-hidden="true" />
@@ -114,12 +108,25 @@ export const DeviceCard = ({ device, onPress, tags, customName, showHospital }: 
           )}
         </div>
 
-        <ChevronRight
-          aria-hidden="true"
-          className={deviceCardStyles.chevron}
-          width={16}
-          height={16}
-        />
+        {selectable ? (
+          <span
+            className={clsx(deviceCardStyles.selectMark, isSelected && deviceCardStyles.selectMarkOn)}
+            aria-hidden="true"
+          >
+            {isSelected && (
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2.5 6.2 5 8.7l4.5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </span>
+        ) : (
+          <ChevronRight
+            aria-hidden="true"
+            className={deviceCardStyles.chevron}
+            width={16}
+            height={16}
+          />
+        )}
       </div>
     </Card>
   );

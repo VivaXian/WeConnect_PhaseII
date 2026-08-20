@@ -1,15 +1,37 @@
 import { Text } from '@filament/react/text';
 import { Item } from '@filament/react/common';
 import { Search } from '@filament/react/search';
+import { Button } from '@filament/react/button';
+import { DownloadCloud } from '@filament/react/icons/download-cloud';
+import { CheckmarkCircle } from '@filament/react/icons/checkmark-circle';
+import { Cross } from '@filament/react/icons/cross';
+import { ChevronRight } from '@filament/react/icons/chevron-right';
+import { Scan } from '@filament/react/icons/scan';
+import { Keyboard } from '@filament/react/icons/keyboard';
+import { FolderEmpty } from '@filament/react/pictograms/folder-empty';
+import { DownloadCloud as DownloadCloudPictogram } from '@filament/react/pictograms/download-cloud';
+import { NoResult } from '@filament/react/pictograms/no-result';
 import clsx from 'clsx';
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, Fragment } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { DeviceCard } from '../components/device-card';
+import { DeviceSortControl } from '../components/device-sort-control';
+import { ConfirmDialog } from '../components/confirm-dialog';
+import { RecentlyUnboundSheet } from '../components/recently-unbound-sheet';
+import { ModalityChipScroller } from '../components/modality-chip-scroller';
 import { useLoadMore } from '../hooks/use-load-more';
 import type { Device, UserFilterStatus } from '../types/device';
 import { deviceList } from '../utils/device-data';
 import { useDeviceCustomNamesStore } from '../stores/device-custom-names-store';
-import { useUserDeviceFilterStore, SORT_OPTIONS } from '../stores/device-list-filter-store';
+import {
+  useDeviceBindingStore,
+  isWithinRetention,
+  daysLeftInRecycle,
+  RECYCLE_RETENTION_DAYS,
+} from '../stores/device-binding-store';
+import { useToastStore } from '../stores/toast-store';
+import { useMigrationStore, formatBatchDate } from '../stores/migration-store';
+import { useUserDeviceFilterStore } from '../stores/device-list-filter-store';
 import { userDeviceStyles } from './user-device-page.css';
 
 const EMPTY_RESULTS: never[] = [];
@@ -60,6 +82,16 @@ function getModality(device: Device): '磁共振' | 'CT' | '血管机' | '超声
   return null;
 }
 
+const MODALITY_GROUP_ORDER = ['CT', '磁共振', '血管机', '超声', '其他'];
+
+function modalityGroup(device: Device): string {
+  return getModality(device) ?? '其他';
+}
+
+function modalityGroupIndex(device: Device): number {
+  return MODALITY_GROUP_ORDER.indexOf(modalityGroup(device));
+}
+
 function matchesUserFilter(d: Device, filter: UserFilterStatus): boolean {
   switch (filter) {
     case 'all': return true;
@@ -93,43 +125,69 @@ const hasMultipleCampuses = allCampuses.length > 1;
 interface UserDevicePageProps {
   onDevicePress?: (device: Device) => void;
   onScanRepair?: () => void;
+  onInputDevice?: () => void;
 }
 
-export const UserDevicePage = ({ onDevicePress, onScanRepair }: UserDevicePageProps) => {
+export const UserDevicePage = ({ onDevicePress, onScanRepair, onInputDevice }: UserDevicePageProps) => {
   const [searchValue, setSearchValue] = useState('');
-  const { activeFilter, activeCampus, activeModality, sortBy, setActiveFilter, setActiveCampus, setActiveModality, setSortBy } = useUserDeviceFilterStore(
+  const { activeFilter, activeCampus, activeModality, sortBy, sortDir, setActiveFilter, setActiveCampus, setActiveModality, setSortBy, toggleSortDir } = useUserDeviceFilterStore(
     useShallow((s) => ({
       activeFilter: s.activeFilter,
       activeCampus: s.activeCampus,
       activeModality: s.activeModality,
       sortBy: s.sortBy,
+      sortDir: s.sortDir,
       setActiveFilter: s.setActiveFilter,
       setActiveCampus: s.setActiveCampus,
       setActiveModality: s.setActiveModality,
       setSortBy: s.setSortBy,
+      toggleSortDir: s.toggleSortDir,
     }))
   );
   const [campusOpen, setCampusOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
   const customNames = useDeviceCustomNamesStore((state) => state.names);
-  const chipScrollRef = useRef<HTMLDivElement>(null);
+  const [manageMode, setManageMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showUnbindConfirm, setShowUnbindConfirm] = useState(false);
+  const [showRecentSheet, setShowRecentSheet] = useState(false);
+  const showToast = useToastStore((state) => state.showToast);
+  const { removedIds, removedAt, purgedIds, unbindMany, restore } = useDeviceBindingStore(
+    useShallow((s) => ({
+      removedIds: s.removedIds,
+      removedAt: s.removedAt,
+      purgedIds: s.purgedIds,
+      unbindMany: s.unbindMany,
+      restore: s.restore,
+    }))
+  );
 
-  useEffect(() => {
-    if (activeModality === 'all') return;
-    const container = chipScrollRef.current;
-    if (!container) return;
-    const activeChip = container.querySelector('[data-active="true"]') as HTMLElement | null;
-    if (!activeChip) return;
-    const chipLeft = activeChip.offsetLeft;
-    const chipWidth = activeChip.offsetWidth;
-    const containerWidth = container.offsetWidth;
-    container.scrollLeft = chipLeft - (containerWidth - chipWidth) / 2;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const boundList = useMemo(
+    () => deviceList.filter((d) => !removedIds.includes(d.id) && !purgedIds.includes(d.id)),
+    [removedIds, purgedIds]
+  );
+
+  const { migrationStatus, migrationExpectedAt, migrationNoticeSeen, markNoticeSeen, migratedCount, doneNoticeSeen, doneBannerDismissed, markDoneNoticeSeen, dismissDoneBanner } =
+    useMigrationStore(
+      useShallow((s) => ({
+        migrationStatus: s.status,
+        migrationExpectedAt: s.expectedAt,
+        migrationNoticeSeen: s.noticeSeen,
+        markNoticeSeen: s.markNoticeSeen,
+        migratedCount: s.migratedCount,
+        doneNoticeSeen: s.doneNoticeSeen,
+        doneBannerDismissed: s.doneBannerDismissed,
+        markDoneNoticeSeen: s.markDoneNoticeSeen,
+        dismissDoneBanner: s.dismissDoneBanner,
+      }))
+    );
+  const migrationPending = migrationStatus === 'pending';
+  const migrationDone = migrationStatus === 'done';
+  const showMigrationNotice = migrationPending && !migrationNoticeSeen;
+  const showMigrationDoneNotice = migrationDone && !doneNoticeSeen;
 
   const campusFilteredList = useMemo(
-    () => activeCampus === 'all' ? deviceList : deviceList.filter((d) => d.campus === activeCampus),
-    [activeCampus]
+    () => activeCampus === 'all' ? boundList : boundList.filter((d) => d.campus === activeCampus),
+    [activeCampus, boundList]
   );
 
   const statCounts = useMemo(() => ({
@@ -159,19 +217,80 @@ export const UserDevicePage = ({ onDevicePress, onScanRepair }: UserDevicePagePr
         return haystack.some((field) => field.toLowerCase().includes(q));
       });
     }
+    const dir = sortDir === 'desc' ? -1 : 1;
     switch (sortBy) {
-      case 'name-asc':
-        return list.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
-      case 'install-date-desc':
-        return list.sort((a, b) => (b.installDate ?? '').localeCompare(a.installDate ?? ''));
-      case 'created-date-desc':
-        return list.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+      case 'name':
+        return list.sort((a, b) => dir * a.name.localeCompare(b.name, 'zh-Hans-CN'));
+      case 'type-group':
+        return list.sort((a, b) => {
+          const diff = modalityGroupIndex(a) - modalityGroupIndex(b);
+          return dir * (diff !== 0 ? diff : a.name.localeCompare(b.name, 'zh-Hans-CN'));
+        });
+      case 'install-date':
+        return list.sort((a, b) => dir * (a.installDate ?? '').localeCompare(b.installDate ?? ''));
+      case 'created-date':
+        return list.sort((a, b) => dir * (a.createdAt ?? '').localeCompare(b.createdAt ?? ''));
       default:
-        return list.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
+        return list.sort((a, b) => dir * a.name.localeCompare(b.name, 'zh-Hans-CN'));
     }
-  }, [campusFilteredList, activeFilter, activeModality, searchValue, customNames, sortBy]);
+  }, [campusFilteredList, activeFilter, activeModality, searchValue, customNames, sortBy, sortDir]);
 
   const { visibleItems: visibleDevices, hasMore: devicesHasMore, loadMore: devicesLoadMore, total: devicesTotal } = useLoadMore(filteredDevices, 6);
+
+  const displayName = (d: Device) => customNames[d.id] ?? d.customName ?? d.name;
+  const noteOf = (d: Device) => customNames[d.id] ?? d.customName ?? '';
+
+  const recentlyUnbound = useMemo(
+    () =>
+      deviceList
+        .filter(
+          (d) =>
+            removedIds.includes(d.id) &&
+            !purgedIds.includes(d.id) &&
+            isWithinRetention(removedAt[d.id])
+        )
+        .sort((a, b) => (removedAt[b.id] ?? '').localeCompare(removedAt[a.id] ?? '')),
+    [removedIds, purgedIds, removedAt]
+  );
+
+  const allSelected = visibleDevices.length > 0 && visibleDevices.every((d) => selectedIds.includes(d.id));
+
+  const exitManageMode = () => {
+    setManageMode(false);
+    setSelectedIds([]);
+  };
+
+  const hasActiveFilters =
+    searchValue.trim() !== '' || activeFilter !== 'all' || activeModality !== 'all' || activeCampus !== 'all';
+
+  const clearFilters = () => {
+    setSearchValue('');
+    setActiveFilter('all');
+    setActiveModality('all');
+    setActiveCampus('all');
+  };
+
+  const toggleSelected = (id: string) =>
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  const toggleSelectAll = () =>
+    setSelectedIds(allSelected ? [] : visibleDevices.map((d) => d.id));
+
+  const confirmUnbind = () => {
+    const ids = [...selectedIds];
+    setShowUnbindConfirm(false);
+    exitManageMode();
+    unbindMany(ids);
+    showToast(`已解绑 ${ids.length} 台设备`, [
+      { label: '查看', onAction: () => setShowRecentSheet(true) },
+      { label: '撤销', onAction: () => ids.forEach((id) => restore(id)) },
+    ]);
+  };
+
+  const handleRestore = (device: Device) => {
+    restore(device.id);
+    showToast(`已恢复「${displayName(device)}」`);
+  };
 
   return (
     <div className={userDeviceStyles.page}>
@@ -181,16 +300,9 @@ export const UserDevicePage = ({ onDevicePress, onScanRepair }: UserDevicePagePr
           <button
             type="button"
             className={userDeviceStyles.scanBtnTop}
-            onClick={onScanRepair}
-            aria-label="扫码报修/绑定"
+            onClick={() => onScanRepair?.()}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M2 7V4a1 1 0 0 1 1-1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M22 7V4a1 1 0 0 0-1-1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M2 17v3a1 1 0 0 0 1 1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M22 17v3a1 1 0 0 1-1 1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
+            <Scan aria-hidden="true" width={16} height={16} />
             扫码报修/绑定
           </button>
         </div>
@@ -256,7 +368,7 @@ export const UserDevicePage = ({ onDevicePress, onScanRepair }: UserDevicePagePr
           <Search
             items={EMPTY_RESULTS}
             aria-label="搜索设备"
-            placeholder="搜索设备"
+            placeholder="搜索"
             onInputChange={setSearchValue}
             inputValue={searchValue}
             isFullWidth
@@ -264,67 +376,159 @@ export const UserDevicePage = ({ onDevicePress, onScanRepair }: UserDevicePagePr
             {() => <Item key="empty">{null}</Item>}
           </Search>
         </div>
-        <div className={userDeviceStyles.chipScroll} ref={chipScrollRef}>
-          <div className={userDeviceStyles.chipGroupInline}>
-            {MODALITY_OPTIONS.map((opt) => (
-              <button
-                key={opt.key}
-                type="button"
-                data-active={activeModality === opt.key ? 'true' : undefined}
-                className={clsx(userDeviceStyles.chip, activeModality === opt.key && userDeviceStyles.chipActive)}
-                onClick={() => setActiveModality(activeModality === opt.key ? 'all' : opt.key)}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <ModalityChipScroller
+          options={MODALITY_OPTIONS}
+          activeKey={activeModality}
+          onSelect={setActiveModality}
+        />
       </div>
 
       {/* 备件防伪 banner removed — entry moved to 我的 page */}
 
-      <div className={userDeviceStyles.listSection}>
-        <div className={userDeviceStyles.sectionHeader}>
-          <Text variant="body-s" color="secondary">共 {devicesTotal} 台设备</Text>
-          <div className={userDeviceStyles.sortBtnWrap}>
+      <div className={clsx(userDeviceStyles.listSection, manageMode && userDeviceStyles.listSectionManaging)}>
+        {migrationPending && boundList.length > 0 && (
+          <div className={userDeviceStyles.migrationBanner}>
+            <DownloadCloud aria-hidden="true" width={15} height={15} />
+            <span>历史设备与数据迁移中，预计 {formatBatchDate(migrationExpectedAt)}前完成</span>
+          </div>
+        )}
+        {migrationDone && !doneBannerDismissed && (
+          <div className={clsx(userDeviceStyles.migrationBanner, userDeviceStyles.migrationBannerDone)}>
+            <CheckmarkCircle aria-hidden="true" width={15} height={15} />
+            <span>已迁入 {migratedCount} 台历史设备及报修记录</span>
             <button
               type="button"
-              className={userDeviceStyles.sortBtn}
-              onClick={() => setSortOpen((prev) => !prev)}
+              className={userDeviceStyles.migrationBannerClose}
+              aria-label="关闭提示"
+              onClick={dismissDoneBanner}
             >
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-              按{SORT_OPTIONS.find((o) => o.key === sortBy)?.label ?? '设备名称'}排序
+              <Cross aria-hidden="true" width={14} height={14} />
             </button>
-            {sortOpen && (
+          </div>
+        )}
+        <div className={userDeviceStyles.sectionHeader}>
+          <div className={userDeviceStyles.sectionHeaderLeft}>
+            <Text variant="body-s" color="secondary">共 {devicesTotal} 台设备</Text>
+            {!manageMode && devicesTotal > 0 && (
               <>
-                <div className={userDeviceStyles.sortBackdrop} onClick={() => setSortOpen(false)} />
-                <div className={userDeviceStyles.sortDropdown}>
-                  {SORT_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.key}
-                      type="button"
-                      className={clsx(
-                        userDeviceStyles.sortDropdownItem,
-                        sortBy === opt.key && userDeviceStyles.sortDropdownItemActive
-                      )}
-                      onClick={() => { setSortBy(opt.key); setSortOpen(false); }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
+                <span className={userDeviceStyles.headerDivider} aria-hidden="true" />
+                <button
+                  type="button"
+                  className={userDeviceStyles.manageEntryBtn}
+                  onClick={() => setManageMode(true)}
+                >
+                  管理
+                </button>
               </>
             )}
           </div>
+          {manageMode ? (
+            recentlyUnbound.length > 0 && (
+              <button
+                type="button"
+                className={userDeviceStyles.recentUnboundEntry}
+                onClick={() => setShowRecentSheet(true)}
+              >
+                最近解绑
+                <span className={userDeviceStyles.recentUnboundCount}>{recentlyUnbound.length}</span>
+                <ChevronRight aria-hidden="true" width={14} height={14} />
+              </button>
+            )
+          ) : (
+            <DeviceSortControl
+              sortBy={sortBy}
+              sortDir={sortDir}
+              onSortByChange={setSortBy}
+              onToggleDir={toggleSortDir}
+            />
+          )}
         </div>
-        {visibleDevices.map((d) => (
-          <DeviceCard key={d.id} device={d} customName={customNames[d.id]} tags={statusTag(d)} showHospital={hasMultipleCampuses && activeCampus === 'all'} onPress={() => onDevicePress?.(d)} />
-        ))}
+        {visibleDevices.map((d, idx) => {
+          const group = modalityGroup(d);
+          const showGroupHeader =
+            sortBy === 'type-group' &&
+            (idx === 0 || modalityGroup(visibleDevices[idx - 1]) !== group);
+          return (
+            <Fragment key={d.id}>
+              {showGroupHeader && (
+                <div className={userDeviceStyles.groupHeader}>
+                  <span className={userDeviceStyles.groupHeaderLabel}>{group}</span>
+                  <span className={userDeviceStyles.groupHeaderCount}>
+                    {filteredDevices.filter((item) => modalityGroup(item) === group).length}
+                  </span>
+                </div>
+              )}
+              <DeviceCard
+                device={d}
+                customName={customNames[d.id]}
+                tags={statusTag(d)}
+                showHospital={hasMultipleCampuses && activeCampus === 'all'}
+                selectable={manageMode}
+                isSelected={selectedIds.includes(d.id)}
+                onPress={() => (manageMode ? toggleSelected(d.id) : onDevicePress?.(d))}
+              />
+            </Fragment>
+          );
+        })}
         {devicesTotal === 0 && (
           <div className={userDeviceStyles.emptyState}>
-            <Text variant="body-m" color="secondary">未找到匹配设备</Text>
+            {boundList.length === 0 ? (
+              <>
+                <div className={userDeviceStyles.emptyActions}>
+                  <button type="button" className={userDeviceStyles.emptyAction} onClick={onScanRepair}>
+                    <span className={userDeviceStyles.emptyActionIcon}>
+                      <Scan aria-hidden="true" width={20} height={20} />
+                    </span>
+                    <span className={userDeviceStyles.emptyActionLabel}>扫设备码</span>
+                    <span className={userDeviceStyles.emptyActionSub}>报修 / 绑定</span>
+                  </button>
+                  <button type="button" className={userDeviceStyles.emptyAction} onClick={onInputDevice}>
+                    <span className={userDeviceStyles.emptyActionIcon}>
+                      <Keyboard aria-hidden="true" width={20} height={20} />
+                    </span>
+                    <span className={userDeviceStyles.emptyActionLabel}>输入编号</span>
+                    <span className={userDeviceStyles.emptyActionSub}>报修 / 绑定</span>
+                  </button>
+                </div>
+                {migrationPending ? (
+                  <>
+                    <DownloadCloudPictogram size="medium" aria-hidden="true" />
+                    <div className={userDeviceStyles.emptyCopy}>
+                      <span className={userDeviceStyles.emptyTitle}>历史设备与数据迁移中</span>
+                      <span className={userDeviceStyles.emptyHint}>
+                        预计 {formatBatchDate(migrationExpectedAt)}前完成
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <FolderEmpty size="medium" aria-hidden="true" />
+                    <span className={userDeviceStyles.emptyTitle}>暂无绑定设备</span>
+                  </>
+                )}
+                {recentlyUnbound.length > 0 && (
+                  <button
+                    type="button"
+                    className={userDeviceStyles.emptyRecentLink}
+                    onClick={() => setShowRecentSheet(true)}
+                  >
+                    查看最近解绑
+                    <span className={userDeviceStyles.recentUnboundCount}>{recentlyUnbound.length}</span>
+                    <ChevronRight aria-hidden="true" width={14} height={14} />
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <NoResult size="medium" aria-hidden="true" />
+                <span className={userDeviceStyles.emptyTitle}>无匹配设备</span>
+                {hasActiveFilters && (
+                  <Button variant="secondary" shape="round" onPress={clearFilters}>
+                    清除筛选条件
+                  </Button>
+                )}
+              </>
+            )}
           </div>
         )}
         {devicesHasMore && (
@@ -335,6 +539,78 @@ export const UserDevicePage = ({ onDevicePress, onScanRepair }: UserDevicePagePr
           </div>
         )}
       </div>
+
+      {manageMode && (
+        <div className={userDeviceStyles.manageActionBar}>
+          <button type="button" className={userDeviceStyles.manageSelectAllBtn} onClick={toggleSelectAll}>
+            {allSelected ? '取消全选' : '全选'}
+          </button>
+          <span className={userDeviceStyles.manageActionBarLabel}>已选 {selectedIds.length} 台</span>
+          <div className={userDeviceStyles.manageActionBarBtns}>
+            <Button variant="quiet" shape="round" onPress={exitManageMode}>
+              取消
+            </Button>
+            <Button
+              variant="primary"
+              signal="danger"
+              shape="round"
+              isDisabled={selectedIds.length === 0}
+              onPress={() => setShowUnbindConfirm(true)}
+            >
+              解绑设备
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {showMigrationNotice && (
+        <ConfirmDialog
+          title="历史设备与数据迁移中"
+          message={
+            `原报修平台的设备与报修记录将自动迁移，预计 ${formatBatchDate(migrationExpectedAt)}前完成。\n` +
+            '期间可扫码或输入编号自助报修。'
+          }
+          confirmLabel="知道了"
+          hideCancel
+          onConfirm={markNoticeSeen}
+          onCancel={markNoticeSeen}
+        />
+      )}
+
+      {showMigrationDoneNotice && (
+        <ConfirmDialog
+          title="历史设备与数据迁移完成"
+          message={`已为你迁入 ${migratedCount} 台设备及其历史报修记录。`}
+          confirmLabel="知道了"
+          hideCancel
+          onConfirm={markDoneNoticeSeen}
+          onCancel={markDoneNoticeSeen}
+        />
+      )}
+
+      {showUnbindConfirm && (
+        <ConfirmDialog
+          title={`解绑所选 ${selectedIds.length} 台设备？`}
+          message={`仅从「我的设备」移除，设备相关数据仍保留在飞利浦服务器，可再次绑定或${RECYCLE_RETENTION_DAYS}天内通过「最近解绑」恢复`}
+          confirmLabel="解绑设备"
+          cancelLabel="取消"
+          destructive
+          onConfirm={confirmUnbind}
+          onCancel={() => setShowUnbindConfirm(false)}
+        />
+      )}
+
+      {showRecentSheet && (
+        <RecentlyUnboundSheet
+          devices={recentlyUnbound}
+          retentionDays={RECYCLE_RETENTION_DAYS}
+          noteOf={noteOf}
+          showCampus={hasMultipleCampuses}
+          daysLeft={(device) => daysLeftInRecycle(removedAt[device.id])}
+          onRestore={handleRestore}
+          onClose={() => setShowRecentSheet(false)}
+        />
+      )}
     </div>
   );
 };

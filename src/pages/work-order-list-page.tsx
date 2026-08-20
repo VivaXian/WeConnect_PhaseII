@@ -1,6 +1,8 @@
 import { Button } from '@filament/react/button';
 import { Item } from '@filament/react/common';
 import { ChevronRight } from '@filament/react/icons/chevron-right';
+import { FolderEmpty } from '@filament/react/pictograms/folder-empty';
+import { NoResult } from '@filament/react/pictograms/no-result';
 import { Search } from '@filament/react/search';
 import { Tag } from '@filament/react/tag';
 import { useMemo, useState } from 'react';
@@ -9,6 +11,7 @@ import { WORK_ORDER_TYPE_LABEL } from '../types/work-order';
 import type { WorkOrder, WorkOrderGroup } from '../types/work-order';
 import { workOrderData } from '../utils/work-order-data';
 import { useRoleStore } from '../stores/role-store';
+import { QuietInquiry } from '../components/quiet-inquiry';
 import { woStyles } from './work-order-list-page.css';
 
 const EMPTY_RESULTS: never[] = [];
@@ -89,9 +92,10 @@ const WorkOrderCard = ({ order, isAdmin, onWorkOrderPress }: WorkOrderCardProps)
 
 interface WorkOrderListPageProps {
   onWorkOrderPress?: (orderId: string) => void;
+  onGeneralInquiry: () => void;
 }
 
-export const WorkOrderListPage = ({ onWorkOrderPress }: WorkOrderListPageProps) => {
+export const WorkOrderListPage = ({ onWorkOrderPress, onGeneralInquiry }: WorkOrderListPageProps) => {
   const { role } = useRoleStore();
   const isAdmin = role === 'admin';
   const [searchValue, setSearchValue] = useState('');
@@ -169,7 +173,26 @@ export const WorkOrderListPage = ({ onWorkOrderPress }: WorkOrderListPageProps) 
           </div>
         ))}
         {ordersTotal === 0 && (
-          <div className={woStyles.emptyState}>暂无工单记录</div>
+          <div className={woStyles.emptyState}>
+            {searchValue.trim() !== '' ? (
+              <>
+                <NoResult size="medium" aria-hidden="true" />
+                <span className={woStyles.emptyTitle}>无匹配工单</span>
+                <Button variant="secondary" shape="round" onPress={() => setSearchValue('')}>
+                  清除搜索
+                </Button>
+              </>
+            ) : (
+              <>
+                <FolderEmpty size="medium" aria-hidden="true" />
+                <div className={woStyles.emptyCopy}>
+                  <span className={woStyles.emptyTitle}>暂无工单记录</span>
+                  <span className={woStyles.emptyHint}>工单在服务完成后生成</span>
+                </div>
+                <QuietInquiry question="需要查询或跟进？" onPress={onGeneralInquiry} />
+              </>
+            )}
+          </div>
         )}
         {ordersHasMore && (
           <div className={woStyles.loadMoreWrap}>
@@ -178,7 +201,9 @@ export const WorkOrderListPage = ({ onWorkOrderPress }: WorkOrderListPageProps) 
             </button>
           </div>
         )}
-      </div>
-    </div>
+        {ordersTotal > 0 && (
+          <QuietInquiry question="对工单内容有疑问？" onPress={onGeneralInquiry} />
+        )}
+      </div>    </div>
   );
 };

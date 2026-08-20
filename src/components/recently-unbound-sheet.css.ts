@@ -1,0 +1,77 @@
+import { style } from '@vanilla-extract/css';
+
+export const recentlyUnboundStyles = {
+  hint: style({
+    margin: '4px 20px 12px',
+    fontSize: 13,
+    lineHeight: '18px',
+    color: '#8a94a6',
+  }),
+  empty: style({
+    margin: 0,
+    padding: '32px 20px 40px',
+    textAlign: 'center',
+    fontSize: 13,
+    color: '#8a94a6',
+  }),
+  list: style({
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '0 20px 24px',
+    maxHeight: '46vh',
+    overflowY: 'auto',
+  }),
+  row: style({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    padding: '14px 0',
+    borderBottom: '1px solid #eef2f7',
+  }),
+  info: style({
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+  }),
+  name: style({
+    fontSize: 14,
+    lineHeight: '20px',
+    fontWeight: 600,
+    color: '#1f2a3d',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  }),
+  note: style({
+    fontWeight: 400,
+    color: '#8a94a6',
+  }),
+  meta: style({
+    fontSize: 12,
+    lineHeight: '17px',
+    color: '#8a94a6',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  }),
+  countdown: style({
+    marginTop: 2,
+    fontSize: 12,
+    lineHeight: '17px',
+    color: '#c24100',
+  }),
+  restoreBtn: style({
+    flexShrink: 0,
+    background: 'none',
+    border: '1px solid #0072DB',
+    borderRadius: 16,
+    padding: '5px 14px',
+    fontSize: 13,
+    fontWeight: 500,
+    color: '#0072DB',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  }),
+};

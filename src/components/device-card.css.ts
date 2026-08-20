@@ -106,6 +106,27 @@ export const deviceCardStyles = {
     color: 'rgba(0,0,0,0.25)',
     marginRight: 10,
   }),
+  cardSelected: style({
+    outline: '2px solid #0072DB',
+    outlineOffset: -2,
+  }),
+  selectMark: style({
+    flexShrink: 0,
+    alignSelf: 'center',
+    marginRight: 12,
+    width: 20,
+    height: 20,
+    borderRadius: '50%',
+    border: '1.5px solid rgba(0,0,0,0.25)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#ffffff',
+  }),
+  selectMarkOn: style({
+    backgroundColor: '#0072DB',
+    borderColor: '#0072DB',
+  }),
   customNameNote: style({
     fontSize: 12,
     color: 'rgba(0,0,0,0.4)',

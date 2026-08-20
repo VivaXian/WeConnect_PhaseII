@@ -144,10 +144,29 @@ export const woStyles = {
     alignItems: 'center',
   }),
   emptyState: style({
-    padding: '40px 0',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 20,
+    padding: '24px 0 40px',
     textAlign: 'center',
-    color: '#999',
-    fontSize: 14,
+  }),
+  emptyTitle: style({
+    fontSize: 15,
+    fontWeight: 600,
+    lineHeight: '22px',
+    color: '#15305c',
+  }),
+  emptyCopy: style({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 4,
+  }),
+  emptyHint: style({
+    fontSize: 13,
+    lineHeight: '18px',
+    color: '#5b6779',
   }),
   scanRow: style({
     display: 'flex',

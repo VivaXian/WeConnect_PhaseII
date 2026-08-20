@@ -8,6 +8,7 @@ export const suServiceStyles = {
     height: '100%',
     position: 'relative',
     overflow: 'hidden',
+    backgroundColor: '#F0F9FF',
   }),
   topBar: style({
     width: '100%',
@@ -42,8 +43,7 @@ export const suServiceStyles = {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#ffffff',
-    borderBottom: '1px solid #f0f0f0',
+    backgroundColor: 'transparent',
     flexShrink: 0,
   }),
   searchInput: style({
@@ -290,6 +290,7 @@ export const suServiceStyles = {
     display: 'flex',
     flexDirection: 'column',
     minHeight: 0,
+    paddingBottom: 16,
   }),
   listHeader: style({
     display: 'flex',
@@ -302,8 +303,30 @@ export const suServiceStyles = {
     paddingBottom: 4,
   }),
   emptyState: style({
-    padding: '32px 0',
+    flexShrink: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 20,
+    padding: '24px 16px 40px',
     textAlign: 'center',
+  }),
+  emptyTitle: style({
+    fontSize: 15,
+    fontWeight: 600,
+    lineHeight: '22px',
+    color: '#15305c',
+  }),
+  emptyCopy: style({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 4,
+  }),
+  emptyHint: style({
+    fontSize: 13,
+    lineHeight: '18px',
+    color: '#5b6779',
   }),
   loadMoreWrap: style({
     paddingTop: 8,

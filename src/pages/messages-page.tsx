@@ -331,7 +331,7 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
         <div className={msgStyles.topBarLeft}>
           <div className={msgStyles.topBarSub}>
             {editMode
-              ? selectedIds.size > 0 ? `已选 ${selectedIds.size} 条` : '点击消息以选择'
+              ? selectedIds.size > 0 ? `已选 ${selectedIds.size} 条` : '点击通知以选择'
               : unreadCount > 0 ? `${unreadCount} 条未读` : '全部已读'}
           </div>
         </div>
@@ -390,7 +390,7 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
                 className={viewMode === 'list' ? msgStyles.viewToggleActive : msgStyles.viewToggle}
                 onClick={() => setViewMode('list')}
               >
-                消息列表
+                通知列表
               </button>
               <button
                 className={viewMode === 'digest' ? msgStyles.viewToggleActive : msgStyles.viewToggle}
@@ -441,7 +441,7 @@ export const MessagesPage = ({ onBack, onMessagePress, onDevicePress }: Messages
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#c8d0dc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <div>暂无消息</div>
+              <div>暂无通知</div>
               {(readFilter !== 'all' || typeFilter !== 'all') && (
                 <button
                   className={msgStyles.clearFilterBtn}

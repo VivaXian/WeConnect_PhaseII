@@ -7,6 +7,7 @@ import { Text } from '@filament/react/text';
 import { useShallow } from 'zustand/react/shallow';
 import type { AppMessage } from '../types/message';
 import { useRoleStore } from '../stores/role-store';
+import { useDeviceBindingStore } from '../stores/device-binding-store';
 import { deviceList } from '../utils/device-data';
 import { AccountSheet } from '../components/account-sheet';
 import { SubscriptionSheet } from '../components/subscription-sheet';
@@ -54,10 +55,18 @@ export const ProfilePage = ({
   const [showContactPhone, setShowContactPhone] = useState(false);
   const [showSubscriptionSheet, setShowSubscriptionSheet] = useState(false);
   const isAdmin = role === 'admin';
+
+  const { removedIds, purgedIds } = useDeviceBindingStore(
+    useShallow((state) => ({ removedIds: state.removedIds, purgedIds: state.purgedIds }))
+  );
+
   const deviceSummaryLabel = useMemo(() => {
-    const campusCount = new Set(deviceList.map((d) => d.campus).filter(Boolean)).size;
-    return `关联 ${deviceList.length} 台设备 | 覆盖 ${campusCount} 个院区`;
-  }, []);
+    const bound = deviceList.filter(
+      (d) => !removedIds.includes(d.id) && !purgedIds.includes(d.id)
+    );
+    const campusCount = new Set(bound.map((d) => d.campus).filter(Boolean)).size;
+    return `关联 ${bound.length} 台设备 | 覆盖 ${campusCount} 个院区`;
+  }, [removedIds, purgedIds]);
 
   return (
     <div className={profileStyles.page}>
@@ -217,9 +226,9 @@ export const ProfilePage = ({
       {/* ── Messages preview ── */}
       <Card className={profileStyles.sectionCard}>
         <div className={profileStyles.sectionHeaderRow}>
-          <span className={profileStyles.cardSectionTitle}>消息中心</span>
+          <span className={profileStyles.cardSectionTitle}>通知中心</span>
           {unreadMessageCount > 0 && (
-            <Badge value={unreadMessageCount} aria-label={`${unreadMessageCount}条未读消息`} />
+            <Badge value={unreadMessageCount} aria-label={`${unreadMessageCount}条未读通知`} />
           )}
           <div className={profileStyles.sectionSpacer} />
           <button type="button" className={profileStyles.subscribeBtn} onClick={() => setShowSubscriptionSheet(true)}>
@@ -231,7 +240,7 @@ export const ProfilePage = ({
         </div>
         {recentMessages.length === 0 ? (
           <div className={profileStyles.msgEmpty}>
-            <Text variant="body-s" color="secondary">暂无消息</Text>
+            <Text variant="body-s" color="secondary">暂无通知</Text>
           </div>
         ) : (
           recentMessages.map((msg) => (

@@ -153,4 +153,17 @@ export const formStyles = {
     textAlign: 'center',
     marginTop: 10,
   }),
+  inquiryRow: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: '8px 16px 0',
+    fontSize: 13,
+    color: '#0161de',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  }),
 };

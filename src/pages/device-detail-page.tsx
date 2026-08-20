@@ -2,11 +2,13 @@ import clsx from 'clsx';
 import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import type { Device } from '../types/device';
+import type { CaseRef } from '../types/conversation';
 import { DEVICE_STATUS_LABEL } from '../types/device';
 import type { LinkedWorkOrder } from '../types/repair';
 import { useRoleStore } from '../stores/role-store';
 import { useDeviceCustomNamesStore } from '../stores/device-custom-names-store';
 import { repairData } from '../utils/repair-data';
+import { contractDaysOf, contractStatusOf, daysFromToday, isContractPending, isPmSoon, pmRiskOf } from '../utils/device-status-flags';
 import { MiniProgramNav } from '../components/mini-program-nav';
 import { detailStyles } from './device-detail-page.css';
 import { DeviceDetailInfoTab } from './device-detail-info-tab';
@@ -14,12 +16,6 @@ import { DeviceDetailContractTab } from './device-detail-contract-tab';
 import { DeviceDetailPmTab } from './device-detail-pm-tab';
 import { DeviceDetailRepairTab } from './device-detail-repair-tab';
 import { DeviceDetailWorkOrderTab } from './device-detail-workorder-tab';
-
-function daysFromToday(dateStr: string): number {
-  const today = new Date();
-  const target = new Date(dateStr);
-  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-}
 
 type DetailTab = 'repair' | 'pm' | 'workorder' | 'contract' | 'info';
 
@@ -29,10 +25,13 @@ interface DeviceDetailPageProps {
   onRepairDetailPress?: (repairId: string) => void;
   onWorkOrderPress?: (orderId: string) => void;
   onQuickRepair?: () => void;
+  onUnbind?: () => void;
+  onConversationPress?: (caseRef: CaseRef) => void;
+  onGeneralInquiry?: () => void;
   initialTab?: DetailTab;
 }
 
-export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOrderPress, onQuickRepair, initialTab }: DeviceDetailPageProps) => {
+export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOrderPress, onQuickRepair, onUnbind, onConversationPress, onGeneralInquiry, initialTab }: DeviceDetailPageProps) => {
   const { role } = useRoleStore();
   const isAdmin = role === 'admin';
   const [activeTab, setActiveTab] = useState<DetailTab>(initialTab ?? 'info');
@@ -57,33 +56,17 @@ export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOr
     ...(device.deviceWorkOrders ?? []),
   ];
 
-  const contractDays = device.contractEnd ? daysFromToday(device.contractEnd) : null;
-  const contractStatus =
-    contractDays === null ? 'none'
-    : contractDays > 120 ? 'good'
-    : contractDays > 0 ? 'warning'
-    : 'expired';
+  const contractDays = contractDaysOf(device);
+  const contractStatus = contractStatusOf(device);
 
-  const hasActiveContract = contractStatus === 'good' || contractStatus === 'warning';
   const daysSincePm = device.pmLastDate ? Math.abs(daysFromToday(device.pmLastDate)) : null;
-  const pmRiskLevel = (
-    !device.type.includes('超声') && !hasActiveContract && !device.pmNextDate
-  ) ? 'high' : 'ok';
-  const showPmSoon = (() => {
-    if (!device.pmNextDate) return false;
-    const d = daysFromToday(device.pmNextDate);
-    return d >= 0 && d <= 30;
-  })();
+  const pmRiskLevel = pmRiskOf(device);
+  const showPmSoon = isPmSoon(device);
 
   const isUltrasound = device.type.includes('超声');
   const isInfoSystem = device.type.includes('影像工作站') || device.type.includes('信息系统');
   const warrantyUnsupported = (device.isDistributedDevice === true) && (isUltrasound || isInfoSystem);
-  const installDateObj = device.installDate ? new Date(device.installDate) : null;
-  const todayDate = new Date();
-  const monthsSinceInstall = installDateObj
-    ? (todayDate.getFullYear() - installDateObj.getFullYear()) * 12 + todayDate.getMonth() - installDateObj.getMonth()
-    : null;
-  const isWithinSixMonths = !device.acceptancePending && monthsSinceInstall !== null && monthsSinceInstall < 6;
+  const isWithinSixMonths = isContractPending(device);
 
   const tabs: { key: DetailTab; label: string }[] = [
     { key: 'info' as DetailTab, label: '总览' },
@@ -148,6 +131,9 @@ export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOr
           showPmSoon={showPmSoon}
           activeRepair={activeRepair}
           onNavigate={(tab) => setActiveTab(tab)}
+          onUnbind={onUnbind}
+          onConversationPress={onConversationPress}
+          onGeneralInquiry={onGeneralInquiry}
         />
       )}
       {activeTab === 'repair' && (
@@ -162,13 +148,20 @@ export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOr
           isAdmin={isAdmin}
           pmWorkOrders={device.pmWorkOrders ?? []}
           onWorkOrderPress={onWorkOrderPress}
+          onGeneralInquiry={onGeneralInquiry}
         />
       )}
       {activeTab === 'workorder' && (
         <DeviceDetailWorkOrderTab workOrders={allWorkOrders} isAdmin={isAdmin} onWorkOrderPress={onWorkOrderPress} />
       )}
       {activeTab === 'contract' && isAdmin && (
-        <DeviceDetailContractTab device={device} contractStatus={contractStatus} contractDays={contractDays} warrantyUnsupported={warrantyUnsupported} />
+        <DeviceDetailContractTab
+          device={device}
+          contractStatus={contractStatus}
+          contractDays={contractDays}
+          warrantyUnsupported={warrantyUnsupported}
+          onGeneralInquiry={onGeneralInquiry}
+        />
       )}
     </div>
   );

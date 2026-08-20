@@ -1,16 +1,23 @@
 import { Text } from '@filament/react/text';
 import { Item } from '@filament/react/common';
 import { Search } from '@filament/react/search';
+import { Scan } from '@filament/react/icons/scan';
+import { FolderEmpty } from '@filament/react/pictograms/folder-empty';
+import { NoResult } from '@filament/react/pictograms/no-result';
+import { Button } from '@filament/react/button';
 import clsx from 'clsx';
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, Fragment } from 'react';
 import { DeviceCard } from '../components/device-card';
+import { DeviceSortControl } from '../components/device-sort-control';
+import { ModalityChipScroller } from '../components/modality-chip-scroller';
 import { useLoadMore } from '../hooks/use-load-more';
-import { useDeviceListFilterStore, SORT_OPTIONS } from '../stores/device-list-filter-store';
+import { useDeviceListFilterStore } from '../stores/device-list-filter-store';
 import { useShallow } from 'zustand/react/shallow';
 import type { FilterStatus } from '../types/device';
 import type { Device } from '../types/device';
 import { deviceList } from '../utils/device-data';
 import { useDeviceCustomNamesStore } from '../stores/device-custom-names-store';
+import { useDeviceBindingStore } from '../stores/device-binding-store';
 import { deviceListPageStyles } from './device-list-page.css';
 
 const EMPTY_RESULTS: never[] = [];
@@ -103,6 +110,16 @@ function getModality(device: Device): '磁共振' | 'CT' | '血管机' | '超声
   return null;
 }
 
+const MODALITY_GROUP_ORDER = ['CT', '磁共振', '血管机', '超声', '其他'];
+
+function modalityGroup(device: Device): string {
+  return getModality(device) ?? '其他';
+}
+
+function modalityGroupIndex(device: Device): number {
+  return MODALITY_GROUP_ORDER.indexOf(modalityGroup(device));
+}
+
 function matchesFilter(device: Device, filter: FilterStatus): boolean {
   switch (filter) {
     case 'all': return true;
@@ -178,45 +195,41 @@ const runtimeNow = new Date();
 
 export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPageProps) => {
   const [searchValue, setSearchValue] = useState('');
-  const { activeFilter, activeCampus, activeModality, sortBy, setActiveFilter, setActiveCampus, setActiveModality, setSortBy } = useDeviceListFilterStore(
+  const { activeFilter, activeCampus, activeModality, sortBy, sortDir, setActiveFilter, setActiveCampus, setActiveModality, setSortBy, toggleSortDir } = useDeviceListFilterStore(
     useShallow((s) => ({
       activeFilter: s.activeFilter,
       activeCampus: s.activeCampus,
       activeModality: s.activeModality,
       sortBy: s.sortBy,
+      sortDir: s.sortDir,
       setActiveFilter: s.setActiveFilter,
       setActiveCampus: s.setActiveCampus,
       setActiveModality: s.setActiveModality,
       setSortBy: s.setSortBy,
+      toggleSortDir: s.toggleSortDir,
     }))
   );
   const [campusOpen, setCampusOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
   const [calYear, setCalYear] = useState(runtimeNow.getFullYear());
   const [calMonth, setCalMonth] = useState(runtimeNow.getMonth() + 1);
   const customNames = useDeviceCustomNamesStore((state) => state.names);
-  const chipScrollRef = useRef<HTMLDivElement>(null);
+  const { removedIds, purgedIds } = useDeviceBindingStore(
+    useShallow((s) => ({ removedIds: s.removedIds, purgedIds: s.purgedIds }))
+  );
 
-  useEffect(() => {
-    if (activeModality === 'all') return;
-    const container = chipScrollRef.current;
-    if (!container) return;
-    const activeChip = container.querySelector('[data-active="true"]') as HTMLElement | null;
-    if (!activeChip) return;
-    const chipLeft = activeChip.offsetLeft;
-    const chipWidth = activeChip.offsetWidth;
-    const containerWidth = container.offsetWidth;
-    container.scrollLeft = chipLeft - (containerWidth - chipWidth) / 2;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleFilterChange = (filter: FilterStatus) => {
     setActiveFilter(filter);
   };
 
+  const boundList = useMemo(
+    () => deviceList.filter((d) => !removedIds.includes(d.id) && !purgedIds.includes(d.id)),
+    [removedIds, purgedIds]
+  );
+
   const campusFilteredList = useMemo(
-    () => activeCampus === 'all' ? deviceList : deviceList.filter((d) => d.campus === activeCampus),
-    [activeCampus]
+    () => activeCampus === 'all' ? boundList : boundList.filter((d) => d.campus === activeCampus),
+    [activeCampus, boundList]
   );
 
   const statCounts = useMemo(() => ({
@@ -254,19 +267,36 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
     if (activeFilter === 'pm-plan') {
       return list.sort(comparePmPlanDevice);
     }
-    switch (sortBy) {
-      case 'name-asc':
-        return list.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
-      case 'install-date-desc':
-        return list.sort((a, b) => (b.installDate ?? '').localeCompare(a.installDate ?? ''));
-      case 'created-date-desc':
-        return list.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
-      default:
-        return list.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
-    }
-  }, [campusFilteredList, activeFilter, activeModality, searchValue, calYear, calMonth, customNames, sortBy]);
+    const dir = sortDir === 'desc' ? -1 : 1;
+    const base = (a: Device, b: Device): number => {
+      switch (sortBy) {
+        case 'type-group': {
+          const diff = modalityGroupIndex(a) - modalityGroupIndex(b);
+          return diff !== 0 ? diff : a.name.localeCompare(b.name, 'zh-Hans-CN');
+        }
+        case 'install-date':
+          return (a.installDate ?? '').localeCompare(b.installDate ?? '');
+        case 'created-date':
+          return (a.createdAt ?? '').localeCompare(b.createdAt ?? '');
+        case 'name':
+        default:
+          return a.name.localeCompare(b.name, 'zh-Hans-CN');
+      }
+    };
+    return list.sort((a, b) => dir * base(a, b));
+  }, [campusFilteredList, activeFilter, activeModality, searchValue, calYear, calMonth, customNames, sortBy, sortDir]);
 
   const { visibleItems: visibleDevices, hasMore: devicesHasMore, loadMore: devicesLoadMore, total: devicesTotal } = useLoadMore(filteredDevices, 6);
+
+  const hasActiveFilters =
+    searchValue.trim() !== '' || activeFilter !== 'all' || activeModality !== 'all' || activeCampus !== 'all';
+
+  const clearFilters = () => {
+    setSearchValue('');
+    setActiveFilter('all');
+    setActiveModality('all');
+    setActiveCampus('all');
+  };
 
   return (
     <div className={deviceListPageStyles.page}>
@@ -279,13 +309,7 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
             onClick={onScanRepair}
             aria-label="扫码报修/绑定"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M2 7V4a1 1 0 0 1 1-1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M22 7V4a1 1 0 0 0-1-1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M2 17v3a1 1 0 0 0 1 1h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M22 17v3a1 1 0 0 1-1 1h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
+            <Scan aria-hidden="true" width={16} height={16} />
             扫码报修/绑定
           </button>
         </div>
@@ -352,7 +376,7 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
             <Search
               items={EMPTY_RESULTS}
               aria-label="搜索设备"
-              placeholder="搜索设备"
+              placeholder="搜索"
               onInputChange={setSearchValue}
               inputValue={searchValue}
               isFullWidth
@@ -360,26 +384,12 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
               {() => <Item key="empty">{null}</Item>}
             </Search>
           </div>
-          <div className={deviceListPageStyles.chipScroll} ref={chipScrollRef}>
-            <div className={deviceListPageStyles.chipGroupInline}>
-              {MODALITY_OPTIONS.map((opt) => (
-                <button
-                  key={opt.key}
-                  type="button"
-                  data-active={activeModality === opt.key ? 'true' : undefined}
-                  className={clsx(
-                    deviceListPageStyles.chip,
-                    activeModality === opt.key && deviceListPageStyles.chipActive
-                  )}
-                  onClick={() => setActiveModality(activeModality === opt.key ? 'all' : opt.key)}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <ModalityChipScroller
+            options={MODALITY_OPTIONS}
+            activeKey={activeModality}
+            onSelect={setActiveModality}
+          />
         </div>
-
         {/* PM date picker – single row: year nav + scrollable months */}
         {activeFilter === 'pm-plan' && (
           <div className={deviceListPageStyles.pmDatePicker}>
@@ -416,38 +426,12 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
             <Text variant="body-s" color="secondary">
               共 {devicesTotal} 台设备
             </Text>
-            <div className={deviceListPageStyles.sortBtnWrap}>
-              <button
-                type="button"
-                className={deviceListPageStyles.sortBtn}
-                onClick={() => setSortOpen((prev) => !prev)}
-              >
-                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                按{SORT_OPTIONS.find((o) => o.key === sortBy)?.label ?? '设备名称'}排序
-              </button>
-              {sortOpen && (
-                <>
-                  <div className={deviceListPageStyles.sortBackdrop} onClick={() => setSortOpen(false)} />
-                  <div className={deviceListPageStyles.sortDropdown}>
-                    {SORT_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.key}
-                        type="button"
-                        className={clsx(
-                          deviceListPageStyles.sortDropdownItem,
-                          sortBy === opt.key && deviceListPageStyles.sortDropdownItemActive
-                        )}
-                        onClick={() => { setSortBy(opt.key); setSortOpen(false); }}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+            <DeviceSortControl
+              sortBy={sortBy}
+              sortDir={sortDir}
+              onSortByChange={setSortBy}
+              onToggleDir={toggleSortDir}
+            />
           </div>
           {activeFilter === 'pm-plan' && (
             <div className={deviceListPageStyles.pmUltrasoundNote}>
@@ -460,21 +444,52 @@ export const DeviceListPage = ({ onDevicePress, onScanRepair }: DeviceListPagePr
             </div>
           )}
 
-          {visibleDevices.map((device) => (
-            <DeviceCard
-              key={device.id}
-              device={device}
-              customName={customNames[device.id]}
-              tags={computeDeviceTags(device, activeFilter)}
-              showHospital={hasMultipleCampuses && activeCampus === 'all'}
-              onPress={() => onDevicePress?.(device)}
-            />
-          ))}
+          {visibleDevices.map((device, idx) => {
+            const group = modalityGroup(device);
+            const showGroupHeader =
+              sortBy === 'type-group' &&
+              activeFilter !== 'pm-plan' &&
+              (idx === 0 || modalityGroup(visibleDevices[idx - 1]) !== group);
+            return (
+              <Fragment key={device.id}>
+                {showGroupHeader && (
+                  <div className={deviceListPageStyles.groupHeader}>
+                    <span className={deviceListPageStyles.groupHeaderLabel}>{group}</span>
+                    <span className={deviceListPageStyles.groupHeaderCount}>
+                      {filteredDevices.filter((d) => modalityGroup(d) === group).length}
+                    </span>
+                  </div>
+                )}
+                <DeviceCard
+                  device={device}
+                  customName={customNames[device.id]}
+                  tags={computeDeviceTags(device, activeFilter)}
+                  showHospital={hasMultipleCampuses && activeCampus === 'all'}
+                  onPress={() => onDevicePress?.(device)}
+                />
+              </Fragment>
+            );
+          })}
 
           {devicesTotal === 0 && (
-            <Text variant="body-m" color="secondary" textAlign="center">
-              {activeFilter === 'pm-plan' ? `${calMonth}月暂无保养计划` : '未找到匹配设备'}
-            </Text>
+            <div className={deviceListPageStyles.emptyState}>
+              {activeFilter === 'pm-plan' ? (
+                <>
+                  <FolderEmpty size="medium" aria-hidden="true" />
+                  <span className={deviceListPageStyles.emptyTitle}>{calMonth} 月暂无保养计划</span>
+                </>
+              ) : (
+                <>
+                  <NoResult size="medium" aria-hidden="true" />
+                  <span className={deviceListPageStyles.emptyTitle}>无匹配设备</span>
+                  {hasActiveFilters && (
+                    <Button variant="secondary" shape="round" onPress={clearFilters}>
+                      清除筛选条件
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
           )}
           {devicesHasMore && (
             <div className={deviceListPageStyles.loadMoreWrap}>

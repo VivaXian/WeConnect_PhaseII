@@ -1,4 +1,4 @@
-import type { WorkOrderType } from './work-order';
+import type { WorkOrderServiceMode, WorkOrderType } from './work-order';
 
 export type RepairStatus = 'reported' | 'in-service' | 'completed-pending' | 'cancelled';
 export type RepairSource = 'mini-program' | 'phone' | 'service-account';
@@ -29,8 +29,10 @@ export interface TimelineNode {
 export interface LinkedWorkOrder {
   id: string;
   type: WorkOrderType;
+  serviceMode?: WorkOrderServiceMode;
   workOrderNo: string;
   status: string;
+  requestTime?: string;
   date?: string;
 }
 
@@ -50,7 +52,6 @@ export interface RepairRecord {
   tagline?: string;
   status: RepairStatus;
   source?: RepairSource;
-  legacyProgress?: boolean;
   serviceTag?: string;
   progress: RepairProgress;
   buttons: string[];

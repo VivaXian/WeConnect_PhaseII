@@ -6,6 +6,8 @@ import { ReportSearch } from '@filament/react/icons/report-search';
 import { Wrench } from '@filament/react/icons/wrench';
 import type { Device } from '../types/device';
 import { deviceList } from '../utils/device-data';
+import { useDeviceBindingStore } from '../stores/device-binding-store';
+import { useDeviceCustomNamesStore } from '../stores/device-custom-names-store';
 import { scanDeviceInputStyles as s } from './scan-device-input-page.css';
 
 interface ScanDeviceInputPageProps {
@@ -96,6 +98,10 @@ export const ScanDeviceInputPage = ({
   const [foundDevice, setFoundDevice] = useState<Device | null>(initialDevice ?? null);
   const [bindConfirmed, setBindConfirmed] = useState(false);
   const [history, setHistory] = useState<string[]>(loadHistory);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [noteSaved, setNoteSaved] = useState(false);
+  const bindSelf = useDeviceBindingStore((state) => state.bindSelf);
+  const setCustomName = useDeviceCustomNamesStore((state) => state.setName);
 
   const canSubmit = deviceNumber.trim().length >= 4;
 
@@ -108,6 +114,8 @@ export const ScanDeviceInputPage = ({
     setDeviceNumber(q);
     setView('confirm');
     setBindConfirmed(false);
+    setNoteDraft('');
+    setNoteSaved(false);
   };
 
   const handleBack = () => {
@@ -122,7 +130,15 @@ export const ScanDeviceInputPage = ({
     setDeviceNumber('');
     setBindConfirmed(false);
     setFoundDevice(null);
+    setNoteDraft('');
+    setNoteSaved(false);
     setView('input');
+  };
+
+  const saveNote = () => {
+    if (!foundDevice || !noteDraft.trim()) return;
+    setCustomName(foundDevice.id, noteDraft.trim());
+    setNoteSaved(true);
   };
 
   if (view === 'confirm') {
@@ -184,6 +200,26 @@ export const ScanDeviceInputPage = ({
                       </svg>
                       已绑定至设备列表
                     </div>
+                    <div className={s.noteBlock}>
+                      <span className={s.noteLabel}>给设备加个备注，方便在列表中区分（选填）</span>
+                      <div className={s.noteRow}>
+                        <input
+                          className={s.noteInput}
+                          value={noteDraft}
+                          maxLength={20}
+                          placeholder={`如：${[foundDevice.department, foundDevice.location].filter(Boolean).join(' ') || '3 号机房'}`}
+                          onChange={(e) => { setNoteDraft(e.target.value); setNoteSaved(false); }}
+                        />
+                        <button
+                          type="button"
+                          className={s.noteSaveBtn}
+                          disabled={!noteDraft.trim() || noteSaved}
+                          onClick={saveNote}
+                        >
+                          {noteSaved ? '已保存' : '保存'}
+                        </button>
+                      </div>
+                    </div>
                     <button type="button" className={s.bindNextBtn} onClick={handleBindNext}>
                       绑定下一台设备 ›
                     </button>
@@ -192,7 +228,10 @@ export const ScanDeviceInputPage = ({
                   <Button
                     variant="secondary"
                     shape="square"
-                    onPress={() => setBindConfirmed(true)}
+                    onPress={() => {
+                      bindSelf(foundDevice.id);
+                      setBindConfirmed(true);
+                    }}
                   >
                     <LinkAdd />
                     绑定设备
@@ -225,7 +264,7 @@ export const ScanDeviceInputPage = ({
             <div className={s.notFound}>
               <p className={s.notFoundTitle}>未找到该设备</p>
               <p className={s.notFoundDesc}>
-                编号「{deviceNumber.trim()}」在系统中暂无记录，请检查编号后重试，或联系飞利浦客服。
+                编号「{deviceNumber.trim()}」在系统中暂无记录，请检查编号后重试，或联系客户响应中心。
               </p>
               <button type="button" className={s.btnOutline} onClick={() => setView('input')}>
                 重新输入

@@ -85,6 +85,13 @@ export const infoTabStyles = {
     color: '#1a1a1a',
     letterSpacing: '0.01em',
   }),
+  sectionHeaderLinks: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    flexShrink: 0,
+  }),
   phoneLink: style({
     display: 'flex',
     flexDirection: 'row',
@@ -363,5 +370,28 @@ export const infoTabStyles = {
   dialogBtnCall: style({
     color: '#0161de',
     fontWeight: 600,
+  }),
+  unbindRow: style({
+    margin: '14px 16px 20px',
+    width: 'calc(100% - 32px)',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    padding: '13px 16px',
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    border: 'none',
+    color: '#d92d20',
+    fontFamily: 'inherit',
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: 'pointer',
+  }),
+  unbindRowIcon: style({
+    width: 16,
+    height: 16,
+    color: '#d92d20',
   }),
 };

@@ -1,0 +1,76 @@
+import { style } from '@vanilla-extract/css';
+
+export const conversationPageStyles = {
+  page: style({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    minHeight: 0,
+    backgroundColor: '#f5f6f7',
+  }),
+  emptyState: style({
+    padding: 32,
+    textAlign: 'center',
+  }),
+  readOnlyBar: style({
+    padding: '8px 16px',
+    borderBottom: '1px solid #ececec',
+    backgroundColor: '#fbf6e8',
+    textAlign: 'center',
+  }),
+  caseBar: style({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: '0 8px 0 16px',
+    borderBottom: '1px solid #ececec',
+    backgroundColor: '#ffffff',
+    width: '100%',
+  }),
+  caseBarMain: style({
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+    padding: '10px 0',
+    border: 'none',
+    background: 'none',
+    cursor: 'pointer',
+    textAlign: 'left',
+  }),
+  caseBarDevice: style({
+    fontSize: 14,
+    fontWeight: 600,
+    color: '#1f2937',
+  }),
+  caseBarMeta: style({
+    fontSize: 12,
+    color: '#6a7282',
+  }),
+  caseBarLink: style({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1,
+    flexShrink: 0,
+    padding: '8px 8px',
+    border: 'none',
+    background: 'none',
+    fontSize: 13,
+    color: '#0072db',
+    cursor: 'pointer',
+  }),
+  caseBarChevron: style({
+    width: 14,
+    height: 14,
+  }),
+  closedCard: style({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+    padding: '14px 16px 18px',
+    borderTop: '1px solid #ececec',
+    backgroundColor: '#ffffff',
+  }),
+};

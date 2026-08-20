@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import { useState } from 'react';
+import { PersonHeadset } from '@filament/react/icons/person-headset';
 import type { Device } from '../types/device';
 import { MiniProgramNav } from '../components/mini-program-nav';
 import { formStyles } from './repair-form-page.css';
@@ -8,6 +9,7 @@ interface RepairFormPageProps {
   device: Device;
   onBack: () => void;
   onSubmitSuccess: () => void;
+  onGeneralInquiry: () => void;
 }
 
 type UrgencyLevel = 'high' | 'medium' | 'low';
@@ -18,7 +20,7 @@ const URGENCY_OPTIONS: { value: UrgencyLevel; label: string }[] = [
   { value: 'low', label: '轻微异常' },
 ];
 
-export const RepairFormPage = ({ device, onBack, onSubmitSuccess }: RepairFormPageProps) => {
+export const RepairFormPage = ({ device, onBack, onSubmitSuccess, onGeneralInquiry }: RepairFormPageProps) => {
   const [description, setDescription] = useState('');
   const [urgency, setUrgency] = useState<UrgencyLevel | null>(null);
   const [contact, setContact] = useState('');
@@ -73,6 +75,10 @@ export const RepairFormPage = ({ device, onBack, onSubmitSuccess }: RepairFormPa
           />
         </div>
       </div>
+      <button type="button" className={formStyles.inquiryRow} onClick={onGeneralInquiry}>
+        <PersonHeadset size="small" aria-hidden="true" />
+        不确定怎么描述？先在线咨询 ›
+      </button>
 
       <span className={formStyles.sectionLabel}>联系信息</span>
       <div className={formStyles.section}>

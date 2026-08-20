@@ -12,7 +12,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 1,
     sender: 'agent',
-    text: '您好！我是飞利浦医疗售后客服，很高兴为您服务。请问有什么可以帮助您？',
+    text: '您好！这里是飞利浦客户响应中心，很高兴为您服务。请问有什么可以帮助您？',
   },
 ];
 
@@ -114,7 +114,7 @@ export const EngineerChatPage = ({ onBack }: EngineerChatPageProps) => {
       <MiniProgramNav variant="back" title="对话工程师" onBack={onBack} />
       <div className={s.statusRow}>
         <span className={s.onlineDot} />
-        <span className={s.statusText}>客服在线 · 聊天室 {roomNumber}</span>
+        <span className={s.statusText}>客户响应中心在线 · 聊天室 {roomNumber}</span>
       </div>
 
       <div className={s.messages}>

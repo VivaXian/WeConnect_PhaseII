@@ -1,10 +1,17 @@
 import clsx from 'clsx';
 import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
+import { UnLink } from '@filament/react/icons/un-link';
+import { PersonHeadset } from '@filament/react/icons/person-headset';
 import type { Device } from '../types/device';
 import type { RepairRecord } from '../types/repair';
+import type { CaseRef } from '../types/conversation';
 import { useDeviceCustomNamesStore } from '../stores/device-custom-names-store';
 import { useDeviceLocationsStore } from '../stores/device-locations-store';
+import { useDeviceBindingStore } from '../stores/device-binding-store';
+import { useConversationUnread } from '../hooks/use-conversation-unread';
+import { useToastStore } from '../stores/toast-store';
+import { ConfirmDialog } from '../components/confirm-dialog';
 import { detailStyles } from './device-detail-page.css';
 import { infoTabStyles } from './device-detail-info-tab.css';
 
@@ -16,6 +23,7 @@ interface StatusItem {
   label: string;
   description: string;
   tab?: NavTab;
+  onPress?: () => void;
 }
 
 interface Props {
@@ -29,6 +37,9 @@ interface Props {
   showPmSoon: boolean;
   activeRepair: RepairRecord | undefined;
   onNavigate: (tab: NavTab) => void;
+  onUnbind?: () => void;
+  onConversationPress?: (caseRef: CaseRef) => void;
+  onGeneralInquiry?: () => void;
 }
 
 function formatPmDate(dateStr: string): string {
@@ -97,11 +108,30 @@ const variantCard = { danger: infoTabStyles.statusCardDanger, warning: infoTabSt
 const variantBadge = { danger: infoTabStyles.statusBadgeDanger, warning: infoTabStyles.statusBadgeWarning, caution: infoTabStyles.statusBadgeCaution, neutral: infoTabStyles.statusBadgeNeutral, active: infoTabStyles.statusBadgeActive };
 
 export const DeviceDetailInfoTab = (props: Props) => {
-  const { device, onNavigate } = props;
-  const statusItems = buildStatusItems(props);
+  const { device, onNavigate, activeRepair, onConversationPress } = props;
+  const { byCaseId } = useConversationUnread();
+  const conversationUnread = activeRepair ? byCaseId[activeRepair.id] ?? 0 : 0;
+  const conversationItem: StatusItem[] = activeRepair && onConversationPress
+    ? [{
+        variant: 'active',
+        label: '沟通中',
+        description: conversationUnread > 0
+          ? `${activeRepair.progress.engineer?.name ?? '远程服务工程师'}发来消息，点此进入对话`
+          : '与远程服务工程师沟通中，点此查看对话',
+        onPress: () => onConversationPress({
+          kind: 'repair',
+          id: activeRepair.id,
+          displayNo: activeRepair.repairId,
+          deviceName: activeRepair.deviceName,
+        }),
+      }]
+    : [];
+  const statusItems = [...conversationItem, ...buildStatusItems(props)];
 
   const { names, setName } = useDeviceCustomNamesStore(useShallow((s) => ({ names: s.names, setName: s.setName })));
   const { locations, setLocation } = useDeviceLocationsStore(useShallow((s) => ({ locations: s.locations, setLocation: s.setLocation })));
+  const { unbind, restore } = useDeviceBindingStore(useShallow((s) => ({ unbind: s.unbind, restore: s.restore })));
+  const showToast = useToastStore((s) => s.showToast);
 
   const customName = names[device.id] ?? device.customName ?? '';
   const locationOverride = locations[device.id];
@@ -113,6 +143,7 @@ export const DeviceDetailInfoTab = (props: Props) => {
   const [locationDraft, setLocationDraft] = useState('');
   const [nameDraft, setNameDraft] = useState('');
   const [showPhone, setShowPhone] = useState(false);
+  const [showUnbindConfirm, setShowUnbindConfirm] = useState(false);
 
   const saveLocation = () => {
     setLocation(device.id, { department: deptDraft.trim(), location: locationDraft.trim() });
@@ -120,36 +151,58 @@ export const DeviceDetailInfoTab = (props: Props) => {
   };
   const saveName = () => { setName(device.id, nameDraft.trim()); setEditingField(null); };
 
+  const displayNameForToast = (names[device.id] ?? device.customName ?? '') || device.name;
+  const handleUnbind = () => {
+    setShowUnbindConfirm(false);
+    unbind(device.id);
+    showToast(`已解绑「${displayNameForToast}」`, {
+      label: '撤销',
+      onAction: () => restore(device.id),
+    });
+    props.onUnbind?.();
+  };
+
   return (
     <div className={clsx(detailStyles.tabContent, statusItems.length > 0 && infoTabStyles.noTopPad)}>
       {/* ── Status highlights (only shown when there are alerts) ── */}
       {statusItems.length > 0 && (
         <div className={infoTabStyles.statusSection}>
-          {statusItems.map((item, i) => (
-            <div
-              key={i}
-              className={clsx(infoTabStyles.statusCard, variantCard[item.variant], !item.tab && infoTabStyles.statusCardStatic)}
-              onClick={item.tab ? () => onNavigate(item.tab!) : undefined}
-            >
-              <div className={infoTabStyles.statusContent}>
-                <span className={clsx(infoTabStyles.statusBadge, variantBadge[item.variant])}>{item.label}</span>
-                <span className={infoTabStyles.statusDesc}>{item.description}</span>
+          {statusItems.map((item, i) => {
+            const handlePress = item.onPress ?? (item.tab ? () => onNavigate(item.tab!) : undefined);
+            return (
+              <div
+                key={i}
+                className={clsx(infoTabStyles.statusCard, variantCard[item.variant], !handlePress && infoTabStyles.statusCardStatic)}
+                onClick={handlePress}
+              >
+                <div className={infoTabStyles.statusContent}>
+                  <span className={clsx(infoTabStyles.statusBadge, variantBadge[item.variant])}>{item.label}</span>
+                  <span className={infoTabStyles.statusDesc}>{item.description}</span>
+                </div>
+                {handlePress && <span className={infoTabStyles.statusArrow}>›</span>}
               </div>
-              {item.tab && <span className={infoTabStyles.statusArrow}>›</span>}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {/* ── Device info + inline annotations ── */}
       <div className={infoTabStyles.sectionHeaderRow}>
         <span className={infoTabStyles.sectionHeaderTitle}>设备信息</span>
-        <button className={infoTabStyles.phoneLink} onClick={() => setShowPhone(true)} aria-label="电话咨询">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M3 2h3l1.5 3.5-1.75 1.05A9.5 9.5 0 008.45 9.25L9.5 7.5 13 9v3a1 1 0 01-1 1C5.82 13 2 9.18 2 4a1 1 0 011-2z" fill="currentColor"/>
-          </svg>
-          电话咨询
-        </button>
+        <div className={infoTabStyles.sectionHeaderLinks}>
+          {props.onGeneralInquiry && (
+            <button className={infoTabStyles.phoneLink} onClick={props.onGeneralInquiry} aria-label="在线咨询">
+              <PersonHeadset size="small" aria-hidden="true" />
+              在线咨询
+            </button>
+          )}
+          <button className={infoTabStyles.phoneLink} onClick={() => setShowPhone(true)} aria-label="电话咨询">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 2h3l1.5 3.5-1.75 1.05A9.5 9.5 0 008.45 9.25L9.5 7.5 13 9v3a1 1 0 01-1 1C5.82 13 2 9.18 2 4a1 1 0 011-2z" fill="currentColor"/>
+            </svg>
+            电话咨询
+          </button>
+        </div>
       </div>
       <div className={infoTabStyles.infoCard}>
       <div className={infoTabStyles.row}>
@@ -245,6 +298,24 @@ export const DeviceDetailInfoTab = (props: Props) => {
         </svg>
         <span className={infoTabStyles.localNoteText}>备注、科室、位置为您的本地标注，仅自己可见。</span>
       </div>
+
+      {props.onUnbind && (
+        <button type="button" className={infoTabStyles.unbindRow} onClick={() => setShowUnbindConfirm(true)}>
+          <UnLink className={infoTabStyles.unbindRowIcon} />
+          解绑设备
+        </button>
+      )}
+
+      {showUnbindConfirm && (
+        <ConfirmDialog
+          title={`解绑「${displayNameForToast}」？`}
+          message="仅从「我的设备」移除，设备相关数据仍保留在飞利浦服务器，可再次绑定或30天内通过「最近解绑」恢复"
+          confirmLabel="解绑设备"
+          destructive
+          onConfirm={handleUnbind}
+          onCancel={() => setShowUnbindConfirm(false)}
+        />
+      )}
 
       {showPhone && (
         <div className={infoTabStyles.dialogOverlay} onClick={() => setShowPhone(false)}>

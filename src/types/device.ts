@@ -4,6 +4,8 @@ export type DeviceStatus = 'normal' | 'under-repair' | 'pending-repair' | 'offli
 export type ContractType = 'platinum' | 'gold' | 'basic' | 'none';
 export type BusinessContract = 'warranty' | 'csa' | 'pos' | 'none';
 export type ContractPeriodType = 'warranty' | 'pos' | 'csa';
+/** 设备来源：self=用户自绑定，system=后台按授权院区同步推送（仅授权用户） */
+export type DeviceSource = 'self' | 'system';
 // Stat-card filter keys
 export type FilterStatus = 'all' | 'contract-risk' | 'pm-risk' | 'in-repair' | 'pm-plan';
 export type UserFilterStatus = 'all' | 'pm-risk' | 'in-repair' | 'pm-plan';
@@ -52,6 +54,7 @@ export interface Device {
   acceptancePending?: boolean;
   installDate?: string;
   isDistributedDevice?: boolean;
+  source?: DeviceSource;
   canShowInstallDate?: boolean;
   pmWorkOrders?: PmWorkOrderEntry[];
   deviceWorkOrders?: DeviceWorkOrderEntry[];
@@ -97,3 +100,5 @@ export const CONTRACT_PERIOD_DESC: Record<ContractPeriodType, string> = {
   pos: '延保期',
   csa: '维保',
 };
+
+export const getDeviceSource = (device: Device): DeviceSource => device.source ?? 'self';
