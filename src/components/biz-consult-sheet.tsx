@@ -5,7 +5,6 @@ import { useRoleStore } from '../stores/role-store';
 import { bizConsultStyles } from './biz-consult-sheet.css';
 
 const MOCK_PHONE = '138 **** 8888';
-const HOTLINE = '400-810-0038';
 
 type PreferTime = 'morning' | 'afternoon' | 'flexible';
 
@@ -18,7 +17,6 @@ const TIME_OPTIONS: { key: PreferTime; label: string }[] = [
 interface BizConsultSheetProps {
   onClose: () => void;
   onSubmitted?: () => void;
-  onOnlineConsult?: () => void;
   title?: string;
   ticketPrefix?: string;
   defaultDescription?: string;
@@ -27,7 +25,6 @@ interface BizConsultSheetProps {
 export const BizConsultSheet = ({
   onClose,
   onSubmitted,
-  onOnlineConsult,
   title = '商务咨询登记',
   ticketPrefix,
   defaultDescription = '咨询保养服务',
@@ -170,27 +167,6 @@ export const BizConsultSheet = ({
           >
             提交登记
           </button>
-
-          <div className={bizConsultStyles.dividerRow}>
-            <span className={bizConsultStyles.dividerLine} />
-            <span className={bizConsultStyles.dividerText}>或</span>
-            <span className={bizConsultStyles.dividerLine} />
-          </div>
-
-          <div className={bizConsultStyles.callRow}>
-            <span className={bizConsultStyles.callNote}>服务热线</span>
-            <div className={bizConsultStyles.altRow}>
-              {onOnlineConsult && (
-                <>
-                  <button type="button" className={bizConsultStyles.altLink} onClick={onOnlineConsult}>
-                    在线咨询
-                  </button>
-                  <span className={bizConsultStyles.altSeparator} />
-                </>
-              )}
-              <a className={bizConsultStyles.altLink} href={`tel:${HOTLINE}`}>{HOTLINE}</a>
-            </div>
-          </div>
         </div>
       </div>
     </div>

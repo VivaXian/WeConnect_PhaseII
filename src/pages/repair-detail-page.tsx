@@ -1,20 +1,19 @@
 import { Button } from '@filament/react/button';
 import { Call } from '@filament/react/icons/call';
-import { Chat } from '@filament/react/icons/chat';
 import { CheckmarkCircle } from '@filament/react/icons/checkmark-circle';
-import { ChevronRight } from '@filament/react/icons/chevron-right';
 import { Cube3D } from '@filament/react/icons/cube3-d';
 import { PersonPortrait } from '@filament/react/icons/person-portrait';
-import { Badge } from '@filament/react/badge';
+import clsx from 'clsx';
 import type { RepairStatus } from '../types/repair';
-import type { CaseRef } from '../types/conversation';
 import { repairData } from '../utils/repair-data';
 import { REPAIR_SYNC_CUTOFF_LABEL, isPreCutoffRepair } from '../utils/repair-cutoff';
 import { caseConversations, isOwnConversation } from '../utils/conversation-grouping';
-import { useConversationStore } from '../stores/conversation-store';
+import { formatConversationTime } from '../utils/conversation-display';
+import { useVisibleConversations } from '../hooks/use-visible-conversations';
 import { useRoleStore } from '../stores/role-store';
 import { useConversationUnread } from '../hooks/use-conversation-unread';
 import { MiniProgramNav } from '../components/mini-program-nav';
+import { SERVICE_HOTLINE } from '../components/contact-options-sheet';
 import { WorkOrderInfoSection } from '../components/work-order-info-section';
 import { rdStyles } from './repair-detail-page.css';
 
@@ -28,8 +27,7 @@ interface RepairDetailPageProps {
   repairId: string;
   onBack: () => void;
   onWorkOrderPress: (orderId: string) => void;
-  onConversationPress: (caseRef: CaseRef) => void;
-  onGeneralInquiry: (caseRef: CaseRef) => void;
+  onConversationPress: (conversationId: string) => void;
   onCaseConversationsPress: (repairId: string) => void;
 }
 
@@ -42,12 +40,12 @@ const TimelineDotIcon = ({ icon }: { icon: string }) => {
 
 type StepperNode = { label: string; active: boolean };
 
-const UnsyncedNotice = ({ onContactPress }: { onContactPress: () => void }) => (
+const UnsyncedNotice = () => (
   <div className={rdStyles.noticeBar}>
     {`由于系统升级，${REPAIR_SYNC_CUTOFF_LABEL}前的报修记录无法完整同步。如需工单详情，`}
-    <button type="button" className={rdStyles.noticeLink} onClick={onContactPress}>
-      请联系客户响应中心
-    </button>
+    <a className={rdStyles.noticeLink} href={`tel:${SERVICE_HOTLINE}`}>
+      请致电飞利浦
+    </a>
     。
   </div>
 );
@@ -84,12 +82,11 @@ export const RepairDetailPage = ({
   onBack,
   onWorkOrderPress,
   onConversationPress,
-  onGeneralInquiry,
   onCaseConversationsPress,
 }: RepairDetailPageProps) => {
   const allRecords = repairData.flatMap((g) => g.records);
   const record = allRecords.find((r) => r.id === repairId);
-  const conversations = useConversationStore((state) => state.conversations);
+  const conversations = useVisibleConversations();
   const { role } = useRoleStore();
   const { byCaseId } = useConversationUnread();
   const unreadCount = byCaseId[repairId] ?? 0;
@@ -106,19 +103,19 @@ export const RepairDetailPage = ({
     );
   }
 
-  const timeline = record.timeline ?? [];
+  const timeline = (record.timeline ?? []).filter((node) => node.isCompleted);
   const linkedWorkOrders = record.linkedWorkOrders ?? [];
-  const hasEngineerChannel = Boolean(record.progress.engineer) && record.status === 'in-service';
   const isPreCutoff = isPreCutoffRepair(record);
-  const caseRef: CaseRef = {
-    kind: 'repair',
-    id: record.id,
-    displayNo: record.repairId,
-    deviceName: record.deviceName,
-  };
+  const engineer = isPreCutoff ? undefined : record.progress.engineer;
   const conversationCount = isPreCutoff ? 0 : visibleConversations.length;
-  const conversationLabel = conversationCount > 1 ? `服务对话（${conversationCount}）` : '服务对话';
-  const openCaseConversations = () => onCaseConversationsPress(record.id);
+  const latestConversation = visibleConversations[0];
+  const openServiceSupport = () => {
+    if (conversationCount === 1) {
+      onConversationPress(visibleConversations[0].id);
+      return;
+    }
+    onCaseConversationsPress(record.id);
+  };
 
   return (
     <div className={rdStyles.page}>
@@ -131,76 +128,47 @@ export const RepairDetailPage = ({
         {record.tagline && (
           <div className={rdStyles.subHeaderTagline}>{record.tagline}</div>
         )}
-        {isPreCutoff && record.status !== 'cancelled' && (
-          <UnsyncedNotice onContactPress={() => onGeneralInquiry(caseRef)} />
-        )}
+        {isPreCutoff && record.status !== 'cancelled' && <UnsyncedNotice />}
       </div>
 
       <div className={rdStyles.sections}>
         {/* 服务工程师 */}
-        {hasEngineerChannel && record.progress.engineer && (
+        {engineer && (
           <div className={rdStyles.section}>
-            <div className={rdStyles.sectionHeader}>
-              <div className={rdStyles.sectionTitle}>服务工程师</div>
-              {conversationCount > 0 && (
-                <button
-                  type="button"
-                  className={rdStyles.sectionHeaderAction}
-                  onClick={openCaseConversations}
-                >
-                  {conversationLabel}
-                  <ChevronRight className={rdStyles.sectionHeaderActionIcon} aria-hidden="true" />
-                </button>
-              )}
-            </div>
+            <div className={rdStyles.sectionTitle}>服务工程师</div>
             <div className={rdStyles.engineerRow}>
               <div className={rdStyles.engineerInfo}>
-                <div>
-                  <div className={rdStyles.engineerName}>{record.progress.engineer.name}</div>
-                  <div className={rdStyles.engineerRole}>{record.progress.engineer.role}</div>
-                </div>
+                <span className={rdStyles.engineerName}>{engineer.name}</span>
+                <span className={rdStyles.engineerRole}>{engineer.role}</span>
               </div>
-              <div className={rdStyles.engineerActions}>
-                <Badge value={unreadCount > 0 ? unreadCount : undefined}>
-                  <Button
-                    variant="quiet"
-                    shape="round"
-                    isIconOnly
-                    aria-label={`图文沟通${unreadCount > 0 ? `，${unreadCount}条未读` : ''}`}
-                    onPress={() => onConversationPress(caseRef)}
-                  >
-                    <Chat aria-hidden="true" />
-                  </Button>
-                </Badge>
-                {record.progress.engineer.phone && (
-                  <Button
-                    variant="quiet"
-                    shape="round"
-                    isIconOnly
-                    aria-label="拨打电话"
-                    onPress={() => { window.location.href = `tel:${record.progress.engineer?.phone}`; }}
-                  >
-                    <Call aria-hidden="true" />
-                  </Button>
-                )}
-              </div>
+              {engineer.phone && (
+                <Button
+                  variant="quiet"
+                  shape="round"
+                  isIconOnly
+                  aria-label={`拨打电话给${engineer.name}`}
+                  onPress={() => { window.location.href = `tel:${engineer.phone}`; }}
+                >
+                  <Call aria-hidden="true" />
+                </Button>
+              )}
             </div>
           </div>
         )}
 
-        {!hasEngineerChannel && conversationCount > 0 && (
-          <div className={rdStyles.section}>
-            <button type="button" className={rdStyles.sectionEntry} onClick={openCaseConversations}>
-              <span className={rdStyles.sectionEntryTitle}>{conversationLabel}</span>
-              <ChevronRight className={rdStyles.sectionEntryIcon} aria-hidden="true" />
-            </button>
-          </div>
-        )}
-
-        {/* 工单信息 */}
+        {/* 服务记录：维修工单 + 沟通记录 */}
         <WorkOrderInfoSection
           workOrders={linkedWorkOrders}
           onWorkOrderPress={onWorkOrderPress}
+          conversation={
+            latestConversation
+              ? {
+                  time: formatConversationTime(latestConversation.updatedAt),
+                  unread: unreadCount,
+                  onPress: openServiceSupport,
+                }
+              : undefined
+          }
           isStatic={isPreCutoff}
         />
 
@@ -216,18 +184,15 @@ export const RepairDetailPage = ({
                 <div className={rdStyles.timeline}>
                   {[...timeline].reverse().map((node, idx, arr) => {
                     const isLast = idx === arr.length - 1;
-                    const nextNode = arr[idx + 1];
                     return (
                       <div key={idx} className={rdStyles.timelineNode}>
                         <div className={rdStyles.timelineLeft}>
-                          <div className={node.isCompleted ? rdStyles.timelineDot : rdStyles.timelineDotInactive}>
+                          <div className={rdStyles.timelineDot}>
                             <TimelineDotIcon icon={node.icon} />
                           </div>
-                          {!isLast && (
-                            <div className={nextNode?.isCompleted ? rdStyles.timelineLine : rdStyles.timelineLineInactive} />
-                          )}
+                          {!isLast && <div className={rdStyles.timelineLine} />}
                         </div>
-                        <div className={rdStyles.timelineContent}>
+                        <div className={clsx(rdStyles.timelineContent, isLast && rdStyles.timelineContentLast)}>
                           <div className={rdStyles.timelineLabel}>{node.label}</div>
                           {node.date && (
                             <div className={rdStyles.timelineDate}>{node.date}</div>
@@ -243,17 +208,6 @@ export const RepairDetailPage = ({
               </>
             )}
           </div>
-        )}
-
-        {record.status === 'completed-pending' && !isPreCutoff && (
-          <button
-            type="button"
-            className={rdStyles.quietInquiry}
-            onClick={() => onGeneralInquiry(caseRef)}
-          >
-            需要进一步信息？
-            <span className={rdStyles.quietInquiryAction}>联系客户响应中心</span>
-          </button>
         )}
 
         {/* 报修描述 */}
@@ -308,8 +262,8 @@ export const RepairDetailPage = ({
               <span className={rdStyles.descValue}>{record.problemDescription}</span>
             </div>
           )}
-          <div style={{ marginTop: 8 }}>
-            <div style={{ fontSize: 13, color: '#6a7282', marginBottom: 6 }}>补充材料</div>
+          <div className={rdStyles.descExtra}>
+            <div className={rdStyles.descExtraLabel}>补充材料</div>
             <div className={rdStyles.photoGrid}>
               <div className={rdStyles.photoPlaceholder}>📷</div>
               <div className={rdStyles.photoPlaceholder}>📷</div>

@@ -8,6 +8,9 @@ export const handoffStyles = {
     gap: 6,
     margin: '18px 0 10px',
   }),
+  wrapMuted: style({
+    opacity: 0.6,
+  }),
   caption: style({
     fontSize: 12,
     color: '#6a7282',

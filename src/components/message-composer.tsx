@@ -1,36 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
-import clsx from 'clsx';
+import { useRef, useState } from 'react';
 import { Button } from '@filament/react/button';
 import { Image } from '@filament/react/icons/image';
 import { Send } from '@filament/react/icons/send';
 import { TextField } from '@filament/react/text-field';
-import type { CaseRef, ConversationAttachment } from '../types/conversation';
-import type { QuickEntryPick } from './quick-entry-card';
-import { QuickEntryCard } from './quick-entry-card';
-import { ConfirmDialog } from './confirm-dialog';
+import type { ConversationAttachment } from '../types/conversation';
 import { composerStyles } from './message-composer.css';
 
 const MAX_ATTACHMENTS = 6;
 
 interface MessageComposerProps {
-  relatedCase?: CaseRef;
-  initialDraft?: string;
   onSend: (text: string, attachments: ConversationAttachment[]) => void;
-  onQuickEntry?: (pick: QuickEntryPick) => void;
-  onEndInquiry?: () => void;
 }
 
-export const MessageComposer = ({ relatedCase, initialDraft, onSend, onQuickEntry, onEndInquiry }: MessageComposerProps) => {
-  const [text, setText] = useState(initialDraft ?? '');
+export const MessageComposer = ({ onSend }: MessageComposerProps) => {
+  const [text, setText] = useState('');
   const [attachments, setAttachments] = useState<ConversationAttachment[]>([]);
-  const [attachedCase, setAttachedCase] = useState<CaseRef | undefined>(relatedCase);
-  const [isPanelOpen, setPanelOpen] = useState(false);
-  const [isEndConfirmOpen, setEndConfirmOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setAttachedCase(relatedCase);
-  }, [relatedCase]);
 
   const canSend = text.trim().length > 0 || attachments.length > 0;
 
@@ -57,53 +42,13 @@ export const MessageComposer = ({ relatedCase, initialDraft, onSend, onQuickEntr
 
   const handleSend = () => {
     if (!canSend) return;
-    const prefix = attachedCase ? `【${attachedCase.deviceName} · ${attachedCase.displayNo}】` : '';
-    onSend(`${prefix}${text.trim()}`, attachments);
+    onSend(text.trim(), attachments);
     setText('');
     setAttachments([]);
   };
 
   return (
     <div className={composerStyles.composer}>
-      {isPanelOpen && onQuickEntry && (
-        <div className={composerStyles.actionPanel}>
-          <QuickEntryCard
-            hint={null}
-            onClose={() => setPanelOpen(false)}
-            onPick={(pick) => {
-              setPanelOpen(false);
-              onQuickEntry(pick);
-            }}
-          />
-        </div>
-      )}
-      {isEndConfirmOpen && (
-        <ConfirmDialog
-          title="结束本次咨询？"
-          message="结束后历史记录仍可查看，您随时可以发起新的咨询。"
-          confirmLabel="结束咨询"
-          onConfirm={() => {
-            setEndConfirmOpen(false);
-            onEndInquiry?.();
-          }}
-          onCancel={() => setEndConfirmOpen(false)}
-        />
-      )}
-      {attachedCase && (
-        <div className={composerStyles.contextRow}>
-          <span className={composerStyles.contextChip}>
-            {`${attachedCase.deviceName} · ${attachedCase.displayNo}`}
-            <button
-              type="button"
-              className={composerStyles.contextRemove}
-              onClick={() => setAttachedCase(undefined)}
-              aria-label="取消关联"
-            >
-              ×
-            </button>
-          </span>
-        </div>
-      )}
       {attachments.length > 0 && (
         <div className={composerStyles.previewRow}>
           {attachments.map((attachment) => (
@@ -119,29 +64,6 @@ export const MessageComposer = ({ relatedCase, initialDraft, onSend, onQuickEntr
               </button>
             </div>
           ))}
-        </div>
-      )}
-      {(onQuickEntry || onEndInquiry) && (
-        <div className={composerStyles.actionBar}>
-          {onQuickEntry && (
-            <button
-              type="button"
-              className={clsx(composerStyles.actionChip, isPanelOpen && composerStyles.actionChipActive)}
-              aria-expanded={isPanelOpen}
-              onClick={() => setPanelOpen((open) => !open)}
-            >
-              选择设备或报修单
-            </button>
-          )}
-          {onEndInquiry && (
-            <button
-              type="button"
-              className={composerStyles.actionChip}
-              onClick={() => setEndConfirmOpen(true)}
-            >
-              结束咨询
-            </button>
-          )}
         </div>
       )}
       <div className={composerStyles.inputRow}>
@@ -169,7 +91,7 @@ export const MessageComposer = ({ relatedCase, initialDraft, onSend, onQuickEntr
         <div className={composerStyles.fieldWrapper}>
           <TextField
             aria-label="消息输入"
-            placeholder="描述您的问题…"
+            placeholder="回复工程师…"
             value={text}
             onChange={setText}
             isFullWidth

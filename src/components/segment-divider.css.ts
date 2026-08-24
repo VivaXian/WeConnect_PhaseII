@@ -14,15 +14,23 @@ export const segmentDividerStyles = {
     height: 1,
     backgroundColor: '#e1e5ea',
   }),
-  lineEnd: style({
-    backgroundColor: '#c9ced6',
-  }),
   text: style({
     fontSize: 12,
     color: '#9aa1ac',
     textAlign: 'center',
   }),
-  textEnd: style({
-    color: '#6a7282',
+  endWrap: style({
+    display: 'flex',
+    justifyContent: 'center',
+    width: '100%',
+    padding: '14px 0 6px',
+  }),
+  endChip: style({
+    padding: '4px 12px',
+    borderRadius: 12,
+    backgroundColor: '#e2e6eb',
+    fontSize: 12,
+    lineHeight: '18px',
+    color: '#4a5058',
   }),
 };

@@ -12,10 +12,14 @@ export const findRepairRecord = (caseId: string) =>
 export const isRepairStatusClosed = (status?: RepairStatus): boolean =>
   status !== undefined && CLOSED_REPAIR_STATUS.includes(status);
 
-export const isConversationClosed = (conversation: Conversation): boolean => {
-  if (conversation.scope === 'general') return false;
-  return isRepairStatusClosed(findRepairRecord(conversation.caseRef?.id ?? '')?.status);
-};
+export const isConversationClosed = (conversation: Conversation): boolean =>
+  !conversation.segments.some((segment) => segment.status === 'open');
+
+/** 报修单本身是否已结束——与远程工单是否关闭无关 */
+export const isCaseClosed = (conversation: Conversation): boolean =>
+  isRepairStatusClosed(
+    conversation.caseRef ? findRepairRecord(conversation.caseRef.id)?.status : undefined
+  );
 
 export const allMessages = (conversation: Conversation): ConversationMessage[] =>
   conversation.segments.flatMap((segment) => segment.messages);

@@ -75,10 +75,6 @@ export const conversationRowStyles = {
     backgroundColor: '#e8f2fd',
     color: '#0072db',
   }),
-  statusWaiting: style({
-    backgroundColor: '#fdf1e2',
-    color: '#b26a12',
-  }),
   meta: style({
     minWidth: 0,
     fontSize: 12,

@@ -12,8 +12,8 @@ export const ThreadPartnerBar = ({ conversation, isClosed }: ThreadPartnerBarPro
   const responder = lastResponderMessage(conversation);
   const isEngineer = responder?.senderRole === 'rse';
   const name = isEngineer
-    ? `远程服务工程师 ${responder?.senderName ?? ''}`.trim()
-    : '客户响应中心';
+    ? `服务工程师 ${responder?.senderName ?? ''}`.trim()
+    : '服务工程师';
 
   return (
     <div className={s.bar}>

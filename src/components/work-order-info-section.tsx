@@ -1,13 +1,24 @@
+import clsx from 'clsx';
 import { Button } from '@filament/react/button';
+import { Badge } from '@filament/react/badge';
 import { Text } from '@filament/react/text';
+import { Chat } from '@filament/react/icons/chat';
 import { ChevronRight } from '@filament/react/icons/chevron-right';
 import type { LinkedWorkOrder } from '../types/repair';
 import { WORK_ORDER_SERVICE_MODE_LABEL } from '../types/work-order';
+import { CASE_CONVERSATION_LABEL } from '../utils/service-support-copy';
 import { workOrderInfoStyles as s } from './work-order-info-section.css';
+
+export interface ConversationEntry {
+  time: string;
+  unread: number;
+  onPress: () => void;
+}
 
 interface WorkOrderInfoSectionProps {
   workOrders: LinkedWorkOrder[];
   onWorkOrderPress: (workOrderId: string) => void;
+  conversation?: ConversationEntry;
   isStatic?: boolean;
 }
 
@@ -99,9 +110,10 @@ const WorkOrderRow = ({ workOrder, isStatic, onWorkOrderPress }: WorkOrderRowPro
 export const WorkOrderInfoSection = ({
   workOrders,
   onWorkOrderPress,
+  conversation,
   isStatic = false,
 }: WorkOrderInfoSectionProps) => {
-  if (workOrders.length === 0) {
+  if (workOrders.length === 0 && !conversation) {
     return null;
   }
 
@@ -109,16 +121,40 @@ export const WorkOrderInfoSection = ({
     <div className={s.section}>
       <div className={s.header}>
         <span className={s.indicator} aria-hidden="true" />
-        <span className={s.headerTitle}>工单信息</span>
+        <span className={s.headerTitle}>服务记录</span>
       </div>
-      {workOrders.map((workOrder) => (
-        <WorkOrderRow
-          key={workOrder.id}
-          workOrder={workOrder}
-          isStatic={isStatic}
-          onWorkOrderPress={onWorkOrderPress}
-        />
-      ))}
+      {conversation && (
+        <button
+          type="button"
+          className={s.conversationCard}
+          onClick={conversation.onPress}
+          aria-label={`${CASE_CONVERSATION_LABEL}，飞利浦服务工程师${conversation.unread > 0 ? `，${conversation.unread}条未读消息` : ''}`}
+        >
+          <Chat className={s.conversationIcon} aria-hidden="true" />
+          <span className={s.conversationBody}>
+            <span className={s.conversationTitle}>{CASE_CONVERSATION_LABEL}</span>
+            <span className={s.conversationMeta}>飞利浦服务工程师</span>
+          </span>
+          {conversation.unread > 0 && (
+            <Badge value={conversation.unread} maxValue={99} aria-hidden="true" />
+          )}
+          <span className={s.conversationTime}>{conversation.time}</span>
+          <ChevronRight className={s.conversationChevron} aria-hidden="true" />
+        </button>
+      )}
+      {workOrders.length > 0 && (
+        <>
+          <span className={clsx(s.groupLabel, conversation && s.groupLabelSpaced)}>工单信息</span>
+          {workOrders.map((workOrder) => (
+            <WorkOrderRow
+              key={workOrder.id}
+              workOrder={workOrder}
+              isStatic={isStatic}
+              onWorkOrderPress={onWorkOrderPress}
+            />
+          ))}
+        </>
+      )}
     </div>
   );
 };

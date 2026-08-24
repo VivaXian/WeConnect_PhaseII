@@ -6,7 +6,8 @@
 
 | 文档 | 范围 |
 | --- | --- |
-| [conversation-model.md](conversation-model.md) | 在线服务对话的归属、分段、生命周期与展示 |
+| [conversation-model.md](conversation-model.md) | 服务支持对话的归属、分段、生命周期与展示（目标模型） |
+| [deferred-user-inquiry.md](deferred-user-inquiry.md) | **本版降级**：取消用户主动问询，被移除的入口与恢复方式 |
 | [device-unbind.md](device-unbind.md) | 认证用户设备解绑、最近解绑恢复 |
 | [data-migration.md](data-migration.md) | 老平台用户历史设备与数据迁移 |
 | [common-display-rules.md](common-display-rules.md) | 跨功能的通用展示规则（医院名称截断等） |

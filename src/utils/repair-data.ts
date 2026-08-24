@@ -66,7 +66,7 @@ export const repairData: MonthGroup[] = [
           label: '已分配服务工程师',
           date: '2026-05-21 11:15:00',
           detail: '',
-          engineer: { name: '周工', role: '飞利浦服务工程师', phone: '13900008765' },
+          engineer: { name: '周工', role: '飞利浦服务工程师' },
         },
         buttons: ['设备详情', '报修详情'],
         timeline: [
@@ -75,7 +75,8 @@ export const repairData: MonthGroup[] = [
           { icon: 'dot', label: '服务中', date: '', isCompleted: false },
         ],
         linkedWorkOrders: [
-          { id: 'wo-010', type: 'repair' as const, serviceMode: 'onsite' as const, workOrderNo: 'W0128923835', status: '进行中', date: '2026-05-21' },
+          { id: 'wo-r02b', type: 'repair' as const, serviceMode: 'remote' as const, workOrderNo: 'W0128924017', status: '进行中', date: '2026-05-22' },
+          { id: 'wo-r02a', type: 'repair' as const, serviceMode: 'remote' as const, workOrderNo: 'W0128923901', status: '已完成', date: '2026-05-21' },
         ],
       },
       {
@@ -95,18 +96,20 @@ export const repairData: MonthGroup[] = [
         progress: {
           icon: 'person-headset',
           label: '已分配服务工程师',
-          date: '2026-05-10 09:00:00',
+          date: '2026-05-10 09:30:00',
           detail: '',
-          engineer: { name: '陈工', role: '飞利浦服务工程师', phone: '13900003456' },
+          engineer: { name: '王工', role: '飞利浦服务工程师', phone: '13900003456' },
         },
         buttons: ['设备详情', '报修详情'],
         timeline: [
           { icon: 'check', label: '报修已收到', date: '2026-05-08 14:00', isCompleted: true },
           { icon: 'person', label: '已分配服务工程师', date: '2026-05-09 09:00', detail: '飞利浦服务工程师：陈工', isCompleted: true },
+          { icon: 'person', label: '已分配服务工程师', date: '2026-05-10 09:30', detail: '飞利浦服务工程师：王工', isCompleted: true },
           { icon: 'dot', label: '服务中', date: '', isCompleted: false },
         ],
         linkedWorkOrders: [
           { id: 'wo-006', type: 'repair' as const, serviceMode: 'onsite' as const, workOrderNo: 'W0128923800', status: '进行中', date: '2026-05-10' },
+          { id: 'wo-r03', type: 'repair' as const, serviceMode: 'remote' as const, workOrderNo: 'W0128923799', status: '已完成', date: '2026-05-10' },
         ],
       },
     ],
@@ -175,6 +178,7 @@ export const repairData: MonthGroup[] = [
         ],
         linkedWorkOrders: [
           { id: 'wo-009', type: 'repair' as const, serviceMode: 'onsite' as const, workOrderNo: 'W0128923820', status: '待签字', date: '2026-04-15' },
+          { id: 'wo-r04', type: 'repair' as const, serviceMode: 'remote' as const, workOrderNo: 'W0128923819', status: '已完成', date: '2026-04-14' },
         ],
       },
     ],
@@ -211,6 +215,7 @@ export const repairData: MonthGroup[] = [
         ],
         linkedWorkOrders: [
           { id: 'wo-001', type: 'repair' as const, serviceMode: 'onsite' as const, workOrderNo: 'W0128923783', status: '待签字', requestTime: '2026.03.18 09:12', date: '2026-03-18' },
+          { id: 'wo-r05', type: 'repair' as const, serviceMode: 'remote' as const, workOrderNo: 'W0128923782', status: '已完成', date: '2026-03-17' },
         ],
       },
     ],
@@ -250,6 +255,7 @@ export const repairData: MonthGroup[] = [
         ],
         linkedWorkOrders: [
           { id: 'wo-008', type: 'repair' as const, serviceMode: 'onsite' as const, workOrderNo: 'W0128923650', status: '待签字', date: '2026-01-22' },
+          { id: 'wo-r06', type: 'repair' as const, serviceMode: 'remote' as const, workOrderNo: 'W0128923649', status: '已完成', date: '2026-01-21' },
         ],
       },
     ],
@@ -315,6 +321,7 @@ export const repairData: MonthGroup[] = [
         ],
         linkedWorkOrders: [
           { id: 'wo-004', type: 'repair' as const, serviceMode: 'onsite' as const, workOrderNo: 'W0128923790', status: '待签字', requestTime: '2025.11.20 14:30', date: '2025-11-20' },
+          { id: 'wo-r07', type: 'repair' as const, serviceMode: 'remote' as const, workOrderNo: 'W0128923789', status: '已完成', date: '2025-11-19' },
         ],
       },
     ],
@@ -386,6 +393,7 @@ export const repairData: MonthGroup[] = [
         ],
         linkedWorkOrders: [
           { id: 'wo-011', type: 'repair' as const, serviceMode: 'onsite' as const, workOrderNo: 'W0128923860', status: '待签字', date: '2025-10-18' },
+          { id: 'wo-r08', type: 'repair' as const, serviceMode: 'remote' as const, workOrderNo: 'W0128923859', status: '已完成', date: '2025-10-17' },
         ],
       },
     ],
@@ -424,6 +432,7 @@ export const repairData: MonthGroup[] = [
         ],
         linkedWorkOrders: [
           { id: 'wo-012', type: 'repair' as const, serviceMode: 'onsite' as const, workOrderNo: 'W0128923840', status: '待签字', date: '2025-08-12' },
+          { id: 'wo-r09', type: 'repair' as const, serviceMode: 'remote' as const, workOrderNo: 'W0128923839', status: '已完成', date: '2025-08-11' },
         ],
       },
     ],

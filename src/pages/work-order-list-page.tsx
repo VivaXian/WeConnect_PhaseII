@@ -11,7 +11,6 @@ import { WORK_ORDER_TYPE_LABEL } from '../types/work-order';
 import type { WorkOrder, WorkOrderGroup } from '../types/work-order';
 import { workOrderData } from '../utils/work-order-data';
 import { useRoleStore } from '../stores/role-store';
-import { QuietInquiry } from '../components/quiet-inquiry';
 import { woStyles } from './work-order-list-page.css';
 
 const EMPTY_RESULTS: never[] = [];
@@ -92,10 +91,9 @@ const WorkOrderCard = ({ order, isAdmin, onWorkOrderPress }: WorkOrderCardProps)
 
 interface WorkOrderListPageProps {
   onWorkOrderPress?: (orderId: string) => void;
-  onGeneralInquiry: () => void;
 }
 
-export const WorkOrderListPage = ({ onWorkOrderPress, onGeneralInquiry }: WorkOrderListPageProps) => {
+export const WorkOrderListPage = ({ onWorkOrderPress }: WorkOrderListPageProps) => {
   const { role } = useRoleStore();
   const isAdmin = role === 'admin';
   const [searchValue, setSearchValue] = useState('');
@@ -189,7 +187,6 @@ export const WorkOrderListPage = ({ onWorkOrderPress, onGeneralInquiry }: WorkOr
                   <span className={woStyles.emptyTitle}>暂无工单记录</span>
                   <span className={woStyles.emptyHint}>工单在服务完成后生成</span>
                 </div>
-                <QuietInquiry question="需要查询或跟进？" onPress={onGeneralInquiry} />
               </>
             )}
           </div>
@@ -200,9 +197,6 @@ export const WorkOrderListPage = ({ onWorkOrderPress, onGeneralInquiry }: WorkOr
               加载更多
             </button>
           </div>
-        )}
-        {ordersTotal > 0 && (
-          <QuietInquiry question="对工单内容有疑问？" onPress={onGeneralInquiry} />
         )}
       </div>    </div>
   );

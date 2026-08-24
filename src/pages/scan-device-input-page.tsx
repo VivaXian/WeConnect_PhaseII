@@ -264,7 +264,7 @@ export const ScanDeviceInputPage = ({
             <div className={s.notFound}>
               <p className={s.notFoundTitle}>未找到该设备</p>
               <p className={s.notFoundDesc}>
-                编号「{deviceNumber.trim()}」在系统中暂无记录，请检查编号后重试，或联系客户响应中心。
+                未查询到编号「{deviceNumber.trim()}」设备，请核对设备编号后重试。
               </p>
               <button type="button" className={s.btnOutline} onClick={() => setView('input')}>
                 重新输入

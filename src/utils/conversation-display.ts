@@ -1,7 +1,7 @@
 import type { Conversation, ConversationMessage } from '../types/conversation';
-import { allMessages, findRepairRecord, isConversationClosed, lastMessageOf, openSegmentOf } from './conversation-status';
+import { allMessages, findRepairRecord, isCaseClosed, lastMessageOf } from './conversation-status';
 
-const CCC_NAME = '客户响应中心';
+const FALLBACK_TITLE = '飞利浦服务';
 
 const formatRepairDate = (value?: string): string => {
   if (!value) return '';
@@ -11,28 +11,20 @@ const formatRepairDate = (value?: string): string => {
 };
 
 export const conversationTitle = (conversation: Conversation): string =>
-  conversation.caseRef ? `报修号：${conversation.caseRef.displayNo}` : CCC_NAME;
+  conversation.caseRef ? conversation.caseRef.deviceName : FALLBACK_TITLE;
 
 export const conversationMeta = (conversation: Conversation): string => {
   if (!conversation.caseRef) return '';
   const reportedAt = formatRepairDate(findRepairRecord(conversation.caseRef.id)?.repairTime);
   return reportedAt
-    ? `${conversation.caseRef.deviceName} · ${reportedAt}`
-    : conversation.caseRef.deviceName;
+    ? `${reportedAt} · ${conversation.caseRef.displayNo}`
+    : conversation.caseRef.displayNo;
 };
 
-export type ConversationStatusTone = 'active' | 'waiting';
-
-export interface ConversationStatus {
-  label: string;
-  tone: ConversationStatusTone;
-}
-
-export const conversationStatus = (conversation: Conversation): ConversationStatus | null => {
-  if (conversation.scope === 'general' || isConversationClosed(conversation)) return null;
-  return openSegmentOf(conversation)
-    ? { label: '服务中', tone: 'active' }
-    : { label: '等待重新安排', tone: 'waiting' };
+/** 列表行上的状态标说的是**报修**，不是对话能不能回复 */
+export const conversationStatus = (conversation: Conversation): string | null => {
+  if (!conversation.caseRef || isCaseClosed(conversation)) return null;
+  return findRepairRecord(conversation.caseRef.id)?.statusTitle ?? '服务中';
 };
 
 export const lastResponderMessage = (conversation: Conversation): ConversationMessage | null =>
@@ -55,9 +47,14 @@ export const formatConversationTime = (iso: string): string => {
   const date = new Date(iso.replace(' ', 'T'));
   if (Number.isNaN(date.getTime())) return '';
   const now = new Date();
-  const isSameDay = date.getFullYear() === now.getFullYear()
-    && date.getMonth() === now.getMonth()
-    && date.getDate() === now.getDate();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  if (date.getFullYear() !== now.getFullYear()) return `${date.getFullYear()}/${month}/${day}`;
+  const isSameDay = date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
   if (isSameDay) return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-  return `${date.getMonth() + 1}-${date.getDate()}`;
+  return `${month}/${day}`;
 };
+
+/** 对话的对方——取最后一位发言的工程师，而不是报修单上当前服务的工程师 */
+export const conversationPartnerName = (conversation: Conversation): string | undefined =>
+  lastResponderMessage(conversation)?.senderName;

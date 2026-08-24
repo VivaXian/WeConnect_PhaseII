@@ -1,15 +1,20 @@
 import clsx from 'clsx';
 import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
+import { Badge } from '@filament/react/badge';
 import { UnLink } from '@filament/react/icons/un-link';
-import { PersonHeadset } from '@filament/react/icons/person-headset';
+
 import type { Device } from '../types/device';
 import type { RepairRecord } from '../types/repair';
-import type { CaseRef } from '../types/conversation';
 import { useDeviceCustomNamesStore } from '../stores/device-custom-names-store';
 import { useDeviceLocationsStore } from '../stores/device-locations-store';
 import { useDeviceBindingStore } from '../stores/device-binding-store';
+import { useVisibleConversations } from '../hooks/use-visible-conversations';
 import { useConversationUnread } from '../hooks/use-conversation-unread';
+import { caseConversations, isOwnConversation } from '../utils/conversation-grouping';
+import { isConversationClosed } from '../utils/conversation-status';
+import { conversationPartnerName } from '../utils/conversation-display';
+import { serviceSupportSummary } from '../utils/service-support-copy';
 import { useToastStore } from '../stores/toast-store';
 import { ConfirmDialog } from '../components/confirm-dialog';
 import { detailStyles } from './device-detail-page.css';
@@ -22,6 +27,7 @@ interface StatusItem {
   variant: StatusVariant;
   label: string;
   description: string;
+  unreadCount?: number;
   tab?: NavTab;
   onPress?: () => void;
 }
@@ -38,8 +44,7 @@ interface Props {
   activeRepair: RepairRecord | undefined;
   onNavigate: (tab: NavTab) => void;
   onUnbind?: () => void;
-  onConversationPress?: (caseRef: CaseRef) => void;
-  onGeneralInquiry?: () => void;
+  onConversationPress?: (conversationId: string) => void;
 }
 
 function formatPmDate(dateStr: string): string {
@@ -62,7 +67,13 @@ function getDeviceCategory(type: string): string {
 
 const HOSPITAL_NAME = 'WeConnect医院主院区';
 
-function buildStatusItems(props: Props): StatusItem[] {
+interface RepairThread {
+  engineerName: string | undefined;
+  unreadCount: number;
+  onPress: () => void;
+}
+
+function buildStatusItems(props: Props, thread?: RepairThread): StatusItem[] {
   const { device, isAdmin, contractStatus, contractDays, pmRiskLevel, showPmSoon, activeRepair } = props;
   const items: StatusItem[] = [];
 
@@ -71,7 +82,17 @@ function buildStatusItems(props: Props): StatusItem[] {
     items.push({ variant: 'warning', label: '待验收', description: `${installStr}请尽快完成验收以开启保修，设备当前无保`, tab: 'contract' });
   }
   if (activeRepair || device.status === 'under-repair' || device.status === 'pending-repair') {
-    items.push({ variant: 'active', label: '报修中', description: '设备当前有进行中的报修，工程师处理中', tab: 'repair' });
+    items.push(
+      thread
+        ? {
+            variant: 'active',
+            label: '报修中',
+            description: serviceSupportSummary(thread.engineerName, thread.unreadCount),
+            unreadCount: thread.unreadCount,
+            onPress: thread.onPress,
+          }
+        : { variant: 'active', label: '报修中', description: '设备当前有进行中的报修，工程师处理中', tab: 'repair' }
+    );
   }
   if (isAdmin && !device.acceptancePending) {
     if (contractStatus === 'warning' && contractDays !== null) {
@@ -108,25 +129,24 @@ const variantCard = { danger: infoTabStyles.statusCardDanger, warning: infoTabSt
 const variantBadge = { danger: infoTabStyles.statusBadgeDanger, warning: infoTabStyles.statusBadgeWarning, caution: infoTabStyles.statusBadgeCaution, neutral: infoTabStyles.statusBadgeNeutral, active: infoTabStyles.statusBadgeActive };
 
 export const DeviceDetailInfoTab = (props: Props) => {
-  const { device, onNavigate, activeRepair, onConversationPress } = props;
+  const { device, isAdmin, onNavigate, activeRepair, onConversationPress } = props;
+  const conversations = useVisibleConversations();
   const { byCaseId } = useConversationUnread();
-  const conversationUnread = activeRepair ? byCaseId[activeRepair.id] ?? 0 : 0;
-  const conversationItem: StatusItem[] = activeRepair && onConversationPress
-    ? [{
-        variant: 'active',
-        label: '沟通中',
-        description: conversationUnread > 0
-          ? `${activeRepair.progress.engineer?.name ?? '远程服务工程师'}发来消息，点此进入对话`
-          : '与远程服务工程师沟通中，点此查看对话',
-        onPress: () => onConversationPress({
-          kind: 'repair',
-          id: activeRepair.id,
-          displayNo: activeRepair.repairId,
-          deviceName: activeRepair.deviceName,
-        }),
-      }]
+  const caseThreads = activeRepair
+    ? caseConversations(conversations, activeRepair.id).filter(
+        (item) => (isOwnConversation(item) || isAdmin) && !isConversationClosed(item)
+      )
     : [];
-  const statusItems = [...conversationItem, ...buildStatusItems(props)];
+  const conversationUnread = activeRepair ? byCaseId[activeRepair.id] ?? 0 : 0;
+  const repairThread: RepairThread | undefined =
+    caseThreads.length > 0 && onConversationPress
+      ? {
+          engineerName: conversationPartnerName(caseThreads[0]),
+          unreadCount: conversationUnread,
+          onPress: () => onConversationPress(caseThreads[0].id),
+        }
+      : undefined;
+  const statusItems = buildStatusItems(props, repairThread);
 
   const { names, setName } = useDeviceCustomNamesStore(useShallow((s) => ({ names: s.names, setName: s.setName })));
   const { locations, setLocation } = useDeviceLocationsStore(useShallow((s) => ({ locations: s.locations, setLocation: s.setLocation })));
@@ -179,6 +199,9 @@ export const DeviceDetailInfoTab = (props: Props) => {
                   <span className={clsx(infoTabStyles.statusBadge, variantBadge[item.variant])}>{item.label}</span>
                   <span className={infoTabStyles.statusDesc}>{item.description}</span>
                 </div>
+                {item.unreadCount ? (
+                  <Badge value={item.unreadCount} maxValue={99} aria-hidden="true" />
+                ) : null}
                 {handlePress && <span className={infoTabStyles.statusArrow}>›</span>}
               </div>
             );
@@ -190,12 +213,6 @@ export const DeviceDetailInfoTab = (props: Props) => {
       <div className={infoTabStyles.sectionHeaderRow}>
         <span className={infoTabStyles.sectionHeaderTitle}>设备信息</span>
         <div className={infoTabStyles.sectionHeaderLinks}>
-          {props.onGeneralInquiry && (
-            <button className={infoTabStyles.phoneLink} onClick={props.onGeneralInquiry} aria-label="在线咨询">
-              <PersonHeadset size="small" aria-hidden="true" />
-              在线咨询
-            </button>
-          )}
           <button className={infoTabStyles.phoneLink} onClick={() => setShowPhone(true)} aria-label="电话咨询">
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M3 2h3l1.5 3.5-1.75 1.05A9.5 9.5 0 008.45 9.25L9.5 7.5 13 9v3a1 1 0 01-1 1C5.82 13 2 9.18 2 4a1 1 0 011-2z" fill="currentColor"/>

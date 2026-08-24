@@ -13,7 +13,6 @@ interface PmTabProps {
   isAdmin: boolean;
   pmWorkOrders: PmWorkOrderEntry[];
   onWorkOrderPress?: (orderId: string) => void;
-  onGeneralInquiry?: () => void;
 }
 
 function formatPmDate(dateStr: string): string {
@@ -61,7 +60,7 @@ function cutoffDate(range: DateRange): Date {
   return d;
 }
 
-export const DeviceDetailPmTab = ({ device, pmRiskLevel, daysSincePm, showPmSoon, isAdmin, pmWorkOrders, onWorkOrderPress, onGeneralInquiry }: PmTabProps) => {
+export const DeviceDetailPmTab = ({ device, pmRiskLevel, daysSincePm, showPmSoon, isAdmin, pmWorkOrders, onWorkOrderPress }: PmTabProps) => {
   const [dateRange, setDateRange] = useState<DateRange>('3m');
   const [loadedCount, setLoadedCount] = useState(BATCH_SIZE);
   const [showBizConsult, setShowBizConsult] = useState(false);
@@ -212,10 +211,6 @@ export const DeviceDetailPmTab = ({ device, pmRiskLevel, daysSincePm, showPmSoon
         <BizConsultSheet
           onClose={() => setShowBizConsult(false)}
           defaultDescription="咨询保养服务"
-          onOnlineConsult={onGeneralInquiry && (() => {
-            setShowBizConsult(false);
-            onGeneralInquiry();
-          })}
           onSubmitted={() => {
             localStorage.setItem(consultKey(device.id), new Date().toISOString());
             setBizConsultDone(true);

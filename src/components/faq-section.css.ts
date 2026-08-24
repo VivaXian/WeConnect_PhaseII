@@ -6,7 +6,6 @@ export const faqSectionStyles = {
     flexDirection: 'column',
     width: '100%',
     minWidth: 0,
-    marginTop: 10,
     backgroundColor: '#fff',
   }),
   header: style({

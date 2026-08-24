@@ -9,14 +9,9 @@ import {
   isEngineerConversation,
   lastMessageText,
 } from '../utils/conversation-display';
-import { isConversationClosed } from '../utils/conversation-status';
+import { isCaseClosed } from '../utils/conversation-status';
 import { RoleAvatar } from './role-avatar';
 import { conversationRowStyles as s } from './conversation-row.css';
-
-const STATUS_CLASS = {
-  active: s.statusActive,
-  waiting: s.statusWaiting,
-};
 
 interface ConversationRowProps {
   conversation: Conversation;
@@ -28,7 +23,7 @@ export const ConversationRow = ({ conversation, unread, onPress }: ConversationR
   const isUnread = unread > 0;
   const status = conversationStatus(conversation);
   const meta = conversationMeta(conversation);
-  const isClosed = isConversationClosed(conversation);
+  const isClosed = isCaseClosed(conversation);
   const isEngineer = isEngineerConversation(conversation);
 
   return (
@@ -45,7 +40,7 @@ export const ConversationRow = ({ conversation, unread, onPress }: ConversationR
         </div>
         {(status || meta) && (
           <div className={s.metaRow}>
-            {status && <span className={clsx(s.status, STATUS_CLASS[status.tone])}>{status.label}</span>}
+            {status && <span className={clsx(s.status, s.statusActive)}>{status}</span>}
             {meta && <span className={s.meta}>{meta}</span>}
           </div>
         )}

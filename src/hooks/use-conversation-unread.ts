@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { Conversation } from '../types/conversation';
-import { useConversationStore } from '../stores/conversation-store';
+import { useVisibleConversations } from './use-visible-conversations';
 import { allMessages, isConversationClosed } from '../utils/conversation-status';
 import { isOwnConversation } from '../utils/conversation-grouping';
 
@@ -17,7 +17,7 @@ export interface ConversationUnread {
 }
 
 export const useConversationUnread = (): ConversationUnread => {
-  const conversations = useConversationStore((state) => state.conversations);
+  const conversations = useVisibleConversations();
 
   return useMemo(() => {
     const byConversationId = conversations.reduce<Record<string, number>>((acc, conversation) => {

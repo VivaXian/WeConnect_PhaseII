@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { ChatBubble, ChatBubbleMedia } from '@filament/react/chat-bubble';
 import { ErrorFill } from '@filament/react/icons/error-fill';
 import type { ConversationMessage, TransferTarget } from '../types/conversation';
@@ -16,13 +17,14 @@ const formatTimestamp = (iso: string): string => {
   return `${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${minutes}`;
 };
 
-const SenderAvatar = ({ message }: { message: ConversationMessage }) => (
-  <RoleAvatar role={message.senderRole === 'rse' ? 'engineer' : 'ccc'} size={32} />
+const SenderAvatar = ({ message, isMuted }: { message: ConversationMessage; isMuted: boolean }) => (
+  <RoleAvatar role={message.senderRole === 'rse' ? 'engineer' : 'ccc'} size={32} isMuted={isMuted} />
 );
 
 interface ThreadMessageProps {
   messages: ConversationMessage[];
   index: number;
+  isMuted?: boolean;
   onTransferPress?: (target: TransferTarget) => void;
   onRetry?: (messageId: string) => void;
   onOpenCase?: (caseId: string) => void;
@@ -32,6 +34,7 @@ interface ThreadMessageProps {
 export const ThreadMessage = ({
   messages,
   index,
+  isMuted = false,
   onTransferPress,
   onRetry,
   onOpenCase,
@@ -53,7 +56,7 @@ export const ThreadMessage = ({
   if (message.senderRole === 'customer') {
     const hasFailed = message.deliveryStatus === 'failed';
     return (
-      <div className={s.sentRow}>
+      <div className={clsx(s.sentRow, isMuted && s.muted)}>
         {hasFailed && (
           <button
             type="button"
@@ -88,7 +91,7 @@ export const ThreadMessage = ({
   if (message.type === 'device-summary' && message.deviceId) {
     return (
       <>
-        {handoff && <HandoffDivider role={handoff.role} name={handoff.name} />}
+        {handoff && <HandoffDivider role={handoff.role} name={handoff.name} isMuted={isMuted} />}
         <div className={s.cardRow}>
           <DeviceSummaryCard
             deviceId={message.deviceId}
@@ -103,12 +106,12 @@ export const ThreadMessage = ({
 
   return (
     <>
-      {handoff && <HandoffDivider role={handoff.role} name={handoff.name} />}
-      <div className={s.receivedBubble}>
+      {handoff && <HandoffDivider role={handoff.role} name={handoff.name} isMuted={isMuted} />}
+      <div className={clsx(s.receivedBubble, isMuted && s.muted)}>
         <ChatBubble
           variant="received"
           state={isRunEnd ? 'latest' : 'previous'}
-          avatar={isRunEnd ? <SenderAvatar message={message} /> : undefined}
+          avatar={isRunEnd ? <SenderAvatar message={message} isMuted={isMuted} /> : undefined}
           timestamp={new Date(message.createdAt.replace(' ', 'T'))}
           timestampFormatter={() => formatTimestamp(message.createdAt)}
         >

@@ -1,5 +1,5 @@
 import { MiniProgramNav } from '../components/mini-program-nav';
-import { useConversationStore } from '../stores/conversation-store';
+import { useVisibleConversations } from '../hooks/use-visible-conversations';
 import { archivedRepairConversations, repairConversations } from '../utils/conversation-grouping';
 import { useConversationUnread } from '../hooks/use-conversation-unread';
 import { ConversationRow } from '../components/conversation-row';
@@ -14,7 +14,7 @@ export const ConversationHistoryPage = ({
   onBack,
   onConversationPress,
 }: ConversationHistoryPageProps) => {
-  const conversations = useConversationStore((state) => state.conversations);
+  const conversations = useVisibleConversations();
   const { byConversationId } = useConversationUnread();
   const current = repairConversations(conversations);
   const archived = archivedRepairConversations(conversations);
@@ -39,7 +39,7 @@ export const ConversationHistoryPage = ({
       )}
       {archived.length > 0 && (
         <>
-          <p className={s.hint}>报修已完成</p>
+          <p className={s.hint}>报修已结束</p>
           <div className={s.list}>
             {archived.map((conversation) => (
               <ConversationRow

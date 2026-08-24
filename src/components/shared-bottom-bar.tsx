@@ -71,11 +71,11 @@ export const SharedBottomBar = ({
         </Item>
         <Item
           key="consult"
-          textValue="在线服务"
-          aria-label={withCount('在线服务', unreadConversationCount, '条未读消息')}
+          textValue="服务支持"
+          aria-label={withCount('服务支持', unreadConversationCount, '条未读消息')}
         >
           <TabIcon count={unreadConversationCount} icon={<PersonHeadset />} />
-          <span>在线服务</span>
+          <span>服务支持</span>
         </Item>
         <Item
           key="orders"

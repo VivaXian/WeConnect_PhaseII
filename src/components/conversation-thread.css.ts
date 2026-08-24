@@ -9,6 +9,9 @@ export const threadStyles = {
     gap: 10,
     padding: '16px 16px 8px',
   }),
+  muted: style({
+    opacity: 0.6,
+  }),
   receivedBubble: style({
     alignSelf: 'flex-start',
     maxWidth: 'calc(76% + 40px)',

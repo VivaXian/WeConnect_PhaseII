@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useConversationStore } from '../stores/conversation-store';
+import { useVisibleConversations } from './use-visible-conversations';
 import { useDeviceBindingStore } from '../stores/device-binding-store';
 import type { FaqSignals } from '../utils/faq-ranking';
 import { isConversationClosed } from '../utils/conversation-status';
@@ -8,7 +8,7 @@ import { repairData } from '../utils/repair-data';
 import { workOrderData } from '../utils/work-order-data';
 
 export const useFaqSignals = (): FaqSignals => {
-  const conversations = useConversationStore((state) => state.conversations);
+  const conversations = useVisibleConversations();
   const removedIds = useDeviceBindingStore((state) => state.removedIds);
 
   return useMemo(

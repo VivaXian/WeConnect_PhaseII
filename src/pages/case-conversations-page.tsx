@@ -1,6 +1,6 @@
 import { MiniProgramNav } from '../components/mini-program-nav';
 import { CaseConversationList } from '../components/case-conversation-list';
-import { useConversationStore } from '../stores/conversation-store';
+import { useVisibleConversations } from '../hooks/use-visible-conversations';
 import { useRoleStore } from '../stores/role-store';
 import { caseConversations, isOwnConversation } from '../utils/conversation-grouping';
 import { repairData } from '../utils/repair-data';
@@ -17,7 +17,7 @@ export const CaseConversationsPage = ({
   onBack,
   onConversationPress,
 }: CaseConversationsPageProps) => {
-  const conversations = useConversationStore((state) => state.conversations);
+  const conversations = useVisibleConversations();
   const { role } = useRoleStore();
   const record = repairData.flatMap((g) => g.records).find((r) => r.id === repairId);
   const visibleConversations = caseConversations(conversations, repairId).filter(
@@ -26,7 +26,7 @@ export const CaseConversationsPage = ({
 
   return (
     <div className={s.page}>
-      <MiniProgramNav variant="back" title="服务对话" onBack={onBack} />
+      <MiniProgramNav variant="back" title="服务支持" onBack={onBack} />
       {record && (
         <div className={s.subHeader}>
           <span className={s.subHeaderTitle}>{record.deviceName}</span>
@@ -41,7 +41,7 @@ export const CaseConversationsPage = ({
           />
         </div>
       ) : (
-        <p className={s.empty}>暂无服务对话</p>
+        <p className={s.empty}>暂无服务支持记录</p>
       )}
     </div>
   );

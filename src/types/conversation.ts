@@ -59,6 +59,8 @@ export interface Conversation {
   caseRef?: CaseRef;
   ownerId: string;
   ownerName: string;
+  /** 演示专用：限定只对某个角色可见，缺省对所有角色可见 */
+  audience?: 'user' | 'admin';
   segments: ConversationSegment[];
   createdAt: string;
   updatedAt: string;
@@ -71,7 +73,7 @@ export const GENERAL_CONVERSATION_ID = 'conv-general';
 export const SENDER_LABEL: Record<SenderRole, string> = {
   customer: '我',
   ccc: '客户响应中心',
-  rse: '远程服务工程师',
+  rse: '服务工程师',
   system: '系统',
 };
 

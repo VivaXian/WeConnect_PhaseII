@@ -6,7 +6,6 @@ import { FolderEmpty } from '@filament/react/pictograms/folder-empty';
 import { NoResult } from '@filament/react/pictograms/no-result';
 import clsx from 'clsx';
 import { useMemo, useState } from 'react';
-import { QuietInquiry } from '../components/quiet-inquiry';
 import { RepairList } from '../components/repair-list';
 import { useLoadMore } from '../hooks/use-load-more';
 import type { Device } from '../types/device';
@@ -82,7 +81,6 @@ interface SuperUserServicePageProps {
   onDevicePress?: (device: Device) => void;
   onRepairDetailPress?: (repairId: string) => void;
   onServiceEvalPress?: (repairId: string) => void;
-  onGeneralInquiry: () => void;
 }
 
 export const SuperUserServicePage = ({
@@ -91,7 +89,6 @@ export const SuperUserServicePage = ({
   onDevicePress,
   onRepairDetailPress,
   onServiceEvalPress,
-  onGeneralInquiry,
 }: SuperUserServicePageProps) => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -204,7 +201,6 @@ export const SuperUserServicePage = ({
                   </button>
                 </div>
               )}
-              <QuietInquiry question="报修进度有疑问？" onPress={onGeneralInquiry} />
             </>
           ) : hasActiveFilters ? (
             <div className={suServiceStyles.emptyState}>
@@ -221,7 +217,6 @@ export const SuperUserServicePage = ({
                 <span className={suServiceStyles.emptyTitle}>暂无报修记录</span>
                 <span className={suServiceStyles.emptyHint}>电话报修可能未同步到小程序</span>
               </div>
-              <QuietInquiry question="需要查询或跟进？" onPress={onGeneralInquiry} />
             </div>
           )}
         </div>

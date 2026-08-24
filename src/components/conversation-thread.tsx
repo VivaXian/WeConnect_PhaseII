@@ -1,7 +1,6 @@
 import { Fragment, useEffect, useRef } from 'react';
 import type { ConversationSegment, TransferTarget } from '../types/conversation';
-import type { QuickEntryPick } from './quick-entry-card';
-import { QuickEntryCard } from './quick-entry-card';
+import { DateDivider } from './date-divider';
 import { SegmentDivider } from './segment-divider';
 import { SegmentHeader } from './segment-header';
 import { ThreadMessage } from './thread-message';
@@ -10,30 +9,41 @@ import { threadStyles } from './conversation-thread.css';
 const messageCount = (segments: ConversationSegment[]) =>
   segments.reduce((total, segment) => total + segment.messages.length, 0);
 
-const awaitsFirstReply = (segment: ConversationSegment): boolean =>
-  segment.status === 'open' && !segment.messages.some((message) => message.senderRole === 'customer');
+const dayKey = (iso: string): string => iso.slice(0, 10);
+
+const dayLabel = (iso: string): string => {
+  const date = new Date(iso.replace(' ', 'T'));
+  if (Number.isNaN(date.getTime())) return '';
+  return `${date.getMonth() + 1}月${date.getDate()}日`;
+};
+
+/** 跨分段地标出每一天的首条消息，对话对用户是一条连续上下文，不按工单切分 */
+const dayStartMessageIds = (segments: ConversationSegment[]): Map<string, string> =>
+  segments
+    .flatMap((segment) => segment.messages)
+    .reduce((acc, message) => {
+      const key = dayKey(message.createdAt);
+      return acc.has(key) ? acc : acc.set(key, message.id);
+    }, new Map<string, string>());
 
 interface ConversationThreadProps {
   segments: ConversationSegment[];
-  isClosed?: boolean;
   onTransferPress?: (target: TransferTarget) => void;
   onRetry?: (messageId: string) => void;
-  onQuickEntry?: (pick: QuickEntryPick) => void;
   onOpenCase?: (caseId: string) => void;
   onOpenDevice?: (deviceName: string) => void;
 }
 
 export const ConversationThread = ({
   segments,
-  isClosed = false,
   onTransferPress,
   onRetry,
-  onQuickEntry,
   onOpenCase,
   onOpenDevice,
 }: ConversationThreadProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const total = messageCount(segments);
+  const dayStarts = dayStartMessageIds(segments);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -41,8 +51,8 @@ export const ConversationThread = ({
 
   return (
     <div className={threadStyles.thread}>
-      {segments.map((segment, segmentIndex) => {
-        const isLast = segmentIndex === segments.length - 1;
+      {segments.map((segment) => {
+        const isMuted = segment.status === 'closed';
         return (
           <Fragment key={segment.id}>
             {segment.kind === 'inquiry' && (
@@ -50,31 +60,28 @@ export const ConversationThread = ({
             )}
 
             {segment.messages.map((message, index) => (
-              <ThreadMessage
-                key={message.id}
-                messages={segment.messages}
-                index={index}
-                onTransferPress={onTransferPress}
-                onRetry={onRetry}
-                onOpenCase={onOpenCase}
-                onOpenDevice={onOpenDevice}
-              />
+              <Fragment key={message.id}>
+                {dayStarts.get(dayKey(message.createdAt)) === message.id && (
+                  <DateDivider label={dayLabel(message.createdAt)} />
+                )}
+                <ThreadMessage
+                  messages={segment.messages}
+                  index={index}
+                  isMuted={isMuted}
+                  onTransferPress={onTransferPress}
+                  onRetry={onRetry}
+                  onOpenCase={onOpenCase}
+                  onOpenDevice={onOpenDevice}
+                />
+              </Fragment>
             ))}
-
-            {isLast && onQuickEntry && awaitsFirstReply(segment) && (
-              <QuickEntryCard onPick={onQuickEntry} />
-            )}
 
             {segment.status === 'closed' && segment.kind === 'inquiry' && (
               <SegmentDivider text="本次咨询已结束" />
             )}
 
             {segment.status === 'closed' && segment.kind === 'work-order' && (
-              isLast && isClosed ? (
-                <SegmentDivider tone="end" text="本次报修已完成，对话已结束" />
-              ) : (
-                <SegmentDivider text="本次服务已结束" />
-              )
+              <SegmentDivider tone="end" text="本次在线沟通已结束" />
             )}
           </Fragment>
         );

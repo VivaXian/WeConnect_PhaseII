@@ -3,11 +3,8 @@ import { useShallow } from 'zustand/react/shallow';
 import { SharedBottomBar } from '../components/shared-bottom-bar';
 import type { AppTab } from '../components/shared-bottom-bar';
 import type { Device } from '../types/device';
-import type { CaseRef } from '../types/conversation';
-import { GENERAL_CONVERSATION_ID } from '../types/conversation';
 import { useRoleStore } from '../stores/role-store';
 import { useMessageStore } from '../stores/message-store';
-import { useConversationStore } from '../stores/conversation-store';
 import { useConversationUnread } from '../hooks/use-conversation-unread';
 import { shellStyles } from './app-shell.css';
 import { MiniProgramNav } from '../components/mini-program-nav';
@@ -28,7 +25,6 @@ import { SelfServicePage } from './self-service-page';
 import { ServiceEvaluationPage } from './service-evaluation-page';
 import { SparePartsAuthPage } from './spare-parts-auth-page';
 import { EngineerVerifyPage } from './engineer-verify-page';
-import { EngineerChatPage } from './engineer-chat-page';
 import { SuperUserServicePage } from './super-user-service-page';
 import { UserDevicePage } from './user-device-page';
 import { WorkOrderDetailPage } from './work-order-detail-page';
@@ -44,13 +40,12 @@ type NavState =
   | { type: 'repair-form'; device: Device }
   | { type: 'spare-parts-auth' }
   | { type: 'engineer-verify' }
-  | { type: 'engineer-chat' }
   | { type: 'scan-camera' }
   | { type: 'scan-device-input'; confirmDevice?: Device }
   | { type: 'repair-detail'; repairId: string }
   | { type: 'work-order-detail'; orderId: string }
   | { type: 'service-eval'; repairId: string }
-  | { type: 'conversation'; conversationId: string; attachedCase?: CaseRef }
+  | { type: 'conversation'; conversationId: string }
   | { type: 'conversation-history' }
   | { type: 'case-conversations'; repairId: string }
   | { type: 'faq' }
@@ -61,7 +56,6 @@ type ProfileSubPage = null | 'messages' | { type: 'message-detail'; messageId: s
 export const AppShell = () => {
   const { role } = useRoleStore();
   const messages = useMessageStore((state) => state.messages);
-  const ensureRepairConversation = useConversationStore((state) => state.ensureRepairConversation);
   const { total: unreadConversationCount, byCaseId: unreadByCaseId } = useConversationUnread();
   const isAdmin = role === 'admin';
 
@@ -84,19 +78,9 @@ export const AppShell = () => {
   const openConversation = (conversationId: string) =>
     navigate({ type: 'conversation', conversationId });
 
-  const openCaseConversation = (caseRef: CaseRef) =>
-    openConversation(ensureRepairConversation(caseRef));
-
   const openDeviceByName = (deviceName: string) => {
     const device = findDeviceByName(deviceName);
     if (device) navigate({ type: 'device-detail', device });
-  };
-
-  const startGeneralInquiry = (relatedCaseRef?: CaseRef) => {
-    setNavStack([
-      { type: 'tab-content' },
-      { type: 'conversation', conversationId: GENERAL_CONVERSATION_ID, attachedCase: relatedCaseRef },
-    ]);
   };
 
   const visibleMessages = useMemo(
@@ -124,8 +108,7 @@ export const AppShell = () => {
             onWorkOrderPress={(orderId) => navigate({ type: 'work-order-detail', orderId })}
             onQuickRepair={() => navigate({ type: 'repair-form', device: currentNav.device })}
             onUnbind={isAdmin ? undefined : goBack}
-            onConversationPress={openCaseConversation}
-            onGeneralInquiry={() => startGeneralInquiry()}
+            onConversationPress={openConversation}
           />
         </div>
       </div>
@@ -140,7 +123,6 @@ export const AppShell = () => {
             device={currentNav.device}
             onBack={goBack}
             onSubmitSuccess={goBack}
-            onGeneralInquiry={() => startGeneralInquiry()}
           />
         </div>
       </div>
@@ -162,16 +144,6 @@ export const AppShell = () => {
       <div className={shellStyles.shell}>
         <div className={shellStyles.content}>
           <EngineerVerifyPage onBack={goBack} />
-        </div>
-      </div>
-    );
-  }
-
-  if (currentNav.type === 'engineer-chat') {
-    return (
-      <div className={shellStyles.shell}>
-        <div className={shellStyles.content}>
-          <EngineerChatPage onBack={goBack} />
         </div>
       </div>
     );
@@ -223,8 +195,7 @@ export const AppShell = () => {
             repairId={currentNav.repairId}
             onBack={goBack}
             onWorkOrderPress={(orderId) => navigate({ type: 'work-order-detail', orderId })}
-            onConversationPress={openCaseConversation}
-            onGeneralInquiry={startGeneralInquiry}
+            onConversationPress={openConversation}
             onCaseConversationsPress={(id) => navigate({ type: 'case-conversations', repairId: id })}
           />
         </div>
@@ -270,7 +241,7 @@ export const AppShell = () => {
     return (
       <div className={shellStyles.shell}>
         <div className={shellStyles.content}>
-          <FaqPage onBack={goBack} onAskPress={() => startGeneralInquiry()} />
+          <FaqPage onBack={goBack} />
         </div>
       </div>
     );
@@ -282,11 +253,9 @@ export const AppShell = () => {
         <div className={shellStyles.content}>
           <ConversationPage
             conversationId={currentNav.conversationId}
-            attachedCase={currentNav.attachedCase}
             onBack={goBack}
             onCasePress={(caseId) => navigate({ type: 'repair-detail', repairId: caseId })}
             onDevicePress={openDeviceByName}
-            onStartGeneralInquiry={startGeneralInquiry}
             onConversationPress={openConversation}
           />
         </div>
@@ -329,7 +298,7 @@ export const AppShell = () => {
   const navTitle = (() => {
     if (activeTab === 'repair') return isAdmin ? '报修记录' : '我的报修';
     if (activeTab === 'orders') return '工单列表';
-    if (activeTab === 'consult') return '在线服务';
+    if (activeTab === 'consult') return '服务支持';
     if (activeTab === 'profile') {
       if (profileSubPage === 'messages') return '通知中心';
       if (typeof profileSubPage === 'object' && profileSubPage !== null) return '通知详情';
@@ -359,7 +328,6 @@ export const AppShell = () => {
                 onDevicePress={(device) => navigate({ type: 'device-detail', device })}
                 onRepairDetailPress={(repairId) => navigate({ type: 'repair-detail', repairId })}
                 onServiceEvalPress={(repairId) => navigate({ type: 'service-eval', repairId })}
-                onGeneralInquiry={() => startGeneralInquiry()}
               />
             )
             : (
@@ -367,7 +335,6 @@ export const AppShell = () => {
                 onDevicePress={(device) => navigate({ type: 'device-detail', device })}
                 onRepairDetailPress={(repairId) => navigate({ type: 'repair-detail', repairId })}
                 onServiceEvalPress={(repairId) => navigate({ type: 'service-eval', repairId })}
-                onGeneralInquiry={() => startGeneralInquiry()}
               />
             )
         )}
@@ -379,7 +346,6 @@ export const AppShell = () => {
         {activeTab === 'orders' && (
           <WorkOrderListPage
             onWorkOrderPress={(orderId) => navigate({ type: 'work-order-detail', orderId })}
-            onGeneralInquiry={() => startGeneralInquiry()}
           />
         )}
         {activeTab === 'consult' && (

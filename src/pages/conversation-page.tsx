@@ -1,22 +1,21 @@
 import { useEffect } from 'react';
-import { Button } from '@filament/react/button';
 import { Text } from '@filament/react/text';
-import { ChevronRight } from '@filament/react/icons/chevron-right';
 import { useShallow } from 'zustand/react/shallow';
-import type { CaseRef } from '../types/conversation';
 import { useConversationStore } from '../stores/conversation-store';
+import { useVisibleConversations } from '../hooks/use-visible-conversations';
 import { useRoleStore } from '../stores/role-store';
 import {
   activeEngineerName,
   allMessages,
-  isConversationClosed,
   openSegmentOf,
 } from '../utils/conversation-status';
 import { isOwnConversation } from '../utils/conversation-grouping';
+import { conversationPartnerName } from '../utils/conversation-display';
 import { repairData } from '../utils/repair-data';
 import { MiniProgramNav } from '../components/mini-program-nav';
 import { ConversationThread } from '../components/conversation-thread';
-import { ThreadPartnerBar } from '../components/thread-partner-bar';
+import { ConversationCaseHeader } from '../components/conversation-case-header';
+import { ConversationClosedNote } from '../components/conversation-closed-note';
 import { MessageComposer } from '../components/message-composer';
 import { conversationPageStyles as s } from './conversation-page.css';
 
@@ -25,9 +24,7 @@ interface ConversationPageProps {
   onBack: () => void;
   onCasePress: (caseId: string) => void;
   onDevicePress: (deviceName: string) => void;
-  onStartGeneralInquiry: (relatedCaseRef?: CaseRef) => void;
   onConversationPress: (conversationId: string) => void;
-  attachedCase?: CaseRef;
 }
 
 export const ConversationPage = ({
@@ -35,20 +32,16 @@ export const ConversationPage = ({
   onBack,
   onCasePress,
   onDevicePress,
-  onStartGeneralInquiry,
   onConversationPress,
-  attachedCase,
 }: ConversationPageProps) => {
-  const { conversations, sendMessage, submitQuickEntry, markRead, retryMessage, closeActiveSegment } = useConversationStore(
+  const { sendMessage, markRead, retryMessage } = useConversationStore(
     useShallow((state) => ({
-      conversations: state.conversations,
       sendMessage: state.sendMessage,
-      submitQuickEntry: state.submitQuickEntry,
       markRead: state.markRead,
       retryMessage: state.retryMessage,
-      closeActiveSegment: state.closeActiveSegment,
     }))
   );
+  const conversations = useVisibleConversations();
   const { role } = useRoleStore();
 
   const conversation = conversations.find((item) => item.id === conversationId);
@@ -62,7 +55,7 @@ export const ConversationPage = ({
   if (!conversation) {
     return (
       <div className={s.page}>
-        <MiniProgramNav variant="back" title="客户响应中心" onBack={onBack} />
+        <MiniProgramNav variant="back" title="对话" onBack={onBack} />
         <div className={s.emptyState}>
           <Text variant="body-s" color="secondary">对话不存在</Text>
         </div>
@@ -87,12 +80,8 @@ export const ConversationPage = ({
   const record = caseRef
     ? repairData.flatMap((group) => group.records).find((item) => item.id === caseRef.id)
     : undefined;
-  const isClosed = isConversationClosed(conversation);
-  const title = caseRef ? `报修 ${caseRef.displayNo}` : '客户响应中心';
-  const isGeneral = conversation.scope === 'general';
-  const openSegment = openSegmentOf(conversation);
-  const canEndInquiry =
-    isGeneral && Boolean(openSegment?.messages.some((message) => message.senderRole === 'customer'));
+  const title = caseRef ? `报修 ${caseRef.displayNo}` : '历史对话';
+  const canReply = !isReadOnly && Boolean(openSegmentOf(conversation));
 
   return (
     <div className={s.page}>
@@ -101,59 +90,30 @@ export const ConversationPage = ({
       {isReadOnly && (
         <div className={s.readOnlyBar}>
           <Text variant="body-s" color="secondary">
-            {`${conversation.ownerName} ↔ ${activeEngineerName(conversation) ?? '客户响应中心'} · 仅可查看`}
+            {`${conversation.ownerName} ↔ ${activeEngineerName(conversation) ?? '服务工程师'} · 仅可查看`}
           </Text>
         </div>
       )}
 
       {caseRef && (
-        <div className={s.caseBar}>
-          <button type="button" className={s.caseBarMain} onClick={() => onCasePress(caseRef.id)}>
-            <span className={s.caseBarDevice}>{caseRef.deviceName}</span>
-            <span className={s.caseBarMeta}>
-              {caseRef.displayNo}
-              {record?.statusTitle ? ` · ${record.statusTitle}` : ''}
-            </span>
-          </button>
-          <button
-            type="button"
-            className={s.caseBarLink}
-            onClick={() => onDevicePress(caseRef.deviceName)}
-          >
-            设备详情
-            <ChevronRight className={s.caseBarChevron} aria-hidden="true" />
-          </button>
-        </div>
+        <ConversationCaseHeader
+          caseRef={caseRef}
+          engineerName={conversationPartnerName(conversation)}
+          onPress={onCasePress}
+          onDevicePress={onDevicePress}
+        />
       )}
-
-      {caseRef && <ThreadPartnerBar conversation={conversation} isClosed={isClosed} />}
 
       <ConversationThread
         segments={conversation.segments}
-        isClosed={isClosed}
         onTransferPress={(target) => onConversationPress(target.conversationId)}
         onRetry={(messageId) => retryMessage(conversation.id, messageId)}
-        onQuickEntry={
-          !isReadOnly && !isClosed && conversation.scope === 'general' && !attachedCase
-            ? (pick) => submitQuickEntry(conversation.id, pick)
-            : undefined
-        }
         onOpenCase={onCasePress}
         onOpenDevice={onDevicePress}
       />
 
-      {isReadOnly ? null : isClosed ? (
-        <div className={s.closedCard}>
-          <Button variant="primary" isFullWidth onPress={() => onStartGeneralInquiry(caseRef)}>
-            再次咨询
-          </Button>
-        </div>
-      ) : (
+      {canReply && (
         <MessageComposer
-          relatedCase={isGeneral ? undefined : caseRef}
-          initialDraft={isGeneral && attachedCase ? `我要咨询报修单 ${attachedCase.displayNo}` : undefined}
-          onQuickEntry={isGeneral ? (pick) => submitQuickEntry(conversation.id, pick) : undefined}
-          onEndInquiry={canEndInquiry ? () => closeActiveSegment(conversation.id) : undefined}
           onSend={(text, attachments) =>
             sendMessage(conversation.id, text, attachments, {
               engineerName: activeEngineerName(conversation) ?? record?.progress.engineer?.name,
@@ -161,6 +121,10 @@ export const ConversationPage = ({
             })
           }
         />
+      )}
+
+      {!canReply && !isReadOnly && caseRef && (
+        <ConversationClosedNote repairStatus={record?.status} />
       )}
     </div>
   );

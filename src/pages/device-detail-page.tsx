@@ -2,7 +2,6 @@ import clsx from 'clsx';
 import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import type { Device } from '../types/device';
-import type { CaseRef } from '../types/conversation';
 import { DEVICE_STATUS_LABEL } from '../types/device';
 import type { LinkedWorkOrder } from '../types/repair';
 import { useRoleStore } from '../stores/role-store';
@@ -26,12 +25,11 @@ interface DeviceDetailPageProps {
   onWorkOrderPress?: (orderId: string) => void;
   onQuickRepair?: () => void;
   onUnbind?: () => void;
-  onConversationPress?: (caseRef: CaseRef) => void;
-  onGeneralInquiry?: () => void;
+  onConversationPress?: (conversationId: string) => void;
   initialTab?: DetailTab;
 }
 
-export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOrderPress, onQuickRepair, onUnbind, onConversationPress, onGeneralInquiry, initialTab }: DeviceDetailPageProps) => {
+export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOrderPress, onQuickRepair, onUnbind, onConversationPress, initialTab }: DeviceDetailPageProps) => {
   const { role } = useRoleStore();
   const isAdmin = role === 'admin';
   const [activeTab, setActiveTab] = useState<DetailTab>(initialTab ?? 'info');
@@ -133,7 +131,6 @@ export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOr
           onNavigate={(tab) => setActiveTab(tab)}
           onUnbind={onUnbind}
           onConversationPress={onConversationPress}
-          onGeneralInquiry={onGeneralInquiry}
         />
       )}
       {activeTab === 'repair' && (
@@ -148,7 +145,6 @@ export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOr
           isAdmin={isAdmin}
           pmWorkOrders={device.pmWorkOrders ?? []}
           onWorkOrderPress={onWorkOrderPress}
-          onGeneralInquiry={onGeneralInquiry}
         />
       )}
       {activeTab === 'workorder' && (
@@ -160,7 +156,6 @@ export const DeviceDetailPage = ({ device, onBack, onRepairDetailPress, onWorkOr
           contractStatus={contractStatus}
           contractDays={contractDays}
           warrantyUnsupported={warrantyUnsupported}
-          onGeneralInquiry={onGeneralInquiry}
         />
       )}
     </div>

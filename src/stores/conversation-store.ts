@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type {
-  CaseRef,
   Conversation,
   ConversationAttachment,
   ConversationMessage,
@@ -9,9 +8,7 @@ import type {
   SenderRole,
   TransferTarget,
 } from '../types/conversation';
-import { CURRENT_USER_ID, GENERAL_CONVERSATION_ID, repairConversationId } from '../types/conversation';
 import { conversationSeed, CONVERSATION_SEED_VERSION } from '../utils/conversation-data';
-import { planAutoReply, planQuickEntryReply } from '../utils/inquiry-auto-reply';
 import { isConversationClosed } from '../utils/conversation-status';
 
 interface IncomingMessage {
@@ -26,13 +23,6 @@ interface IncomingMessage {
   transferTo?: TransferTarget;
 }
 
-interface QuickEntrySubmission {
-  text: string;
-  topic?: string;
-  deviceId?: string;
-  caseId?: string;
-}
-
 interface SendContext {
   engineerName?: string;
   originWorkOrderId?: string;
@@ -43,10 +33,8 @@ type ConversationState = {
   promptedIds: string[];
   isRseAvailable: boolean;
   sendMessage: (conversationId: string, text: string, attachments: ConversationAttachment[], context: SendContext) => void;
-  submitQuickEntry: (conversationId: string, pick: QuickEntrySubmission) => void;
   retryMessage: (conversationId: string, messageId: string) => void;
   receiveMessage: (conversationId: string, message: IncomingMessage) => void;
-  ensureRepairConversation: (caseRef: CaseRef) => string;
   recordTransfer: (fromConversationId: string, target: TransferTarget) => void;
   closeActiveSegment: (conversationId: string) => void;
   markRead: (conversationId: string) => void;
@@ -58,26 +46,13 @@ const nowIso = () => new Date().toISOString();
 
 const createId = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
-const inquiryCaseId = () => `inq-${Date.now().toString(36)}`;
-
 const openSegmentFor = (conversation: Conversation, timestamp: string): ConversationSegment => ({
   id: createId('seg'),
-  kind: conversation.scope === 'general' ? 'inquiry' : 'work-order',
-  caseId: conversation.scope === 'general' ? inquiryCaseId() : conversation.caseRef?.id ?? '',
+  kind: 'work-order',
+  caseId: conversation.caseRef?.id ?? '',
   status: 'open',
   startedAt: timestamp,
-  messages: conversation.scope === 'general'
-    ? []
-    : [
-        {
-          id: createId('msg'),
-          senderRole: 'system',
-          type: 'system',
-          content: '客户响应中心已接手，将为您重新安排',
-          createdAt: timestamp,
-          isRead: true,
-        },
-      ],
+  messages: [],
 });
 
 const withMessage = (conversation: Conversation, message: ConversationMessage): Conversation => {
@@ -138,56 +113,18 @@ export const useConversationStore = create<ConversationState>()(
         if (!conversation) return;
 
         const activeSegment = conversation.segments[conversation.segments.length - 1];
-        const hasEngineerJoined = activeSegment?.messages.some((item) => item.senderRole === 'rse') ?? false;
+        const engineerName = context.engineerName ?? activeSegment?.engineerName;
+        if (!engineerName) return;
 
-        planAutoReply(text, {
-          engineerName: context.engineerName ?? activeSegment?.engineerName,
-          originWorkOrderId: context.originWorkOrderId,
-          isRseAvailable: get().isRseAvailable,
-          hasEngineerJoined,
-        }).forEach((reply) => {
-          window.setTimeout(() => {
-            get().receiveMessage(conversationId, {
-              senderRole: reply.senderRole,
-              senderName: reply.senderName,
-              type: reply.type,
-              content: reply.content,
-              originWorkOrderId: reply.originWorkOrderId,
-            });
-          }, reply.delayMs);
-        });
-      },
-
-      submitQuickEntry: (conversationId, pick) => {
-        const target = get().conversations.find((item) => item.id === conversationId);
-        if (!target || isConversationClosed(target)) return;
-
-        const message: ConversationMessage = {
-          id: createId('msg'),
-          senderRole: 'customer',
-          type: 'text',
-          content: pick.text,
-          createdAt: nowIso(),
-          isRead: true,
-        };
-
-        set((state) => ({
-          conversations: mapConversation(state.conversations, conversationId, (conversation) =>
-            withMessage(conversation, message)
-          ),
-        }));
-
-        planQuickEntryReply({ topic: pick.topic, deviceId: pick.deviceId, caseId: pick.caseId }).forEach((reply) => {
-          window.setTimeout(() => {
-            get().receiveMessage(conversationId, {
-              senderRole: reply.senderRole,
-              type: reply.type,
-              content: reply.content,
-              deviceId: reply.deviceId,
-              caseId: reply.caseId,
-            });
-          }, reply.delayMs);
-        });
+        window.setTimeout(() => {
+          get().receiveMessage(conversationId, {
+            senderRole: 'rse',
+            senderName: engineerName,
+            type: 'text',
+            content: '收到，我看一下您发的信息，稍后回复您。',
+            originWorkOrderId: context.originWorkOrderId,
+          });
+        }, 1200);
       },
 
       receiveMessage: (conversationId, message) =>
@@ -213,47 +150,6 @@ export const useConversationStore = create<ConversationState>()(
             })),
           })),
         })),
-
-      ensureRepairConversation: (caseRef) => {
-        const id = repairConversationId(caseRef.id, CURRENT_USER_ID);
-        if (get().conversations.some((conversation) => conversation.id === id)) return id;
-
-        const timestamp = nowIso();
-        set((state) => ({
-          conversations: [
-            ...state.conversations,
-            {
-              id,
-              scope: 'repair',
-              caseRef,
-              ownerId: CURRENT_USER_ID,
-              ownerName: '我',
-              createdAt: timestamp,
-              updatedAt: timestamp,
-              segments: [
-                {
-                  id: createId('seg'),
-                  kind: 'work-order',
-                  caseId: caseRef.id,
-                  status: 'open',
-                  startedAt: timestamp,
-                  messages: [
-                    {
-                      id: createId('msg'),
-                      senderRole: 'ccc',
-                      type: 'text',
-                      content: `您好，这里是客户响应中心。关于报修 ${caseRef.displayNo}（${caseRef.deviceName}），您可以在这里补充说明或上传照片。`,
-                      createdAt: timestamp,
-                      isRead: true,
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        }));
-        return id;
-      },
 
       recordTransfer: (fromConversationId, target) =>
         set((state) => ({

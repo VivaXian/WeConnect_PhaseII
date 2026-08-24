@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import clsx from 'clsx';
-import { ChevronRight } from '@filament/react/icons/chevron-right';
 import type { FaqCategory } from '../types/faq';
 import { FAQ_CATEGORY_LABEL } from '../types/faq';
 import { MiniProgramNav } from '../components/mini-program-nav';
@@ -19,10 +18,9 @@ const filterLabel = (filter: Filter): string =>
 
 interface FaqPageProps {
   onBack: () => void;
-  onAskPress: () => void;
 }
 
-export const FaqPage = ({ onBack, onAskPress }: FaqPageProps) => {
+export const FaqPage = ({ onBack }: FaqPageProps) => {
   const signals = useFaqSignals();
   const [filter, setFilter] = useState<Filter>('all');
 
@@ -53,11 +51,6 @@ export const FaqPage = ({ onBack, onAskPress }: FaqPageProps) => {
           ? <p className={s.empty}>该分类下暂无问题</p>
           : <FaqAccordion key={filter} items={items} />}
       </div>
-
-      <button type="button" className={s.askRow} onClick={onAskPress}>
-        <span>没找到答案？联系客户响应中心</span>
-        <ChevronRight className={s.askChevron} aria-hidden="true" />
-      </button>
     </div>
   );
 };

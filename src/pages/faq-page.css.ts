@@ -55,23 +55,4 @@ export const faqPageStyles = {
     fontSize: 13,
     color: '#9aa1ac',
   }),
-  askRow: style({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-    width: '100%',
-    border: 'none',
-    background: 'none',
-    padding: '18px 16px 24px',
-    fontSize: 13,
-    color: '#6a7282',
-    cursor: 'pointer',
-  }),
-  askChevron: style({
-    flexShrink: 0,
-    width: 14,
-    height: 14,
-    color: '#b0b6be',
-  }),
 };

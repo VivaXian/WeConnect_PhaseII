@@ -10,7 +10,6 @@ interface ContractTabProps {
   contractStatus: 'good' | 'warning' | 'expired' | 'none';
   contractDays: number | null;
   warrantyUnsupported?: boolean;
-  onGeneralInquiry?: () => void;
 }
 
 function daysFromToday(dateStr: string): number {
@@ -60,7 +59,7 @@ function isConsultActive(deviceId: string): boolean {
   return new Date() < reset;
 }
 
-export const DeviceDetailContractTab = ({ device, contractStatus, contractDays, warrantyUnsupported, onGeneralInquiry }: ContractTabProps) => {
+export const DeviceDetailContractTab = ({ device, contractStatus, contractDays, warrantyUnsupported }: ContractTabProps) => {
   const [showBizConsult, setShowBizConsult] = useState(false);
   const [contractConsultDone, setContractConsultDone] = useState(() => isConsultActive(device.id));
 
@@ -235,10 +234,6 @@ export const DeviceDetailContractTab = ({ device, contractStatus, contractDays, 
         <BizConsultSheet
           onClose={() => setShowBizConsult(false)}
           defaultDescription="咨询服务合同续保"
-          onOnlineConsult={onGeneralInquiry && (() => {
-            setShowBizConsult(false);
-            onGeneralInquiry();
-          })}
           onSubmitted={() => {
             localStorage.setItem(consultKey(device.id), new Date().toISOString());
             setContractConsultDone(true);

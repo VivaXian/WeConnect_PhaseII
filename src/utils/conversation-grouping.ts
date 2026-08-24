@@ -1,6 +1,6 @@
 import type { Conversation } from '../types/conversation';
 import { CURRENT_USER_ID } from '../types/conversation';
-import { allMessages, isConversationClosed } from './conversation-status';
+import { allMessages, isCaseClosed } from './conversation-status';
 
 const parseTime = (value?: string): number => {
   if (!value) return 0;
@@ -30,12 +30,12 @@ export const generalConversationOf = (conversations: Conversation[]): Conversati
 
 export const repairConversations = (conversations: Conversation[]): Conversation[] =>
   conversations
-    .filter((conversation) => listable(conversation) && !isConversationClosed(conversation))
+    .filter((conversation) => listable(conversation) && !isCaseClosed(conversation))
     .sort(byRecency);
 
 export const archivedRepairConversations = (conversations: Conversation[]): Conversation[] =>
   conversations
-    .filter((conversation) => listable(conversation) && isConversationClosed(conversation))
+    .filter((conversation) => listable(conversation) && isCaseClosed(conversation))
     .sort(byRecency);
 
 export const activeConversations = (conversations: Conversation[]): Conversation[] =>
