@@ -3,11 +3,14 @@ import { Avatar } from '@filament/react/avatar';
 import { Badge } from '@filament/react/badge';
 import { Card } from '@filament/react/card';
 import { ChevronRight } from '@filament/react/icons/chevron-right';
+import { PersonHeadset } from '@filament/react/icons/person-headset';
 import { Text } from '@filament/react/text';
 import { useShallow } from 'zustand/react/shallow';
 import type { AppMessage } from '../types/message';
 import { useRoleStore } from '../stores/role-store';
 import { useDeviceBindingStore } from '../stores/device-binding-store';
+import { useConversationUnread } from '../hooks/use-conversation-unread';
+import { REPAIR_CHAT_LABEL, repairChatSummary } from '../utils/service-support-copy';
 import { deviceList } from '../utils/device-data';
 import { AccountSheet } from '../components/account-sheet';
 import { SubscriptionSheet } from '../components/subscription-sheet';
@@ -26,6 +29,8 @@ interface ProfilePageProps {
   onInputDevicePress?: () => void;
   onSparePartsAuthPress?: () => void;
   onEngineerVerifyPress?: () => void;
+  onRemoteServicePress?: () => void;
+  onFaqPress?: () => void;
   onPrivacyPolicyPress?: () => void;
 }
 
@@ -39,6 +44,8 @@ export const ProfilePage = ({
   onInputDevicePress,
   onSparePartsAuthPress,
   onEngineerVerifyPress,
+  onRemoteServicePress,
+  onFaqPress,
   onPrivacyPolicyPress,
 }: ProfilePageProps) => {
   const { role, username, setUsername, adminCampuses } = useRoleStore(
@@ -59,6 +66,8 @@ export const ProfilePage = ({
   const { removedIds, purgedIds } = useDeviceBindingStore(
     useShallow((state) => ({ removedIds: state.removedIds, purgedIds: state.purgedIds }))
   );
+
+  const { total: unreadConversationCount } = useConversationUnread();
 
   const deviceSummaryLabel = useMemo(() => {
     const bound = deviceList.filter(
@@ -204,18 +213,25 @@ export const ProfilePage = ({
               <path d="M9 6l6 6-6 6" stroke="#c4c9d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <button type="button" className={`${profileStyles.toolLinkRow} ${profileStyles.toolLinkWide}`}>
+          <button
+            type="button"
+            className={`${profileStyles.toolLinkRow} ${profileStyles.toolLinkWide}`}
+            onClick={onRemoteServicePress}
+          >
             <div className={profileStyles.toolLinkIconWrap}>
-              <svg width="18" height="18" viewBox="0 -2.5 24 24" fill="none" aria-hidden="true">
-                <path d="M3 6.5L12 3l9 3.5L12 10 3 6.5z" stroke="#0161de" strokeWidth="1.8" strokeLinejoin="round"/>
-                <path d="M7 8.5V13c0 1.66 2.24 3 5 3s5-1.34 5-3V8.5" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M21 6.5V12" stroke="#0161de" strokeWidth="1.8" strokeLinecap="round"/>
-              </svg>
+              <PersonHeadset className={profileStyles.toolLinkIcon} aria-hidden="true" />
             </div>
             <div className={profileStyles.toolLinkInfo}>
-              <span className={profileStyles.toolLinkLabel}>飞利浦超声微课堂</span>
-              <span className={profileStyles.toolLinkSub}>仪器操作&临床应用</span>
+              <span className={profileStyles.toolLinkLabel}>{REPAIR_CHAT_LABEL}</span>
+              <span className={profileStyles.toolLinkSub}>{repairChatSummary(unreadConversationCount)}</span>
             </div>
+            {unreadConversationCount > 0 && (
+              <Badge
+                value={unreadConversationCount}
+                maxValue={99}
+                aria-label={`${unreadConversationCount}条未读消息`}
+              />
+            )}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{flexShrink:0}}>
               <path d="M9 6l6 6-6 6" stroke="#c4c9d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -267,6 +283,10 @@ export const ProfilePage = ({
 
       {/* ── About ── */}
       <Card className={profileStyles.sectionCard}>
+        <button type="button" className={profileStyles.aboutRow} onClick={onFaqPress}>
+          <span>常见问题</span>
+          <ChevronRight />
+        </button>
         <button type="button" className={profileStyles.aboutRow} onClick={onPrivacyPolicyPress}>
           <span>隐私政策</span>
           <ChevronRight />

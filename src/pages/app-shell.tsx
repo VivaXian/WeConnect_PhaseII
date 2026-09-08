@@ -48,6 +48,7 @@ type NavState =
   | { type: 'conversation'; conversationId: string }
   | { type: 'conversation-history' }
   | { type: 'case-conversations'; repairId: string }
+  | { type: 'self-service' }
   | { type: 'faq' }
   | { type: 'privacy-policy' };
 
@@ -247,6 +248,20 @@ export const AppShell = () => {
     );
   }
 
+  if (currentNav.type === 'self-service') {
+    return (
+      <div className={shellStyles.shell}>
+        <div className={shellStyles.content}>
+          <SelfServicePage
+            onBack={goBack}
+            onConversationPress={openConversation}
+            onHistoryPress={() => navigate({ type: 'conversation-history' })}
+          />
+        </div>
+      </div>
+    );
+  }
+
   if (currentNav.type === 'conversation') {
     return (
       <div className={shellStyles.shell}>
@@ -298,7 +313,6 @@ export const AppShell = () => {
   const navTitle = (() => {
     if (activeTab === 'repair') return isAdmin ? '报修记录' : '我的报修';
     if (activeTab === 'orders') return '工单列表';
-    if (activeTab === 'consult') return '服务支持';
     if (activeTab === 'profile') {
       if (profileSubPage === 'messages') return '通知中心';
       if (typeof profileSubPage === 'object' && profileSubPage !== null) return '通知详情';
@@ -348,13 +362,6 @@ export const AppShell = () => {
             onWorkOrderPress={(orderId) => navigate({ type: 'work-order-detail', orderId })}
           />
         )}
-        {activeTab === 'consult' && (
-          <SelfServicePage
-            onConversationPress={openConversation}
-            onHistoryPress={() => navigate({ type: 'conversation-history' })}
-            onFaqPress={() => navigate({ type: 'faq' })}
-          />
-        )}
         {activeTab === 'profile' && typeof profileSubPage === 'object' && profileSubPage !== null && profileSubPage.type === 'message-detail' && (
           <MessageDetailPage
             messageId={profileSubPage.messageId}
@@ -386,6 +393,8 @@ export const AppShell = () => {
             onInputDevicePress={() => navigate({ type: 'scan-device-input' })}
             onSparePartsAuthPress={() => navigate({ type: 'spare-parts-auth' })}
             onEngineerVerifyPress={() => navigate({ type: 'engineer-verify' })}
+            onRemoteServicePress={() => navigate({ type: 'self-service' })}
+            onFaqPress={() => navigate({ type: 'faq' })}
             onPrivacyPolicyPress={() => navigate({ type: 'privacy-policy' })}
           />
         )}

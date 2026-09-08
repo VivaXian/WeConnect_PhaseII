@@ -395,6 +395,11 @@ export const profileStyles = {
     justifyContent: 'center',
     flexShrink: 0,
   }),
+  toolLinkIcon: style({
+    width: 18,
+    height: 18,
+    color: '#0161de',
+  }),
   toolLinkInfo: style({
     flex: 1,
     display: 'flex',
