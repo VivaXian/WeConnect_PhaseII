@@ -5,7 +5,7 @@ export const dateDividerStyles = {
     display: 'flex',
     justifyContent: 'center',
     width: '100%',
-    padding: '6px 0 2px',
+    padding: 0,
   }),
   label: style({
     fontSize: 12,

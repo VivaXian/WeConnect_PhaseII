@@ -6,10 +6,12 @@ import { TabContext, Tabs } from '@filament/react/tabs';
 import { ClipboardList } from '@filament/react/icons/clipboard-list';
 import { ClipboardPerson } from '@filament/react/icons/clipboard-person';
 import { Compass } from '@filament/react/icons/compass';
+import { PersonHeadset } from '@filament/react/icons/person-headset';
 import { PersonPortraitCircle } from '@filament/react/icons/person-portrait-circle';
+import { CUSTOMER_SERVICE_LABEL } from '../utils/service-support-copy';
 import { bottomBarStyles as s } from './shared-bottom-bar.css';
 
-export type AppTab = 'repair' | 'devices' | 'orders' | 'profile';
+export type AppTab = 'repair' | 'devices' | 'consult' | 'orders' | 'profile';
 
 interface SharedBottomBarProps {
   activeTab: AppTab;
@@ -48,18 +50,8 @@ export const SharedBottomBar = ({
   unreadMessageCount = 0,
   unreadConversationCount = 0,
 }: SharedBottomBarProps) => {
-  // 远程服务支持的未读优先按数字展示；只有通知中心有未读时降级为红点
-  const hasConversationUnread = unreadConversationCount > 0;
-  const profileCount = hasConversationUnread
-    ? unreadConversationCount
-    : unreadMessageCount > 0
-      ? 1
-      : 0;
-  const profileLabel = hasConversationUnread
-    ? withCount('我的', unreadConversationCount, '条未读消息')
-    : unreadMessageCount > 0
-      ? '我的，有未读通知'
-      : '我的';
+  // 对话未读归「客服」数字角标；「我的」只剩通知中心，用红点
+  const profileLabel = unreadMessageCount > 0 ? '我的，有未读通知' : '我的';
 
   return (
     <TabContext
@@ -83,6 +75,14 @@ export const SharedBottomBar = ({
             <span>报修</span>
           </Item>
           <Item
+            key="consult"
+            textValue={CUSTOMER_SERVICE_LABEL}
+            aria-label={withCount(CUSTOMER_SERVICE_LABEL, unreadConversationCount, '条未读消息')}
+          >
+            <TabIcon count={unreadConversationCount} icon={<PersonHeadset />} />
+            <span>{CUSTOMER_SERVICE_LABEL}</span>
+          </Item>
+          <Item
             key="orders"
             textValue="工单"
             aria-label={withCount('工单', pendingOrderCount, '条待签字')}
@@ -92,8 +92,8 @@ export const SharedBottomBar = ({
           </Item>
           <Item key="profile" textValue="我的" aria-label={profileLabel}>
             <TabIcon
-              count={profileCount}
-              variant={hasConversationUnread ? 'default' : 'dot'}
+              count={unreadMessageCount}
+              variant="dot"
               icon={<PersonPortraitCircle />}
             />
             <span>我的</span>

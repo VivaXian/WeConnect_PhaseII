@@ -395,11 +395,6 @@ export const profileStyles = {
     justifyContent: 'center',
     flexShrink: 0,
   }),
-  toolLinkIcon: style({
-    width: 18,
-    height: 18,
-    color: '#0161de',
-  }),
   toolLinkInfo: style({
     flex: 1,
     display: 'flex',
@@ -611,6 +606,33 @@ export const profileStyles = {
     fontFamily: 'inherit',
     display: 'block',
   }),
+  // ── Engineer login link ───────────────────────────────────────────────────
+  engineerLoginLink: style({
+    alignSelf: 'center',
+    margin: '20px auto 10px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    background: '#ffffff',
+    border: '1px solid #d4d9e2',
+    borderRadius: 999,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    fontSize: 13,
+    fontWeight: 500,
+    color: '#4a5468',
+    padding: '7px 14px',
+  }),
+  engineerLoginText: style({
+    lineHeight: 1,
+  }),
+  engineerLoginIcon: style({
+    display: 'inline-flex',
+    alignItems: 'center',
+    fontSize: 16,
+    color: '#4a5468',
+  }),
+
   // ── About section rows ────────────────────────────────────────────────────
   aboutRow: style({
     width: '100%',

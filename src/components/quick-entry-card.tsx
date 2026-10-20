@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import clsx from 'clsx';
+import { useShallow } from 'zustand/react/shallow';
 import { ChevronLeft } from '@filament/react/icons/chevron-left';
 import { Cross } from '@filament/react/icons/cross';
 import { deviceList } from '../utils/device-data';
 import { getModality } from '../utils/device-modality';
 import { activeRepairs } from '../utils/device-summary';
+import { useDeviceBindingStore } from '../stores/device-binding-store';
+import { useIsNewDemoUser } from '../hooks/use-is-new-demo-user';
+import { QuickEntryEmptyState } from './quick-entry-empty-state';
 import { EntryRow, deviceNoOf, deviceOfRepair, modalityIconOf } from './quick-entry-rows';
 import { quickEntryStyles as s } from './quick-entry-card.css';
 
@@ -15,7 +18,7 @@ export interface QuickEntryPick {
   caseId?: string;
 }
 
-type Step = 'root' | 'repair' | 'device' | 'new-device';
+export type QuickEntryStep = 'root' | 'repair' | 'device' | 'new-device';
 
 const NEW_DEVICE_TOPICS = ['采购报价', '合同与续保', '产品演示', '培训与验收', '其他'];
 
@@ -23,29 +26,55 @@ const DEFAULT_HINT = '您想咨询什么？选一项可更快为您接入对应�
 
 interface QuickEntryCardProps {
   onPick: (pick: QuickEntryPick) => void;
+  initialStep?: QuickEntryStep;
   hint?: string | null;
   onClose?: () => void;
 }
 
-export const QuickEntryCard = ({ onPick, hint = DEFAULT_HINT, onClose }: QuickEntryCardProps) => {
-  const [step, setStep] = useState<Step>('root');
-  const repairs = activeRepairs();
+export const QuickEntryCard = ({
+  onPick,
+  initialStep = 'root',
+  hint = DEFAULT_HINT,
+  onClose,
+}: QuickEntryCardProps) => {
+  const [step, setStep] = useState<QuickEntryStep>(initialStep);
+  const isNewDemoUser = useIsNewDemoUser();
+  const { removedIds, purgedIds } = useDeviceBindingStore(
+    useShallow((state) => ({
+      removedIds: state.removedIds,
+      purgedIds: state.purgedIds,
+    }))
+  );
+  const devices = deviceList.filter(
+    (device) => !removedIds.includes(device.id) && !purgedIds.includes(device.id)
+  );
+  const repairs = isNewDemoUser ? [] : activeRepairs().filter(
+    (record) => devices.some((device) => device.name === record.deviceName)
+  );
 
-  const cardClass = clsx(s.card, onClose && s.cardWithClose);
-  const closeButton = onClose ? (
-    <button type="button" className={s.close} aria-label="关闭" onClick={onClose}>
-      <Cross className={s.closeIcon} aria-hidden="true" />
-    </button>
-  ) : null;
+  const header = (label?: string) => (
+    <div className={s.headerRow}>
+      {label ? (
+        <button type="button" className={s.back} onClick={() => setStep('root')}>
+          <ChevronLeft className={s.backIcon} aria-hidden="true" />
+          {label}
+        </button>
+      ) : (
+        <span className={s.headerTitle}>选择咨询内容</span>
+      )}
+      {onClose && (
+        <button type="button" className={s.close} aria-label="关闭" onClick={onClose}>
+          <Cross className={s.closeIcon} aria-hidden="true" />
+        </button>
+      )}
+    </div>
+  );
 
   if (step === 'repair') {
     return (
-      <div className={cardClass}>
-        {closeButton}
-        <button type="button" className={s.back} onClick={() => setStep('root')}>
-          <ChevronLeft className={s.backIcon} aria-hidden="true" />
-          {`选择报修单（${repairs.length}）`}
-        </button>
+      <div className={s.card}>
+        {header(`选择报修单（${repairs.length}）`)}
+        {repairs.length === 0 && <QuickEntryEmptyState kind="repair" />}
         <div className={s.scrollList}>
           {repairs.map((record) => (
             <EntryRow
@@ -55,7 +84,7 @@ export const QuickEntryCard = ({ onPick, hint = DEFAULT_HINT, onClose }: QuickEn
               iconSrc={modalityIconOf(deviceOfRepair(record))}
               onPress={() =>
                 onPick({
-                  text: `我要咨询报修单 ${record.repairId}`,
+                  text: `查询报修 ${record.repairId}`,
                   deviceId: deviceOfRepair(record)?.id,
                   caseId: record.id,
                 })
@@ -69,14 +98,11 @@ export const QuickEntryCard = ({ onPick, hint = DEFAULT_HINT, onClose }: QuickEn
 
   if (step === 'device') {
     return (
-      <div className={cardClass}>
-        {closeButton}
-        <button type="button" className={s.back} onClick={() => setStep('root')}>
-          <ChevronLeft className={s.backIcon} aria-hidden="true" />
-          {`选择设备（${deviceList.length}）`}
-        </button>
+      <div className={s.card}>
+        {header(`选择设备（${devices.length}）`)}
+        {devices.length === 0 && <QuickEntryEmptyState kind="device" />}
         <div className={s.scrollList}>
-          {deviceList.map((device) => (
+          {devices.map((device) => (
             <EntryRow
               key={device.id}
               title={device.customName ?? device.name}
@@ -84,7 +110,7 @@ export const QuickEntryCard = ({ onPick, hint = DEFAULT_HINT, onClose }: QuickEn
               iconSrc={getModality(device.type).icon}
               onPress={() =>
                 onPick({
-                  text: `我要咨询 ${device.name}（${deviceNoOf(device)}）`,
+                  text: `咨询设备 ${device.name}（${deviceNoOf(device)}）`,
                   deviceId: device.id,
                 })
               }
@@ -97,19 +123,15 @@ export const QuickEntryCard = ({ onPick, hint = DEFAULT_HINT, onClose }: QuickEn
 
   if (step === 'new-device') {
     return (
-      <div className={cardClass}>
-        {closeButton}
-        <button type="button" className={s.back} onClick={() => setStep('root')}>
-          <ChevronLeft className={s.backIcon} aria-hidden="true" />
-          选择咨询方向
-        </button>
+      <div className={s.card}>
+        {header('选择咨询方向')}
         <div className={s.chips}>
           {NEW_DEVICE_TOPICS.map((topic) => (
             <button
               key={topic}
               type="button"
               className={s.chip}
-              onClick={() => onPick({ text: `我想咨询新设备的${topic}`, topic })}
+              onClick={() => onPick({ text: `咨询${topic}`, topic })}
             >
               {topic}
             </button>
@@ -120,24 +142,24 @@ export const QuickEntryCard = ({ onPick, hint = DEFAULT_HINT, onClose }: QuickEn
   }
 
   return (
-    <div className={cardClass}>
-      {closeButton}
+    <div className={s.card}>
+      {header()}
       {hint && <span className={s.hint}>{hint}</span>}
       <div className={s.list}>
-        {repairs.length > 0 && (
-          <EntryRow
-            title="报修中设备"
-            desc={`${repairs.length} 个进行中的报修 · 查进度 · 催单`}
-            onPress={() => setStep('repair')}
-          />
-        )}
         <EntryRow
-          title="已有设备"
+          title="查询报修"
+          desc={repairs.length > 0
+            ? `${repairs.length} 个进行中的报修 · 查进度 · 催单`
+            : '查询报修进度 · 报修问题咨询'}
+          onPress={() => setStep('repair')}
+        />
+        <EntryRow
+          title="咨询我的设备"
           desc="合同保养 · 使用问题 · 培训"
           onPress={() => setStep('device')}
         />
         <EntryRow
-          title="新设备"
+          title="商务咨询及其他"
           desc="采购报价 · 合同与续保 · 演示与培训"
           onPress={() => setStep('new-device')}
         />

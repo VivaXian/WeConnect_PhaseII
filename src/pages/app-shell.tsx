@@ -22,6 +22,7 @@ import { RepairFormPage } from './repair-form-page';
 import { ScanCameraPage } from './scan-camera-page';
 import { ScanDeviceInputPage } from './scan-device-input-page';
 import { SelfServicePage } from './self-service-page';
+import { UnreadConversationToast } from '../components/unread-conversation-toast';
 import { ServiceEvaluationPage } from './service-evaluation-page';
 import { SparePartsAuthPage } from './spare-parts-auth-page';
 import { EngineerVerifyPage } from './engineer-verify-page';
@@ -32,6 +33,7 @@ import { WorkOrderListPage } from './work-order-list-page';
 import { PrivacyPolicyPage } from './privacy-policy-page';
 import { FaqPage } from './faq-page';
 import { deviceList } from '../utils/device-data';
+import { CUSTOMER_SERVICE_TITLE } from '../utils/service-support-copy';
 import { findDeviceByName } from '../utils/device-modality';
 
 type NavState =
@@ -48,7 +50,6 @@ type NavState =
   | { type: 'conversation'; conversationId: string }
   | { type: 'conversation-history' }
   | { type: 'case-conversations'; repairId: string }
-  | { type: 'self-service' }
   | { type: 'faq' }
   | { type: 'privacy-policy' };
 
@@ -61,8 +62,11 @@ export const AppShell = () => {
   const isAdmin = role === 'admin';
 
   const [activeTab, setActiveTab] = useState<AppTab>('devices');
+  // 客服是全屏对话页（无 tab bar），返回要回到进来之前那个 tab
+  const [tabBeforeConsult, setTabBeforeConsult] = useState<AppTab>('devices');
   const [navStack, setNavStack] = useState<NavState[]>([{ type: 'tab-content' }]);
   const [profileSubPage, setProfileSubPage] = useState<ProfileSubPage>(null);
+  const [dismissedUnreadKey, setDismissedUnreadKey] = useState<string | null>(null);
   const currentNav = navStack[navStack.length - 1];
 
   const navigate = (state: NavState) => setNavStack((prev) => [...prev, state]);
@@ -71,6 +75,7 @@ export const AppShell = () => {
     setNavStack((prev) => [...prev.slice(0, -1), current, next]);
 
   const handleTabChange = (tab: AppTab) => {
+    if (tab === 'consult' && activeTab !== 'consult') setTabBeforeConsult(activeTab);
     setActiveTab(tab);
     setNavStack([{ type: 'tab-content' }]);
     setProfileSubPage(null);
@@ -248,20 +253,6 @@ export const AppShell = () => {
     );
   }
 
-  if (currentNav.type === 'self-service') {
-    return (
-      <div className={shellStyles.shell}>
-        <div className={shellStyles.content}>
-          <SelfServicePage
-            onBack={goBack}
-            onConversationPress={openConversation}
-            onHistoryPress={() => navigate({ type: 'conversation-history' })}
-          />
-        </div>
-      </div>
-    );
-  }
-
   if (currentNav.type === 'conversation') {
     return (
       <div className={shellStyles.shell}>
@@ -282,7 +273,11 @@ export const AppShell = () => {
     return (
       <div className={shellStyles.shell}>
         <div className={shellStyles.content}>
-          <ConversationHistoryPage onBack={goBack} onConversationPress={openConversation} />
+          <ConversationHistoryPage
+            onBack={goBack}
+            onConversationPress={openConversation}
+            onGeneralPress={goBack}
+          />
         </div>
       </div>
     );
@@ -304,6 +299,7 @@ export const AppShell = () => {
 
   const navVariant: 'logo' | 'back' | 'page' = (() => {
     if (activeTab === 'devices') return 'logo';
+    if (activeTab === 'consult') return 'back';
     if (activeTab === 'profile') {
       if (profileSubPage === null) return 'page';
       return 'back'; // messages or message-detail
@@ -313,6 +309,7 @@ export const AppShell = () => {
   const navTitle = (() => {
     if (activeTab === 'repair') return isAdmin ? '报修记录' : '我的报修';
     if (activeTab === 'orders') return '工单列表';
+    if (activeTab === 'consult') return CUSTOMER_SERVICE_TITLE;
     if (activeTab === 'profile') {
       if (profileSubPage === 'messages') return '通知中心';
       if (typeof profileSubPage === 'object' && profileSubPage !== null) return '通知详情';
@@ -321,6 +318,7 @@ export const AppShell = () => {
     return '飞利浦医疗在线服务';
   })();
   const navOnBack = (() => {
+    if (activeTab === 'consult') return () => setActiveTab(tabBeforeConsult);
     if (activeTab === 'profile') {
       if (profileSubPage === 'messages') return () => setProfileSubPage(null);
       if (typeof profileSubPage === 'object' && profileSubPage !== null) {
@@ -362,6 +360,15 @@ export const AppShell = () => {
             onWorkOrderPress={(orderId) => navigate({ type: 'work-order-detail', orderId })}
           />
         )}
+        {activeTab === 'consult' && (
+          <SelfServicePage
+            onConversationPress={openConversation}
+            onHistoryPress={() => navigate({ type: 'conversation-history' })}
+            onFaqPress={() => navigate({ type: 'faq' })}
+            onCasePress={(caseId) => navigate({ type: 'repair-detail', repairId: caseId })}
+            onDevicePress={openDeviceByName}
+          />
+        )}
         {activeTab === 'profile' && typeof profileSubPage === 'object' && profileSubPage !== null && profileSubPage.type === 'message-detail' && (
           <MessageDetailPage
             messageId={profileSubPage.messageId}
@@ -393,21 +400,31 @@ export const AppShell = () => {
             onInputDevicePress={() => navigate({ type: 'scan-device-input' })}
             onSparePartsAuthPress={() => navigate({ type: 'spare-parts-auth' })}
             onEngineerVerifyPress={() => navigate({ type: 'engineer-verify' })}
-            onRemoteServicePress={() => navigate({ type: 'self-service' })}
             onFaqPress={() => navigate({ type: 'faq' })}
             onPrivacyPolicyPress={() => navigate({ type: 'privacy-policy' })}
           />
         )}
       </div>
       <div className={shellStyles.bottomBar}>
-        <SharedBottomBar
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          pendingOrderCount={isAdmin ? 3 : 1}
-          unreadMessageCount={unreadMessageCount}
-          unreadConversationCount={unreadConversationCount}
-        />
+        {activeTab !== 'consult' && (
+          <SharedBottomBar
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            pendingOrderCount={isAdmin ? 3 : 1}
+            unreadMessageCount={unreadMessageCount}
+            unreadConversationCount={unreadConversationCount}
+          />
+        )}
       </div>
+      {activeTab !== 'consult' && (
+        <UnreadConversationToast
+          dismissedKey={dismissedUnreadKey}
+          onDismiss={setDismissedUnreadKey}
+          onOpenConversation={openConversation}
+          onOpenGeneral={() => handleTabChange('consult')}
+          onOpenAll={() => navigate({ type: 'conversation-history' })}
+        />
+      )}
     </div>
   );
 };

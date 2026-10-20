@@ -11,7 +11,7 @@ interface HandoffDividerProps {
 
 const caption = (role: HandoffRole, name?: string): string => {
   if (role === 'rse') return name ? `服务工程师 ${name} 加入对话` : '服务工程师加入对话';
-  return '本次在线沟通已结束';
+  return '飞利浦客户响应中心已接入';
 };
 
 export const HandoffDivider = ({ role, name, isMuted = false }: HandoffDividerProps) => (

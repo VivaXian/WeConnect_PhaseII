@@ -72,8 +72,7 @@ export const deviceStatusFlags = (
   { isAdmin, hasActiveRepair }: FlagContext
 ): DeviceStatusFlag[] => {
   const contractStatus = contractStatusOf(device);
-  const isRepairing =
-    hasActiveRepair || device.status === 'under-repair' || device.status === 'pending-repair';
+  const isRepairing = hasActiveRepair;
   const noContractRecord = contractStatus === 'none' && device.isDistributedDevice !== true;
 
   return [

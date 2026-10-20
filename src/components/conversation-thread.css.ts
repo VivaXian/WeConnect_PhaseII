@@ -9,6 +9,11 @@ export const threadStyles = {
     gap: 10,
     padding: '16px 16px 8px',
   }),
+  sessionHead: style({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
+  }),
   muted: style({
     opacity: 0.6,
   }),

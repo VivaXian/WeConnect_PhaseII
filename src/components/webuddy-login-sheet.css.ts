@@ -1,0 +1,70 @@
+import { style } from '@vanilla-extract/css';
+
+export const webuddyLoginStyles = {
+  page: style({
+    position: 'fixed',
+    top: 0,
+    bottom: 0,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: 375,
+    maxWidth: '100vw',
+    backgroundColor: '#ffffff',
+    display: 'flex',
+    flexDirection: 'column',
+    zIndex: 9999,
+  }),
+  topBar: style({
+    display: 'flex',
+    alignItems: 'center',
+    height: 48,
+    padding: '0 8px',
+    flexShrink: 0,
+  }),
+  backBtn: style({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 40,
+    height: 40,
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+  }),
+  brandBlock: style({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    padding: '24px 28px 36px',
+  }),
+  brandName: style({
+    fontWeight: 700,
+  }),
+  form: style({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    padding: '0 28px',
+  }),
+  label: style({
+    fontSize: 13,
+    color: '#555',
+    fontWeight: 500,
+    marginTop: 8,
+  }),
+  input: style({
+    width: '100%',
+    fontSize: 15,
+    borderRadius: 8,
+    border: '1.5px solid #d0d5dd',
+    outline: 'none',
+    fontFamily: 'inherit',
+    boxSizing: 'border-box',
+    padding: '10px 12px',
+  }),
+  submitRow: style({
+    display: 'flex',
+    flexDirection: 'column',
+    marginTop: 24,
+  }),
+};

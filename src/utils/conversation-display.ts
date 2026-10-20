@@ -1,7 +1,7 @@
 import type { Conversation, ConversationMessage } from '../types/conversation';
 import { allMessages, findRepairRecord, isCaseClosed, lastMessageOf } from './conversation-status';
 
-const FALLBACK_TITLE = '飞利浦服务';
+const FALLBACK_TITLE = '客户响应中心';
 
 const formatRepairDate = (value?: string): string => {
   if (!value) return '';
@@ -32,12 +32,21 @@ export const lastResponderMessage = (conversation: Conversation): ConversationMe
     .reverse()
     .find((message) => message.senderRole !== 'customer' && message.senderRole !== 'system') ?? null;
 
-export const isEngineerConversation = (conversation: Conversation): boolean =>
+/** 当前对接方——远程工单开着是工程师，关了就回到 CCC */
+export const conversationPartnerLabel = (conversation: Conversation): string => {
+  const last = lastResponderMessage(conversation);
+  if (last?.senderRole === 'rse') return last.senderName ?? '服务工程师';
+  return '客户响应中心';
+};
+
+export const hasEngineerPartner = (conversation: Conversation): boolean =>
   lastResponderMessage(conversation)?.senderRole === 'rse';
 
 export const lastMessageText = (conversation: Conversation): string => {
   const last = lastMessageOf(conversation);
-  if (!last) return '';
+  if (!last) {
+    return conversation.scope === 'general' ? '7×24 小时接收您的消息' : '';
+  }
   if (last.type === 'image') return last.content || '[图片]';
   if (last.type === 'device-summary') return '[设备状态]';
   return last.content;

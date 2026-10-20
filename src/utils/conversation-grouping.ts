@@ -11,19 +11,14 @@ const parseTime = (value?: string): number => {
 export const isOwnConversation = (conversation: Conversation): boolean =>
   conversation.ownerId === CURRENT_USER_ID;
 
-export const hasCustomerActivity = (conversation: Conversation): boolean =>
-  allMessages(conversation).some((message) => message.senderRole === 'customer');
-
 const byRecency = (a: Conversation, b: Conversation) =>
   parseTime(b.updatedAt) - parseTime(a.updatedAt);
 
-const hasResponderFollowUp = (conversation: Conversation): boolean =>
-  allMessages(conversation).length > 1;
-
+// 只要不是空对话就算数：工程师主动发的那一条也得浮上来
 const listable = (conversation: Conversation) =>
   conversation.scope === 'repair'
   && isOwnConversation(conversation)
-  && (hasCustomerActivity(conversation) || hasResponderFollowUp(conversation));
+  && allMessages(conversation).length > 0;
 
 export const generalConversationOf = (conversations: Conversation[]): Conversation | undefined =>
   conversations.find((item) => item.scope === 'general' && isOwnConversation(item));

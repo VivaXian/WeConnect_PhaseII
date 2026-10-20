@@ -5,8 +5,8 @@ export const transferCardStyles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 8,
-    padding: '14px 0 6px',
+    gap: 6,
+    padding: 0,
   }),
   caption: style({
     fontSize: 12,

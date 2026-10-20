@@ -15,8 +15,9 @@ export const handoffAt = (messages: ConversationMessage[], index: number): Hando
   if (!isResponder(message)) return null;
 
   const previous = messages.slice(0, index).reverse().find(isResponder);
-  if (!previous) return message.senderRole === 'rse' ? { role: 'rse', name: message.senderName } : null;
-  if (previous.senderRole === message.senderRole && previous.senderName === message.senderName) return null;
+  if (previous && previous.senderRole === message.senderRole && previous.senderName === message.senderName) {
+    return null;
+  }
 
   return { role: message.senderRole as HandoffRole, name: message.senderName };
 };

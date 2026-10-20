@@ -31,6 +31,8 @@ export interface ConversationMessage {
   originWorkOrderId?: string;
   deviceId?: string;
   caseId?: string;
+  /** 设备卡是历史，发出时查到什么就永远是什么；null 表示当时没有进行中的报修 */
+  repairSnapshot?: string | null;
   transferTo?: TransferTarget;
 }
 

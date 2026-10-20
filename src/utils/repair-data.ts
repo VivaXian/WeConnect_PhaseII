@@ -1,4 +1,57 @@
 import type { MonthGroup } from '../types/repair';
+import { deviceList } from './device-data';
+
+const today = new Date();
+const pad = (value: number) => `${value}`.padStart(2, '0');
+const todayAt = (time: string) =>
+  `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())} ${time}`;
+
+export const DEMO_REPAIR_CASE_ID = 'may26-2';
+const DEMO_REPAIR_DEVICE_ID = 'dev-012';
+
+/** 演示里这张单由 CCC 当场创建，在那之前它不该出现在任何列表或设备卡上 */
+const demoRepairGroup: MonthGroup = {
+  month: `${today.getFullYear()}年${today.getMonth() + 1}月 (1)`,
+  records: [
+    {
+      id: DEMO_REPAIR_CASE_ID,
+      repairId: 'D-12126619',
+      deviceName: 'EPIQ 7',
+      hospital: 'WeConnect医院（南院）',
+      department: '心脏超声科',
+      eq: '2094002',
+      serialNo: 'US-2024-0431',
+      contactPerson: '王护士长',
+      contactPhone: '13700002211',
+      repairTime: todayAt('09:12:00'),
+      problemDescription: '开机后触摸屏无响应，需要反复重启才能进入操作界面。',
+      statusTitle: '服务中',
+      tagline: '创新于心，医路护行，我们一直在您身边',
+      status: 'in-service' as const,
+      source: 'mini-program' as const,
+      serviceTag: '服务中',
+      progress: {
+        icon: 'person-headset' as const,
+        label: '已分配服务工程师',
+        date: todayAt('09:15:00'),
+        detail: '',
+        engineer: { name: '王工', role: '飞利浦服务工程师' },
+      },
+      buttons: ['设备详情', '报修详情'],
+      timeline: [
+        { icon: 'check' as const, label: '报修已收到', date: todayAt('09:12'), isCompleted: true },
+        {
+          icon: 'person' as const,
+          label: '已分配服务工程师',
+          date: todayAt('09:15'),
+          detail: '飞利浦服务工程师：王工',
+          isCompleted: true,
+        },
+        { icon: 'dot' as const, label: '服务中', date: '', isCompleted: false },
+      ],
+    },
+  ],
+};
 
 export const repairData: MonthGroup[] = [
   {
@@ -42,7 +95,7 @@ export const repairData: MonthGroup[] = [
     ],
   },
   {
-    month: '2026年5月 (2)',
+    month: '2026年5月 (1)',
     records: [
       {
         id: 'may26-1',
@@ -438,3 +491,16 @@ export const repairData: MonthGroup[] = [
     ],
   },
 ];
+
+/** CCC 建单那一刻才把这张单放进列表，各处都是在渲染时读 repairData，所以直接改数组即可 */
+export const ensureDemoRepair = (caseId: string) => {
+  if (caseId !== DEMO_REPAIR_CASE_ID) return;
+  const exists = repairData.some((group) =>
+    group.records.some((record) => record.id === DEMO_REPAIR_CASE_ID)
+  );
+  if (exists) return;
+
+  repairData.unshift(demoRepairGroup);
+  const device = deviceList.find((item) => item.id === DEMO_REPAIR_DEVICE_ID);
+  if (device) device.status = 'under-repair';
+};

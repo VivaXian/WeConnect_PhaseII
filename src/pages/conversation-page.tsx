@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Text } from '@filament/react/text';
 import { useShallow } from 'zustand/react/shallow';
 import { useConversationStore } from '../stores/conversation-store';
@@ -7,7 +7,7 @@ import { useRoleStore } from '../stores/role-store';
 import {
   activeEngineerName,
   allMessages,
-  openSegmentOf,
+  isCaseClosed,
 } from '../utils/conversation-status';
 import { isOwnConversation } from '../utils/conversation-grouping';
 import { conversationPartnerName } from '../utils/conversation-display';
@@ -17,6 +17,7 @@ import { ConversationThread } from '../components/conversation-thread';
 import { ConversationCaseHeader } from '../components/conversation-case-header';
 import { ConversationClosedNote } from '../components/conversation-closed-note';
 import { MessageComposer } from '../components/message-composer';
+import { QuickEntryCard } from '../components/quick-entry-card';
 import { conversationPageStyles as s } from './conversation-page.css';
 
 interface ConversationPageProps {
@@ -34,15 +35,17 @@ export const ConversationPage = ({
   onDevicePress,
   onConversationPress,
 }: ConversationPageProps) => {
-  const { sendMessage, markRead, retryMessage } = useConversationStore(
+  const { sendMessage, markRead, retryMessage, submitQuickEntry } = useConversationStore(
     useShallow((state) => ({
       sendMessage: state.sendMessage,
       markRead: state.markRead,
       retryMessage: state.retryMessage,
+      submitQuickEntry: state.submitQuickEntry,
     }))
   );
   const conversations = useVisibleConversations();
   const { role } = useRoleStore();
+  const [isPickerOpen, setPickerOpen] = useState(false);
 
   const conversation = conversations.find((item) => item.id === conversationId);
 
@@ -80,8 +83,9 @@ export const ConversationPage = ({
   const record = caseRef
     ? repairData.flatMap((group) => group.records).find((item) => item.id === caseRef.id)
     : undefined;
-  const title = caseRef ? `报修 ${caseRef.displayNo}` : '历史对话';
-  const canReply = !isReadOnly && Boolean(openSegmentOf(conversation));
+  const title = caseRef ? `报修 ${caseRef.displayNo}` : '客户响应中心';
+  // 远程工单关闭不再锁输入框，消息转由 CCC 接待；只有报修单结束才只读
+  const canReply = !isReadOnly && !isCaseClosed(conversation);
 
   return (
     <div className={s.page}>
@@ -113,14 +117,36 @@ export const ConversationPage = ({
       />
 
       {canReply && (
-        <MessageComposer
-          onSend={(text, attachments) =>
-            sendMessage(conversation.id, text, attachments, {
-              engineerName: activeEngineerName(conversation) ?? record?.progress.engineer?.name,
-              originWorkOrderId: record?.linkedWorkOrders?.[0]?.id,
-            })
-          }
-        />
+        <>
+          {isPickerOpen && (
+            <div className={s.pickerPanel}>
+              <QuickEntryCard
+                hint={null}
+                onClose={() => setPickerOpen(false)}
+                onPick={(pick) => {
+                  setPickerOpen(false);
+                  submitQuickEntry(conversation.id, pick.text, {
+                    topic: pick.topic,
+                    deviceId: pick.deviceId,
+                    caseId: pick.caseId,
+                  });
+                }}
+              />
+            </div>
+          )}
+          <MessageComposer
+            onPickContext={
+              conversation.scope === 'general' ? () => setPickerOpen((open) => !open) : undefined
+            }
+            onSend={(text, attachments) => {
+              sendMessage(conversation.id, text, attachments, {
+                engineerName: record?.progress.engineer?.name,
+                originWorkOrderId: record?.linkedWorkOrders?.[0]?.id,
+              });
+              setPickerOpen(false);
+            }}
+          />
+        </>
       )}
 
       {!canReply && !isReadOnly && caseRef && (

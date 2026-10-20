@@ -1,5 +1,5 @@
 import type { Conversation, ConversationMessage, ConversationSegment } from '../types/conversation';
-import { CURRENT_USER_ID, repairConversationId } from '../types/conversation';
+import { CURRENT_USER_ID, GENERAL_CONVERSATION_ID, repairConversationId } from '../types/conversation';
 
 const daysAgo = (days: number): string => {
   const date = new Date();
@@ -9,7 +9,7 @@ const daysAgo = (days: number): string => {
   return `${date.getFullYear()}-${month}-${day}`;
 };
 
-export const CONVERSATION_SEED_VERSION = 15;
+export const CONVERSATION_SEED_VERSION = 21;
 
 type MessageSeed = Omit<ConversationMessage, 'isRead'> & { isRead?: boolean };
 
@@ -205,6 +205,60 @@ const colleagueElitionConversation: Conversation = {
   ],
 };
 
+/** 演示全链路：用户发问 → CCC 接入并回复 → CCC 分配工程师 → 工程师接手 */
+const elitionConversation: Conversation = {
+  id: repairConversationId('apr26-1', CURRENT_USER_ID),
+  scope: 'repair',
+  caseRef: { kind: 'repair', id: 'apr26-1', displayNo: 'D-12126601', deviceName: 'Elition 磁共振' },
+  ...OWNER_ME,
+  audience: 'user',
+  createdAt: `${daysAgo(1)}T10:12:00`,
+  updatedAt: `${daysAgo(1)}T10:41:00`,
+  segments: [
+    segment({
+      id: 'seg-wo-eli-me-1',
+      kind: 'work-order',
+      caseId: 'apr26-1',
+      workOrderNo: 'W0128923815',
+      engineerName: '刘工',
+      status: 'open',
+      startedAt: `${daysAgo(1)}T10:12:00`,
+      messages: [
+        {
+          id: 'eli-me-1',
+          senderRole: 'customer',
+          type: 'text',
+          content: '这台磁共振今天又进不去扫描界面了，上周处理过一次，现在又复发。',
+          createdAt: `${daysAgo(1)}T10:12:00`,
+        },
+        {
+          id: 'eli-me-2',
+          senderRole: 'ccc',
+          type: 'text',
+          content: '您好，这里是飞利浦客户响应中心，已收到您的信息，正在为您查看。',
+          createdAt: `${daysAgo(1)}T10:19:00`,
+        },
+        {
+          id: 'eli-me-3',
+          senderRole: 'ccc',
+          type: 'text',
+          content: '查到该设备 4 月曾因梯度放大器过温报修过。这次复发需要远程服务工程师协助，我来为您安排。',
+          createdAt: `${daysAgo(1)}T10:26:00`,
+        },
+        {
+          id: 'eli-me-4',
+          senderRole: 'rse',
+          senderName: '刘工',
+          type: 'text',
+          content: '您好，我是服务工程师刘工，4 月那次也是我跟进的。麻烦先把报错界面拍一张给我，设备先保持开机不要断电。',
+          createdAt: `${daysAgo(1)}T10:41:00`,
+          isRead: false,
+        },
+      ],
+    }),
+  ],
+};
+
 const azurionConversation: Conversation = {
   id: repairConversationId('jul26-1', CURRENT_USER_ID),
   scope: 'repair',
@@ -266,9 +320,145 @@ const azurionConversation: Conversation = {
   ],
 };
 
+const generalConversation: Conversation = {
+  id: GENERAL_CONVERSATION_ID,
+  scope: 'general',
+  ...OWNER_ME,
+  createdAt: `${daysAgo(6)}T14:20:00`,
+  updatedAt: `${daysAgo(0)}T09:00:00`,
+  segments: [
+    segment({
+      id: 'seg-inquiry-biz',
+      kind: 'inquiry',
+      caseId: 'inq-biz',
+      status: 'closed',
+      startedAt: `${daysAgo(6)}T14:20:00`,
+      closedAt: `${daysAgo(6)}T15:02:00`,
+      messages: [
+        {
+          id: 'inq-biz-1',
+          senderRole: 'customer',
+          type: 'text',
+          content: '咨询采购报价',
+          createdAt: `${daysAgo(6)}T14:20:00`,
+        },
+        {
+          id: 'inq-biz-2',
+          senderRole: 'ccc',
+          type: 'text',
+          content: '已收到您关于「采购报价」的咨询。客户响应中心正在为您接入，请稍作等待。',
+          createdAt: `${daysAgo(6)}T14:22:00`,
+        },
+        {
+          id: 'inq-biz-3',
+          senderRole: 'customer',
+          type: 'text',
+          content: '想了解超声科再增配一台便携超声的价格区间和交付周期。',
+          createdAt: `${daysAgo(6)}T14:31:00`,
+        },
+        {
+          id: 'inq-biz-4',
+          senderRole: 'ccc',
+          type: 'text',
+          content: '已转给华东区商务同事，会在 1 个工作日内与您联系。如需加急可拨打 400-810-0038。',
+          createdAt: `${daysAgo(6)}T15:02:00`,
+        },
+      ],
+    }),
+    segment({
+      id: 'seg-inquiry-contract',
+      kind: 'inquiry',
+      caseId: 'inq-contract',
+      status: 'closed',
+      startedAt: `${daysAgo(3)}T10:08:00`,
+      closedAt: `${daysAgo(3)}T10:35:00`,
+      messages: [
+        {
+          id: 'inq-contract-1',
+          senderRole: 'customer',
+          type: 'text',
+          content: 'Affiniti 70 的服务合同什么时候到期？续保要走什么流程？',
+          createdAt: `${daysAgo(3)}T10:08:00`,
+        },
+        {
+          id: 'inq-contract-2',
+          senderRole: 'ccc',
+          type: 'text',
+          content: '您好，这里是飞利浦客户响应中心，已收到您的信息，正在为您查看。',
+          createdAt: `${daysAgo(3)}T10:12:00`,
+        },
+        {
+          id: 'inq-contract-3',
+          senderRole: 'ccc',
+          type: 'text',
+          content: '该设备服务合同剩余 52 天。续保需要科室提交申请，商务同事会把报价和合同一并发给您。',
+          createdAt: `${daysAgo(3)}T10:35:00`,
+        },
+      ],
+    }),
+    segment({
+      id: 'seg-inquiry-device',
+      kind: 'inquiry',
+      caseId: 'inq-device',
+      status: 'closed',
+      startedAt: `${daysAgo(1)}T16:05:00`,
+      closedAt: `${daysAgo(1)}T16:48:00`,
+      messages: [
+        {
+          id: 'inq-device-1',
+          senderRole: 'customer',
+          type: 'text',
+          content: '咨询设备 BigBore CT 7500（EQ 2093720）',
+          createdAt: `${daysAgo(1)}T16:05:00`,
+        },
+        {
+          id: 'inq-device-2',
+          senderRole: 'system',
+          type: 'device-summary',
+          content: '[设备状态]',
+          deviceId: 'dev-005',
+          repairSnapshot: null,
+          createdAt: `${daysAgo(1)}T16:05:00`,
+        },
+        {
+          id: 'inq-device-3',
+          senderRole: 'ccc',
+          type: 'text',
+          content: '客户响应中心正在为您接入，请稍作等待。您可以先补充说明遇到的问题，或直接上传照片。',
+          createdAt: `${daysAgo(1)}T16:07:00`,
+        },
+        {
+          id: 'inq-device-4',
+          senderRole: 'customer',
+          type: 'text',
+          content: '这台机器下周三要做年度保养，想确认一下工程师几点到、大概停机多久。',
+          createdAt: `${daysAgo(1)}T16:12:00`,
+        },
+        {
+          id: 'inq-device-5',
+          senderRole: 'ccc',
+          type: 'text',
+          content: '已查到保养工单 WM0125120101，工程师预计上午 9 点到场，停机约 3 小时。前一天我们会再和科室确认一次。',
+          createdAt: `${daysAgo(1)}T16:48:00`,
+        },
+      ],
+    }),
+    segment({
+      id: 'seg-inquiry-open',
+      kind: 'inquiry',
+      caseId: 'inq-open',
+      status: 'open',
+      startedAt: `${daysAgo(0)}T09:00:00`,
+      messages: [],
+    }),
+  ],
+};
+
 export const conversationSeed: Conversation[] = [
+  generalConversation,
   epiqConversation,
   vereosConversation,
+  elitionConversation,
   colleagueElitionConversation,
   azurionConversation,
 ];

@@ -10,9 +10,17 @@ const MAX_ATTACHMENTS = 6;
 
 interface MessageComposerProps {
   onSend: (text: string, attachments: ConversationAttachment[]) => void;
+  onPickContext?: () => void;
+  onRepairPress?: () => void;
+  onFaqPress?: () => void;
 }
 
-export const MessageComposer = ({ onSend }: MessageComposerProps) => {
+export const MessageComposer = ({
+  onSend,
+  onPickContext,
+  onRepairPress,
+  onFaqPress,
+}: MessageComposerProps) => {
   const [text, setText] = useState('');
   const [attachments, setAttachments] = useState<ConversationAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -49,6 +57,25 @@ export const MessageComposer = ({ onSend }: MessageComposerProps) => {
 
   return (
     <div className={composerStyles.composer}>
+      {(onPickContext || onRepairPress || onFaqPress) && (
+        <div className={composerStyles.actionRow}>
+          {onPickContext && (
+            <button type="button" className={composerStyles.actionChip} onClick={onPickContext}>
+              选择咨询内容
+            </button>
+          )}
+          {onFaqPress && (
+            <button type="button" className={composerStyles.actionChip} onClick={onFaqPress}>
+              常见问题
+            </button>
+          )}
+          {onRepairPress && (
+            <button type="button" className={composerStyles.actionChip} onClick={onRepairPress}>
+              全部对话
+            </button>
+          )}
+        </div>
+      )}
       {attachments.length > 0 && (
         <div className={composerStyles.previewRow}>
           {attachments.map((attachment) => (
@@ -91,7 +118,7 @@ export const MessageComposer = ({ onSend }: MessageComposerProps) => {
         <div className={composerStyles.fieldWrapper}>
           <TextField
             aria-label="消息输入"
-            placeholder="回复工程师…"
+            placeholder="描述您的问题…"
             value={text}
             onChange={setText}
             isFullWidth

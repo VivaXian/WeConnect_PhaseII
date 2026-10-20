@@ -1,4 +1,5 @@
 import type { RepairRecord } from '../types/repair';
+import { deviceList } from './device-data';
 import { repairData } from './repair-data';
 
 const OPEN_STATUS: RepairRecord['status'][] = ['reported', 'in-service'];
@@ -11,3 +12,8 @@ export const repairById = (id: string): RepairRecord | undefined =>
 
 export const activeRepairOfDevice = (deviceName: string): RepairRecord | undefined =>
   activeRepairs().find((record) => record.deviceName === deviceName);
+
+export const activeRepairIdOfDevice = (deviceId: string): string | null => {
+  const device = deviceList.find((item) => item.id === deviceId);
+  return (device ? activeRepairOfDevice(device.name)?.id : undefined) ?? null;
+};

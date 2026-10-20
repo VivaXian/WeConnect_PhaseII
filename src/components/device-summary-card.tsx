@@ -34,6 +34,8 @@ const deviceRows = (device: Device, repair: RepairRecord | undefined, canSeeCont
 interface DeviceSummaryCardProps {
   deviceId: string;
   caseId?: string;
+  /** 来自消息的快照：传了就以它为准，不再实时查；null 代表当时没有进行中的报修 */
+  repairSnapshot?: string | null;
   onOpenCase?: (caseId: string) => void;
   onOpenDevice?: (deviceName: string) => void;
 }
@@ -45,18 +47,30 @@ const CHIP_CLASS: Record<DeviceStatusFlag['signal'], string> = {
   information: s.chipInfo,
 };
 
-export const DeviceSummaryCard = ({ deviceId, caseId, onOpenCase, onOpenDevice }: DeviceSummaryCardProps) => {
+export const DeviceSummaryCard = ({
+  deviceId,
+  caseId,
+  repairSnapshot,
+  onOpenCase,
+  onOpenDevice,
+}: DeviceSummaryCardProps) => {
   const role = useRoleStore((state) => state.role);
   const device = deviceList.find((item) => item.id === deviceId);
   if (!device) return null;
 
-  const repair = caseId ? repairById(caseId) : activeRepairOfDevice(device.name);
+  const isSnapshot = repairSnapshot !== undefined;
+  const repair = isSnapshot
+    ? (repairSnapshot ? repairById(repairSnapshot) : undefined)
+    : (caseId ? repairById(caseId) : activeRepairOfDevice(device.name));
+  const hasActiveRepair =
+    Boolean(repair)
+    || (!isSnapshot && (device.status === 'under-repair' || device.status === 'pending-repair'));
   const isRepairView = Boolean(caseId && repair);
   const rows = isRepairView && repair ? repairRows(repair) : deviceRows(device, repair, role === 'admin');
   const flags: DeviceStatusFlag[] =
     isRepairView && repair
       ? [{ label: repair.statusTitle ?? '服务中', signal: 'information' }]
-      : deviceStatusFlags(device, { isAdmin: role === 'admin', hasActiveRepair: Boolean(repair) });
+      : deviceStatusFlags(device, { isAdmin: role === 'admin', hasActiveRepair });
 
   const handlePress = () => {
     if (isRepairView && repair) {

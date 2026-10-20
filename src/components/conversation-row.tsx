@@ -6,7 +6,6 @@ import {
   conversationStatus,
   conversationTitle,
   formatConversationTime,
-  isEngineerConversation,
   lastMessageText,
 } from '../utils/conversation-display';
 import { isCaseClosed } from '../utils/conversation-status';
@@ -24,7 +23,8 @@ export const ConversationRow = ({ conversation, unread, onPress }: ConversationR
   const status = conversationStatus(conversation);
   const meta = conversationMeta(conversation);
   const isClosed = isCaseClosed(conversation);
-  const isEngineer = isEngineerConversation(conversation);
+  // 头像的职责是区分对话类型，不是报告谁最后说话
+  const avatarRole = conversation.scope === 'general' ? 'ccc' : 'engineer';
 
   return (
     <button
@@ -32,7 +32,7 @@ export const ConversationRow = ({ conversation, unread, onPress }: ConversationR
       className={s.row}
       onClick={() => onPress(conversation.id)}
     >
-      <RoleAvatar role={isEngineer ? 'engineer' : 'ccc'} size={40} isMuted={isClosed} />
+      <RoleAvatar role={avatarRole} size={40} isMuted={isClosed} />
       <div className={s.content}>
         <div className={s.top}>
           <span className={clsx(s.title, isClosed && s.titleClosed)}>{conversationTitle(conversation)}</span>

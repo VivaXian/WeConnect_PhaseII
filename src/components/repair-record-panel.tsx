@@ -6,6 +6,7 @@ import type { MonthGroup, RepairStatus } from '../types/repair';
 import { deviceList } from '../utils/device-data';
 import { repairData } from '../utils/repair-data';
 import { RepairList } from './repair-list';
+import { useIsNewDemoUser } from '../hooks/use-is-new-demo-user';
 import { homePageStyles } from '../pages/home-page.css';
 
 type FilterChip = 'all' | RepairStatus;
@@ -30,6 +31,7 @@ export const RepairRecordPanel = ({
   onServiceEvalPress,
   showScanEntry = false,
 }: RepairRecordPanelProps) => {
+  const isNewDemoUser = useIsNewDemoUser();
   const [activeChip, setActiveChip] = useState<FilterChip>('all');
 
   const handleDevicePress = (deviceName: string) => {
@@ -40,6 +42,7 @@ export const RepairRecordPanel = ({
   };
 
   const filteredGroups = useMemo<MonthGroup[]>(() => {
+    if (isNewDemoUser) return [];
     if (activeChip === 'all') {
       return repairData;
     }
@@ -49,7 +52,7 @@ export const RepairRecordPanel = ({
       .filter((record) => record.status === activeChip);
 
     return records.length > 0 ? [{ month: '筛选结果', records }] : [];
-  }, [activeChip]);
+  }, [activeChip, isNewDemoUser]);
 
   return (
     <>

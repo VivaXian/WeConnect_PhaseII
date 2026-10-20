@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { ChatBubble, ChatBubbleMedia } from '@filament/react/chat-bubble';
 import { ErrorFill } from '@filament/react/icons/error-fill';
-import type { ConversationMessage, TransferTarget } from '../types/conversation';
+import type { ConversationMessage, SegmentKind, TransferTarget } from '../types/conversation';
 import { handoffAt } from '../utils/conversation-handoff';
 import { DeviceSummaryCard } from './device-summary-card';
 import { HandoffDivider } from './handoff-divider';
@@ -24,6 +24,7 @@ const SenderAvatar = ({ message, isMuted }: { message: ConversationMessage; isMu
 interface ThreadMessageProps {
   messages: ConversationMessage[];
   index: number;
+  segmentKind: SegmentKind;
   isMuted?: boolean;
   onTransferPress?: (target: TransferTarget) => void;
   onRetry?: (messageId: string) => void;
@@ -34,6 +35,7 @@ interface ThreadMessageProps {
 export const ThreadMessage = ({
   messages,
   index,
+  segmentKind,
   isMuted = false,
   onTransferPress,
   onRetry,
@@ -47,6 +49,20 @@ export const ThreadMessage = ({
   const isRunEnd = next?.senderRole !== message.senderRole || next?.senderName !== message.senderName;
 
   if (message.senderRole === 'system') {
+    // 系统自动调取的信息卡：没有应答方，所以不出「已接入」标记
+    if (message.type === 'device-summary' && message.deviceId) {
+      return (
+        <div className={s.cardRow}>
+          <DeviceSummaryCard
+            deviceId={message.deviceId}
+            caseId={message.caseId}
+            repairSnapshot={message.repairSnapshot}
+            onOpenCase={onOpenCase}
+            onOpenDevice={onOpenDevice}
+          />
+        </div>
+      );
+    }
     if (message.transferTo && onTransferPress) {
       return <TransferCard target={message.transferTo} onPress={onTransferPress} />;
     }
@@ -86,7 +102,9 @@ export const ThreadMessage = ({
     );
   }
 
-  const handoff = isRunStart ? handoffAt(messages, index) : null;
+  const entered = isRunStart ? handoffAt(messages, index) : null;
+  // 只标记非默认身份的进场：咨询段里对面恒为客户响应中心，没有身份变化可标
+  const handoff = entered?.role === 'ccc' && segmentKind === 'inquiry' ? null : entered;
 
   if (message.type === 'device-summary' && message.deviceId) {
     return (
@@ -96,6 +114,7 @@ export const ThreadMessage = ({
           <DeviceSummaryCard
             deviceId={message.deviceId}
             caseId={message.caseId}
+            repairSnapshot={message.repairSnapshot}
             onOpenCase={onOpenCase}
             onOpenDevice={onOpenDevice}
           />

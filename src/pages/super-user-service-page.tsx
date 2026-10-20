@@ -8,6 +8,7 @@ import clsx from 'clsx';
 import { useMemo, useState } from 'react';
 import { RepairList } from '../components/repair-list';
 import { useLoadMore } from '../hooks/use-load-more';
+import { useIsNewDemoUser } from '../hooks/use-is-new-demo-user';
 import type { Device } from '../types/device';
 import type { MonthGroup, RepairSource, RepairStatus } from '../types/repair';
 import { deviceList } from '../utils/device-data';
@@ -90,6 +91,7 @@ export const SuperUserServicePage = ({
   onRepairDetailPress,
   onServiceEvalPress,
 }: SuperUserServicePageProps) => {
+  const isNewDemoUser = useIsNewDemoUser();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
@@ -111,12 +113,13 @@ export const SuperUserServicePage = ({
   };
 
   const groups = useMemo(() => {
+    if (isNewDemoUser) return [];
     const hasFilter =
       search.trim() !== '' || statusFilter !== 'all' || timeFilter !== 'all' || sourceFilter !== 'all';
     return hasFilter
       ? applyFilters(search, statusFilter, timeFilter, sourceFilter)
       : repairData;
-  }, [search, statusFilter, timeFilter, sourceFilter]);
+  }, [search, statusFilter, timeFilter, sourceFilter, isNewDemoUser]);
 
   const allRecords = useMemo(() => groups.flatMap((g) => g.records), [groups]);
   const { hasMore: repairsHasMore, loadMore: repairsLoadMore, total: repairsTotal, shown: repairsShown } = useLoadMore(allRecords, 5);
