@@ -40,7 +40,7 @@ type RoleState = {
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
 export const useRoleStore = create<RoleState>((set) => ({
-  role: 'admin',
+  role: 'user',
   upgradeStatus: 'not-applied',
   upgradeSubmittedAt: null,
   upgradeHospitals: [],

@@ -1,17 +1,52 @@
 import { style } from '@vanilla-extract/css';
+import { colorTheme } from '@filament/themes/contracts/color.css';
+
+const presentationMedia = 'screen and (min-width: 600px)';
 
 export const roleSwitcherStyles = {
   bar: style({
     width: '100%',
     flexShrink: 0,
     display: 'flex',
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 0,
     backgroundColor: '#f0f0f0',
     borderBottom: '1px solid #e0e0e0',
     height: 36,
+    '@media': {
+      [presentationMedia]: {
+        width: 'auto',
+        alignSelf: 'center',
+        height: 40,
+        backgroundColor: 'transparent',
+        border: 'none',
+      },
+    },
+  }),
+  controls: style({
+    display: 'contents',
+    '@media': {
+      [presentationMedia]: {
+        display: 'flex',
+        alignItems: 'center',
+        height: '100%',
+        gap: 12,
+      },
+    },
+  }),
+  segmentedControl: style({
+    display: 'contents',
+    '@media': {
+      [presentationMedia]: {
+        display: 'flex',
+        height: '100%',
+        boxSizing: 'border-box',
+        backgroundColor: colorTheme.container.background.primary,
+        border: `1px solid ${colorTheme.container.border.color.default}`,
+        borderRadius: 12,
+        overflow: 'hidden',
+      },
+    },
   }),
   btn: style({
     flex: 1,
@@ -26,8 +61,23 @@ export const roleSwitcherStyles = {
     color: '#666',
     fontFamily: 'inherit',
     whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    '@media': {
+      [presentationMedia]: {
+        flex: 'none',
+        minWidth: 100,
+        color: colorTheme.foreground.color.secondary,
+        selectors: {
+          '&[aria-pressed="true"]': {
+            backgroundColor: colorTheme.element.background.primary.default,
+            color: colorTheme.foreground.color.onPrimary,
+          },
+          '&:focus-visible': {
+            outline: `2px solid ${colorTheme.element.focusOutline.color}`,
+            outlineOffset: -3,
+          },
+        },
+      },
+    },
   }),
   btnActive: style({
     backgroundColor: '#0072db',
@@ -48,5 +98,24 @@ export const roleSwitcherStyles = {
     color: '#8a8a8a',
     fontFamily: 'inherit',
     whiteSpace: 'nowrap',
+    '@media': {
+      [presentationMedia]: {
+        padding: '0 16px',
+        boxSizing: 'border-box',
+        backgroundColor: colorTheme.container.background.primary,
+        border: `1px solid ${colorTheme.container.border.color.default}`,
+        borderRadius: 12,
+        color: colorTheme.foreground.color.secondary,
+        selectors: {
+          '&:hover': {
+            backgroundColor: colorTheme.element.background.hover,
+          },
+          '&:focus-visible': {
+            outline: `2px solid ${colorTheme.element.focusOutline.color}`,
+            outlineOffset: 2,
+          },
+        },
+      },
+    },
   }),
 };

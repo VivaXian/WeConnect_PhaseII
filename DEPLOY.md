@@ -1,5 +1,21 @@
 # Deployment Guide
 
+## 演示分支本地预览
+
+`demo/tablet-presentation` 使用独立工作区，不修改 `main`。
+宽度达到 600px 时，顶部仅显示身份切换与重置按钮；手机画面固定为
+375 × 812，连同外壳按剩余空间等比缩放，横竖屏均居中展示。
+手机尺寸下保留原来的页面布局。刷新或重置后默认为认证用户。
+
+本地根路径预览需先运行 `yarn type-check && yarn build --base /`，
+然后运行 `python3 -m http.server 5182 --bind 127.0.0.1 --directory dist`。
+修改代码后需重新构建并刷新预览。此预览不执行 GitHub Pages 部署。
+
+演示版上线时，提交并推送 `demo/tablet-presentation` 和独立演示标签，
+不要合并到 `main`。使用默认的 `/WeConnect_PhaseII/` 构建路径，
+将构建产物发布到 `gh-pages`，会替换现有线上首页，但不修改 `main`。
+需要恢复设计版时，从 `main` 重新构建并部署即可。
+
 ## 重要约束
 
 `@filament` 系列包托管在 Philips Artifactory（需要 VPN），GitHub Actions 服务器无法访问。

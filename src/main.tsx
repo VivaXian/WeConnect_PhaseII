@@ -13,7 +13,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './app';
 import { appFontFamily } from './app-font.css';
-import { Toast } from './components/toast';
 
 const AppWithTheme = () => (
   <div
@@ -22,7 +21,6 @@ const AppWithTheme = () => (
     <Portal>
       <App />
     </Portal>
-    <Toast />
   </div>
 );
 
