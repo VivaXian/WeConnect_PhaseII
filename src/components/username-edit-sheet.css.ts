@@ -8,7 +8,7 @@ export const usernameEditStyles = {
     left: '50%',
     transform: 'translateX(-50%)',
     width: 375,
-    maxWidth: '100vw',
+    maxWidth: '100%',
     backgroundColor: 'rgba(0,0,0,0.45)',
     display: 'flex',
     flexDirection: 'column',

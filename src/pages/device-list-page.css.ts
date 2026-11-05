@@ -6,7 +6,7 @@ export const deviceListPageStyles = {
     flexDirection: 'column',
     width: '100%',
     maxWidth: 375,
-    minHeight: '100vh',
+    minHeight: '100%',
     margin: '0 auto',
     overflowX: 'hidden',
     backgroundColor: '#F0F9FF',

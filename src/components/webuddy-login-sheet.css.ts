@@ -8,7 +8,7 @@ export const webuddyLoginStyles = {
     left: '50%',
     transform: 'translateX(-50%)',
     width: 375,
-    maxWidth: '100vw',
+    maxWidth: '100%',
     backgroundColor: '#ffffff',
     display: 'flex',
     flexDirection: 'column',

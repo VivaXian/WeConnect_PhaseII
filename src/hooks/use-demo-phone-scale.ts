@@ -10,15 +10,23 @@ export const useDemoPhoneScale = () => {
     if (!stage || !frame) return;
 
     const updateScale = (): void => {
-      const { width, height } = stage.getBoundingClientRect();
-      const scale = Math.min(1, width / 391, height / 828);
+      const { clientWidth, clientHeight } = stage;
+      const scale = Math.min(1, clientWidth / 391, clientHeight / 828);
       frame.style.setProperty('--demo-phone-scale', String(scale));
     };
 
     const observer = new ResizeObserver(updateScale);
     observer.observe(stage);
+    window.addEventListener('resize', updateScale);
+    window.addEventListener('orientationchange', updateScale);
+    window.visualViewport?.addEventListener('resize', updateScale);
     updateScale();
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateScale);
+      window.removeEventListener('orientationchange', updateScale);
+      window.visualViewport?.removeEventListener('resize', updateScale);
+    };
   }, []);
 
   return { stageRef, frameRef };

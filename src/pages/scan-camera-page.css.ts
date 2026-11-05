@@ -14,7 +14,7 @@ export const scanCameraStyles = {
     left: '50%',
     transform: 'translateX(-50%)',
     width: 375,
-    maxWidth: '100vw',
+    maxWidth: '100%',
     backgroundColor: '#000',
     display: 'flex',
     flexDirection: 'column',

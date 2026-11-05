@@ -666,7 +666,7 @@ export const profileStyles = {
     background: '#ffffff',
     borderRadius: 16,
     padding: '28px 24px 20px',
-    width: 'min(320px, calc(100vw - 48px))',
+    width: '320px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',

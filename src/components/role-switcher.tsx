@@ -1,4 +1,3 @@
-import clsx from 'clsx';
 import type { UserRole } from '../stores/role-store';
 import { useRoleStore } from '../stores/role-store';
 import { useDeviceBindingStore } from '../stores/device-binding-store';
@@ -30,10 +29,7 @@ export const RoleSwitcher = () => {
             <button
               key={key}
               type="button"
-              className={clsx(
-                roleSwitcherStyles.btn,
-                role === key && roleSwitcherStyles.btnActive
-              )}
+              className={roleSwitcherStyles.btn}
               aria-pressed={role === key}
               onClick={() => selectMode(key)}
             >

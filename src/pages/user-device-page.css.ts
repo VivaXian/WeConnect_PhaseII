@@ -264,7 +264,7 @@ export const userDeviceStyles = {
     left: '50%',
     transform: 'translateX(-50%)',
     width: 375,
-    maxWidth: '100vw',
+    maxWidth: '100%',
     zIndex: 30,
     display: 'flex',
     alignItems: 'center',
